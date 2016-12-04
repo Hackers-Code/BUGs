@@ -1,2 +1,3 @@
-0x0 - exit
-0x1 - connect
+0x0 - exit (both)
+0x1 - connect (client)
+0x2 + unsigned int - accept connection (server)
