@@ -1,14 +1,42 @@
-
 #include <iostream>
 #include <math.h>
 #include <cstdlib>
+#include <windows.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 
 using namespace std;
 
-sf::TcpSocket socket;
+bool copyToClipboard(string input){
+    HGLOBAL hglbCopy;
+    LPTSTR  lptstrCopy;
+
+    if(!OpenClipboard(0))
+        return 0;
+    EmptyClipboard();
+    if(!input.length()){
+        CloseClipboard();
+        return 0;
+    }
+
+    hglbCopy=GlobalAlloc(GMEM_MOVEABLE, input.length()+1);
+    if(!hglbCopy){
+        CloseClipboard();
+        return 0;
+    }
+
+    memcpy(GlobalLock(hglbCopy), &input[0], input.length()+1);
+    GlobalUnlock(hglbCopy);
+    SetClipboardData(CF_TEXT, hglbCopy);
+    CloseClipboard();
+    return 1;
+}
+
+sf::TcpSocket clientsocket;
 sf::Socket::Status status;
+unsigned char data[128]={1}, receiving=0, deltareceive=0;
+sf::Texture ont, offt;
+sf::Sprite connectionS;
 
 bool connect(string ip, string port){
     sf::IpAddress ipaddress0(ip);
@@ -16,13 +44,18 @@ bool connect(string ip, string port){
         cout<<"invalid ip\n";
         return 0;
     }
-    status=socket.connect(ipaddress0, atoi(port.c_str()));
+    status=clientsocket.connect(ipaddress0, atoi(port.c_str()));
     if(status!=sf::Socket::Done)
     {
         cout<<"not connected\n";
         return 0;
     }
-    socket.setBlocking(0);
+    clientsocket.setBlocking(0);
+    if (clientsocket.send(data, 1) != sf::Socket::Done){
+        cout<<"failed to send\n";
+        return 0;
+    }
+    connectionS.setTexture(ont);
     return 1;
 }
 
@@ -33,17 +66,17 @@ sf::Texture backgroundt, inputbart, okt;
 sf::Sprite  backgrounds, inputbars, oks;
 sf::Image backgroundi;
 sf::Font mainfont;
-sf::Text ipinput, portinput, ipinfo, portinfo;
+sf::Text ipinput, portinput, ipinfo, portinfo, nickinput, nickinfo;
 sf::Color checkedclr(0,255,255), normalclr(0,255,0);
 float mapscale=1;
 bool bounds[4];//up,right,down,left
-enum modes{ingame, waitroom};
-modes mode=waitroom;
-enum textboxes{none=0, ip, port};
+enum modes{ingame, connectroom};
+enum textboxes{none=0, ip, port, nick};
+modes mode=connectroom;
 textboxes textbox=none;
-string buffer;
-unsigned char data[128];
+string buffer, nickname;
 size_t received=0;
+unsigned int myid=0;
 
 void placek(sf::Image &image, int x, int y,unsigned int r){cout<<x<<", "<<y<<", "<<r;
     sf::Vector2f margins;
@@ -98,19 +131,24 @@ void createmap(unsigned int seed){
 int main(){
     {
         system("color 0a");
+        window.setFramerateLimit(60);
         inputbart.loadFromFile("img/inputbar.bmp");
         inputbars.setTexture(inputbart);
         okt.loadFromFile("img/ok.bmp");
         oks.setTexture(okt);
         oks.setPosition(0,60);
+        ont.loadFromFile("img/on.bmp");
+        offt.loadFromFile("img/off.bmp");
+        connectionS.setTexture(offt);
+        connectionS.setPosition(1170,0);
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
-        ipinput.setString("192.168.100.101");
+        ipinput.setString("185.84.136.151");
         ipinput.setCharacterSize(12);
         ipinput.setPosition(8,8);
         ipinput.setColor(normalclr);
         portinput.setFont(mainfont);
-        portinput.setString("80");
+        portinput.setString("31337");
         portinput.setCharacterSize(12);
         portinput.setPosition(8,38);
         portinput.setColor(normalclr);
@@ -124,11 +162,21 @@ int main(){
         portinfo.setCharacterSize(12);
         portinfo.setPosition(150,38);
         portinfo.setColor(normalclr);
+        nickinput.setFont(mainfont);
+        nickinput.setString("guest");
+        nickinput.setCharacterSize(12);
+        nickinput.setPosition(258,8);
+        nickinput.setColor(normalclr);
+        nickinfo.setFont(mainfont);
+        nickinfo.setString("nickname");
+        nickinfo.setCharacterSize(12);
+        nickinfo.setPosition(400, 8);
+        nickinfo.setColor(normalclr);
     }
     while(window.isOpen()){
         while(window.pollEvent(event)){
             if(event.type==sf::Event::Closed){
-                socket.disconnect();
+                clientsocket.disconnect();
                 window.close();
             }else
             if(event.type==sf::Event::Resized){
@@ -155,13 +203,16 @@ int main(){
                     if(event.mouseMove.y>window.getSize().y-10) bounds[2]=1;
                 }
             }else
-            if(mode==waitroom){
+            if(mode==connectroom){
                 if(event.type==sf::Event::MouseButtonPressed){
                     if(textbox==ip){
                         ipinput.setColor(normalclr);
                     }else
                     if(textbox==port){
                         portinput.setColor(normalclr);
+                    }else
+                    if(textbox==nick){
+                        nickinput.setColor(normalclr);
                     }
                     textbox=none;
 
@@ -174,45 +225,76 @@ int main(){
                         textbox=port;
                         portinput.setColor(checkedclr);
                     }else
+                    if((event.mouseButton.x>=inputbars.getPosition().x+100+inputbars.getLocalBounds().width)&&(event.mouseButton.x<=inputbars.getPosition().x+100+inputbars.getLocalBounds().width*2)&&(event.mouseButton.y>=inputbars.getPosition().y)&&(event.mouseButton.y<=inputbars.getPosition().y+inputbars.getLocalBounds().height)){
+                        textbox=nick;
+                        nickinput.setColor(checkedclr);
+                    }else
                     if((event.mouseButton.x>=oks.getPosition().x)&&(event.mouseButton.x<=oks.getPosition().x+oks.getLocalBounds().width)&&(event.mouseButton.y>=oks.getPosition().y)&&(event.mouseButton.y<=oks.getPosition().y+oks.getLocalBounds().height)){
                         if(connect(ipinput.getString(), portinput.getString())){
                             cout<<"connected\n";
                         }
                     }
                 }else
-                if(event.type==sf::Event::TextEntered){
-                    if(textbox==ip){
-                        if((event.text.unicode==13)||(event.text.unicode==127)){
+                if(event.type==sf::Event::TextEntered){sf::Text* inputpointer=0;
+                    if(textbox==ip){inputpointer=&ipinput;
+                        if((event.text.unicode==13)||(event.text.unicode==9)){
                             textbox=port;
+                            portinput.setColor(checkedclr);
+                            ipinput.setColor(normalclr);
+                        }
+                    }else
+                    if(textbox==port){inputpointer=&portinput;
+                        if(event.text.unicode==9){
+                            textbox=ip;
                             portinput.setColor(normalclr);
                             ipinput.setColor(checkedclr);
                         }else
-                        if(event.text.unicode==8){
-                            buffer=ipinput.getString();
-                            if(buffer.length()){
-                                buffer.erase(buffer.length()-1);
-                                ipinput.setString(buffer);
-                            }
-                        }else
-                        {
-                            ipinput.setString(ipinput.getString()+event.text.unicode);
+                        if(event.text.unicode==13){
+                            if(connect(ipinput.getString(), portinput.getString())) cout<<"connected\n";
                         }
                     }else
-                    if(textbox==port){
-                        if(event.text.unicode==127){
-                            textbox=ip;
-                            portinput.setColor(checkedclr);
-                            ipinput.setColor(normalclr);
-                        }else
+                    if(textbox==nick){inputpointer=&nickinput;
+                        if(event.text.unicode==13){
+                            buffer=nickinput.getString();
+                            if(buffer.length()<=20){//parser do protoko³u 3
+                                unsigned char to_send[25]={0};
+                                unsigned int nickbuffer=myid;
+                                to_send[0]=3;
+                                for(int i=4; i>0; i--){
+                                    to_send[i]=nickbuffer%256;
+                                    nickbuffer=nickbuffer>>8;
+                                }
+                                for(int i=0; i<buffer.length(); i++){
+                                    to_send[i+4]=buffer[i];
+                                }
+                                if (clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
+                            }
+                            nickinput.setColor(normalclr);
+                            inputpointer=0;
+                        }
+                    }
+                    if(inputpointer){
                         if(event.text.unicode==8){
-                            buffer=portinput.getString();
+                            buffer=(*inputpointer).getString();
                             if(buffer.length()){
                                 buffer.erase(buffer.length()-1);
-                                portinput.setString(buffer);
+                                (*inputpointer).setString(buffer);
+                            }
+                        }else
+                        if((event.text.unicode==127)&&((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))||(sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))){
+                            (*inputpointer).setString("");
+                        }else
+                        if((event.text.unicode==3)&&((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))||(sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))){
+                            copyToClipboard((*inputpointer).getString());
+                        }else
+                        if((event.text.unicode==22)&&((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))||(sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))){
+                            if(OpenClipboard(0)){
+                                (*inputpointer).setString((*inputpointer).getString()+(char*)(GetClipboardData(CF_TEXT)));
+                                CloseClipboard();
                             }
                         }else
                         {
-                            portinput.setString(portinput.getString()+event.text.unicode);
+                            (*inputpointer).setString((*inputpointer).getString()+event.text.unicode);
                         }
                     }
                 }
@@ -234,15 +316,39 @@ int main(){
         }
 
 
-        if(socket.receive(data, 128, received)==sf::Socket::Done){
-            cout<<"odebrano.size()=="<<received<<"\n";
+        if(clientsocket.receive(data, 128, received)==sf::Socket::Done){
+            if(!receiving)
             for(int i=0; i<received; i++){
                 if(!data[i]){
-                    socket.disconnect();
+                    clientsocket.disconnect();
                     cout<<"\ndisconnected\n";
-                }else
-                cout<<data[i];
-            }cout<<"\n";
+                    connectionS.setTexture(offt);
+                    break;
+                }
+                if(data[i]==2){
+                    receiving=2;
+                    deltareceive=i+1;
+                    break;
+                }
+                if(data[i]==4){
+                    if(i+1<received){
+                        if(data[i+1]){
+                            nickname=nickinput.getString();
+                            cout<<"nick accepted\n"<<char(7);
+                        }else{
+                            cout<<"nick denited\n";
+                        }
+                    }
+                }
+            }
+            if(receiving==2){
+                for(int i=deltareceive; i<deltareceive+4; i++){
+                    myid=myid<<8;
+                    myid+=data[i];
+                }
+                receiving=0;
+                cout<<"myid="<<myid<<"\n";
+            }
         }
 
 
@@ -250,16 +356,23 @@ int main(){
         if(mode==ingame){
             window.draw(backgrounds);
         }else
-        if(mode==waitroom){
+        if(mode==connectroom){
             window.draw(inputbars);
             inputbars.move(0,inputbars.getLocalBounds().height);
             window.draw(inputbars);
+            inputbars.move(inputbars.getLocalBounds().width+100,0);
+            window.draw(inputbars);
             inputbars.move(0,-inputbars.getLocalBounds().height);
+            window.draw(inputbars);
+            inputbars.move(-(inputbars.getLocalBounds().width+100),0);
             window.draw(ipinput);
             window.draw(portinput);
             window.draw(ipinfo);
             window.draw(portinfo);
+            window.draw(nickinput);
+            window.draw(nickinfo);
             window.draw(oks);
+            window.draw(connectionS);
         }
         window.display();
     }
