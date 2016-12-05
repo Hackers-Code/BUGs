@@ -1,3 +1,5 @@
 0x0 - exit (both)
 0x1 - connect (client)
-0x2 + unsigned int - accept connection (server)
+0x2 + 4 bytes (id) - accept connection (server)
+0x3 + 4 bytes (id) + 20 bytes (nickname) - reserve nickname (client)
+0x4 + bool ( nickname status ) - accept nickname
