@@ -5,3 +5,5 @@
 0x4 + bool ( nickname status ) - accept nickname (server)
 0x5 - list games (client)
 0x6 + 4 bytes (games count) + (4bytes (game id) + 20 bytes (game name)) * games count - list games ( server )
+0x7 + 4 bytes (id) + 20 bytes (game name) - create game (client)
+0x8 + bool ( game name status ) - accept game creating (server)
