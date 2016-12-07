@@ -7,7 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 
-#define INFO_AMOUNT 5
+#define INFO_AMOUNT 7
 
 using namespace std;
 
@@ -65,18 +65,19 @@ bool connect(string ip, string port){
     return 1;
 }
 
+//{
 sf::RenderWindow window(sf::VideoMode(1200, 720), "worms");
 sf::Event event;
 sf::Color bgcolor(40,40,40), checkedclr(0,255,255), normalclr(0,255,0);
-sf::Texture backgroundt, inputbart, okt, bgplanet;
-sf::Sprite  backgrounds, inputbars, oks, bgplanes;
+sf::Texture backgroundt, inputbart, binputbart, okt, bgplanet, reloadgamelistt;
+sf::Sprite  backgrounds, inputbars, binputbars, okconnects, bgplanes, reloadgamelists;
 sf::Image backgroundi, bgplanei;
 sf::Font mainfont;
-sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput;
+sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwordinput;
 float mapscale=1;
 bool bounds[4];//up,right,down,left
 enum modes{ingame, connectroom};
-enum textboxes{none=0, ip, port, nick};
+enum textboxes{none=0, ip, port, nick, roomname, password};
 modes mode=connectroom;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol;
@@ -117,18 +118,17 @@ class gamelistelements{public:
         idt.setString(to_string(id));
     }
 
-    void draw(sf::RenderWindow &window, sf::Sprite &sprite){
+    void draw(sf::RenderWindow &window, sf::Sprite &sprite, sf::Sprite &bsprite){
         sprite.setPosition(0, deltagamelist+pos*sprite.getLocalBounds().height);
         window.draw(sprite);
-        sprite.move(sprite.getLocalBounds().width, 0);
-        window.draw(sprite);
+        bsprite.setPosition(sprite.getLocalBounds().width, deltagamelist+pos*sprite.getLocalBounds().height);
+        window.draw(bsprite);
         namet.setPosition(sprite.getLocalBounds().width+8, deltagamelist+pos*sprite.getLocalBounds().height+8);
         window.draw(namet);
         idt.setPosition(8, deltagamelist+pos*sprite.getLocalBounds().height+8);
         window.draw(idt);
     }
 };
-
 list<gamelistelements> gamelist;
 
 void placek(sf::Image &image, int x, int y,unsigned int r){cout<<x<<", "<<y<<", "<<r;
@@ -180,6 +180,7 @@ void createmap(unsigned int seed){
     backgrounds.setTexture(backgroundt);
     window.setFramerateLimit(60);
 }
+//}
 
 int main(){
     {
@@ -187,9 +188,11 @@ int main(){
         window.setFramerateLimit(60);
         inputbart.loadFromFile("img/inputbar.bmp");
         inputbars.setTexture(inputbart);
+        binputbart.loadFromFile("img/binputbar.bmp");
+        binputbars.setTexture(binputbart);
         okt.loadFromFile("img/ok.bmp");
-        oks.setTexture(okt);
-        oks.setPosition(0,60);
+        okconnects.setTexture(okt);
+        okconnects.setPosition(0,60);
         ont.loadFromFile("img/on.bmp");
         offt.loadFromFile("img/off.bmp");
         connectionS.setTexture(offt);
@@ -199,6 +202,9 @@ int main(){
         bgplanes.setTexture(bgplanet);
         bgplanes.setScale(1200, 120);
         bgplanes.setPosition(0,0);
+        reloadgamelistt.loadFromFile("img/reload.bmp");
+        reloadgamelists.setTexture(reloadgamelistt);
+        reloadgamelists.setPosition(54, 60);
 
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
@@ -214,8 +220,18 @@ int main(){
         nickinput.setFont(mainfont);
         nickinput.setString("guest");
         nickinput.setCharacterSize(12);
-        nickinput.setPosition(258,8);
+        nickinput.setPosition(208,8);
         nickinput.setColor(normalclr);
+        roomnameinput.setFont(mainfont);
+        roomnameinput.setString("room001");
+        roomnameinput.setCharacterSize(12);
+        roomnameinput.setPosition(508,8);
+        roomnameinput.setColor(normalclr);
+        passwordinput.setFont(mainfont);
+        passwordinput.setString("123");
+        passwordinput.setCharacterSize(12);
+        passwordinput.setPosition(508,38);
+        passwordinput.setColor(normalclr);
         for(int i=0; i<INFO_AMOUNT; i++){
             info[i].setFont(mainfont);
             info[i].setCharacterSize(12);
@@ -227,10 +243,14 @@ int main(){
         info[1].setPosition(150,38);
         info[2].setString("nickname");
         info[2].setPosition(400, 8);
-        info[3].setString("game id");
-        info[3].setPosition(8, 98);
-        info[4].setString("game name");
-        info[4].setPosition(158, 98);
+        info[3].setString("roomname");
+        info[3].setPosition(700, 8);
+        info[4].setString("password");
+        info[4].setPosition(700, 38);
+        info[5].setString("game id");
+        info[5].setPosition(8, 98);
+        info[6].setString("game name");
+        info[6].setPosition(158, 98);
     }
     while(window.isOpen()){
         while(window.pollEvent(event)){
@@ -272,6 +292,12 @@ int main(){
                     }else
                     if(textbox==nick){
                         nickinput.setColor(normalclr);
+                    }else
+                    if(textbox==roomname){
+                        roomnameinput.setColor(normalclr);
+                    }else
+                    if(textbox==password){
+                        passwordinput.setColor(normalclr);
                     }
                     textbox=none;
 
@@ -284,14 +310,27 @@ int main(){
                         textbox=port;
                         portinput.setColor(checkedclr);
                     }else
-                    if((event.mouseButton.x>=nickinput.getPosition().x-8)&&(event.mouseButton.x<=nickinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=nickinput.getPosition().y-8)&&(event.mouseButton.y<=nickinput.getPosition().y-8+inputbars.getLocalBounds().height)){
+                    if((event.mouseButton.x>=nickinput.getPosition().x-8)&&(event.mouseButton.x<=nickinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=nickinput.getPosition().y-8)&&(event.mouseButton.y<=nickinput.getPosition().y-8+binputbars.getLocalBounds().height)){
                         textbox=nick;
                         nickinput.setColor(checkedclr);
                     }else
-                    if((event.mouseButton.x>=oks.getPosition().x)&&(event.mouseButton.x<=oks.getPosition().x+oks.getLocalBounds().width)&&(event.mouseButton.y>=oks.getPosition().y)&&(event.mouseButton.y<=oks.getPosition().y+oks.getLocalBounds().height)){
+                    if((event.mouseButton.x>=roomnameinput.getPosition().x-8)&&(event.mouseButton.x<=roomnameinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=roomnameinput.getPosition().y-8)&&(event.mouseButton.y<=roomnameinput.getPosition().y-8+binputbars.getLocalBounds().height)){
+                        textbox=roomname;
+                        roomnameinput.setColor(checkedclr);
+                    }else
+                    if((event.mouseButton.x>=passwordinput.getPosition().x-8)&&(event.mouseButton.x<=passwordinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=passwordinput.getPosition().y-8)&&(event.mouseButton.y<=passwordinput.getPosition().y-8+binputbars.getLocalBounds().height)){
+                        textbox=password;
+                        passwordinput.setColor(checkedclr);
+                    }else
+                    if((event.mouseButton.x>=okconnects.getPosition().x)&&(event.mouseButton.x<=okconnects.getPosition().x+okconnects.getLocalBounds().width)&&(event.mouseButton.y>=okconnects.getPosition().y)&&(event.mouseButton.y<=okconnects.getPosition().y+okconnects.getLocalBounds().height)){
                         if(connect(ipinput.getString(), portinput.getString())){
                             cout<<"connected\n";
                         }
+                    }else
+                    if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
+                        if(connected){unsigned char gfhahdsgfgdj[1]={5};
+                            if(clientsocket.send(gfhahdsgfgdj,1)!=sf::Socket::Done) cout<<"error while sending request 5\n";
+                        }else cout<<"not connected, cannot refresh\n";
                     }
                 }else
                 if(event.type==sf::Event::TextEntered){sf::Text* inputpointer=0;
@@ -315,21 +354,37 @@ int main(){
                     if(textbox==nick){inputpointer=&nickinput;
                         if(event.text.unicode==13){
                             buffer=nickinput.getString();
-                            if(buffer.length()<=20){//parser do protokoÅ‚u 3
-                                unsigned char to_send[25]={0};
-                                unsigned int nickbuffer=myid;
-                                to_send[0]=3;
-                                for(int i=4; i>0; i--){
-                                    to_send[i]=nickbuffer%256;
-                                    nickbuffer=nickbuffer>>8;
-                                }
-                                for(int i=0; i<buffer.length(); i++){
-                                    to_send[i+5]=buffer[i];
-                                }
-                                if (clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
-                            }
+                            if(buffer.length()<=20){//parser do protoko³u 3
+                                if(connected){
+                                    unsigned char to_send[25]={0};
+                                    unsigned int nickbuffer=myid;
+                                    to_send[0]=3;
+                                    for(int i=4; i>0; i--){
+                                        to_send[i]=nickbuffer%256;
+                                        nickbuffer=nickbuffer>>8;
+                                    }
+                                    for(int i=0; i<buffer.length(); i++){
+                                        to_send[i+5]=buffer[i];
+                                    }
+                                    if (clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
+                                }else cout<<"not connected, cannot get nick\n";
+                            }else cout<<"nick must have no more than 20 letters\n";
                             nickinput.setColor(normalclr);
                             inputpointer=0;
+                        }
+                    }else
+                    if(textbox==roomname){inputpointer=&roomnameinput;
+                        if((event.text.unicode==13)&&(event.text.unicode==9)){
+                            textbox=password;
+                            passwordinput.setColor(checkedclr);
+                            roomnameinput.setColor(normalclr);
+                        }
+                    }else
+                    if(textbox==password){inputpointer=&passwordinput;
+                        if(event.text.unicode==13){
+                            if(connected){
+                                //clientsocket.send();
+                            }else cout<<"not connected, can not create room\n";
                         }
                     }
                     if(inputpointer){
@@ -439,6 +494,12 @@ int main(){
                     deltareceive+=3;
                 }
                 for(int i=deltareceive; i<received; i++){
+                    if(to_receive==0){
+                        cout<<"roomlist is empty\n";
+                        receiving=0;
+                        deltareceive=0;
+                        break;
+                    }
                     if(to_receive%24==0){
                         lastgamelistelement++;
                         if(!gamelist.empty()){
@@ -453,23 +514,27 @@ int main(){
                         (*j).id=(*j).id<<8;
                         (*j).id+=data[i];
                     }else{
-                        (*j).name+=data[i];
+                        if(data[i])
+                            (*j).name+=data[i];
                     }
-                    if(!to_receive) break;
+                    if(!to_receive){
+                        (*j).update();
+                        break;
+                    }
                 }
                 deltareceive=0;
             }
         }
 
 
-        window.clear(bgcolor);
+        window.clear(bgcolor);{
         if(mode==ingame){
             window.draw(backgrounds);
         }else
         if(mode==connectroom){
             if(connected)
                 for(list<gamelistelements>::iterator i=gamelist.begin(); i!=gamelist.end(); ++i){
-                    (*i).draw(window, inputbars);
+                    (*i).draw(window, inputbars, binputbars);
                 }
             window.draw(bgplanes);
             inputbars.setPosition(ipinput.getPosition()+sf::Vector2f(-8,-8));
@@ -478,18 +543,25 @@ int main(){
             inputbars.setPosition(portinput.getPosition()+sf::Vector2f(-8,-8));
             window.draw(inputbars);
             window.draw(portinput);
-            inputbars.setPosition(nickinput.getPosition()+sf::Vector2f(-8,-8));
-            window.draw(inputbars);
+            binputbars.setPosition(nickinput.getPosition()+sf::Vector2f(-8,-8));
+            window.draw(binputbars);
             window.draw(nickinput);
-            for(int i=0; i<3; i++)
+            binputbars.setPosition(roomnameinput.getPosition()+sf::Vector2f(-8,-8));
+            window.draw(binputbars);
+            window.draw(roomnameinput);
+            binputbars.setPosition(passwordinput.getPosition()+sf::Vector2f(-8,-8));
+            window.draw(binputbars);
+            window.draw(passwordinput);
+            for(int i=0; i<5; i++)
                 window.draw(info[i]);
             if(connected)
-                for(int i=3; i<INFO_AMOUNT; i++)
+                for(int i=5; i<INFO_AMOUNT; i++)
                     window.draw(info[i]);
-            window.draw(oks);
+            window.draw(okconnects);
+            window.draw(reloadgamelists);
             window.draw(connectionS);
         }
-        window.display();
+        }window.display();
     }
     return 0;
 }
