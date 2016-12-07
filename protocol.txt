@@ -10,5 +10,5 @@
 0x9 + 4 bytes (id) + 4 bytes (map_id) + 1 byte ( players_count, allowed values [2,3,4] ) - set game settings ( client )
 0xa + bool ( game settings status ) - accept game setting ( server )
 
-0x10 + 4 bytes ( id ) + 4 bytes ( game id ) + + 1 byte ( password_length ) + password_length bytes ( password ) - join game ( client )
+0x10 + 4 bytes ( id ) + 4 bytes ( game id ) + 1 byte ( password_length ) + password_length bytes ( password ) - join game ( client )
 0x11 + bool ( join game status ) + 4 bytes ( mapID [if true only] ) - accept join game ( server )
