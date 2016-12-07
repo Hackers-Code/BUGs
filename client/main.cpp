@@ -76,21 +76,29 @@ sf::Font mainfont;
 sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwordinput;
 float mapscale=1;
 bool bounds[4];//up,right,down,left
-enum modes{ingame, connectroom};
+enum modes{ingame, connectroom, lobby};
 enum textboxes{none=0, ip, port, nick, roomname, password};
 modes mode=connectroom;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol;
 size_t received=0;
-unsigned int myid=0, to_receive=0, to_ignore=0, lastgamelistelement=0;
+unsigned int myid=0, to_receive=0, to_ignore=0, lastgamelistelement=0, frame=0;
 float deltagamelist=120;
+
+
+//zmienne do lobby
+string lobbyname;
+sf::Text lobbynamet;
+sf::Texture lobbyoutt;
+sf::Sprite  lobbyouts;
+
 
 class gamelistelements{public:
     unsigned int id, pos;
     string name;
     sf::Text namet, idt;
 
-    gamelistelements(unsigned int posin=1, unsigned int idin=0, string namein="undefined"){
+    gamelistelements(unsigned int posin=1, unsigned int idin=0, string namein=""){
         pos=posin;
         id=idin;
         name=namein;
@@ -205,6 +213,9 @@ int main(){
         reloadgamelistt.loadFromFile("img/reload.bmp");
         reloadgamelists.setTexture(reloadgamelistt);
         reloadgamelists.setPosition(54, 60);
+        lobbyoutt.loadFromFile("img/back.bmp");
+        lobbyouts.setTexture(lobbyoutt);
+        lobbyouts.setPosition(0,0);
 
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
@@ -232,6 +243,10 @@ int main(){
         passwordinput.setCharacterSize(12);
         passwordinput.setPosition(508,38);
         passwordinput.setColor(normalclr);
+        lobbynamet.setFont(mainfont);
+        lobbynamet.setCharacterSize(16);
+        lobbynamet.setColor(normalclr);
+        lobbynamet.setPosition(38,8);
         for(int i=0; i<INFO_AMOUNT; i++){
             info[i].setFont(mainfont);
             info[i].setCharacterSize(12);
@@ -330,6 +345,10 @@ int main(){
                     if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
                         if(connected){unsigned char gfhahdsgfgdj[1]={5};
                             if(clientsocket.send(gfhahdsgfgdj,1)!=sf::Socket::Done) cout<<"error while sending request 5\n";
+                            else {
+                                gamelist.clear();
+                                lastgamelistelement=0;
+                            }
                         }else cout<<"not connected, cannot refresh\n";
                     }
                 }else
@@ -366,7 +385,7 @@ int main(){
                                     for(int i=0; i<buffer.length(); i++){
                                         to_send[i+5]=buffer[i];
                                     }
-                                    if (clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
+                                    if(clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
                                 }else cout<<"not connected, cannot get nick\n";
                             }else cout<<"nick must have no more than 20 letters\n";
                             nickinput.setColor(normalclr);
@@ -382,9 +401,27 @@ int main(){
                     }else
                     if(textbox==password){inputpointer=&passwordinput;
                         if(event.text.unicode==13){
-                            if(connected){
-                                //clientsocket.send();
+                            if(connected){//parser do protoko³u 7
+                                unsigned char to_send[26+(passwordinput.getString().getSize())];
+                                unsigned int idbuffer=myid;
+                                to_send[0]=7;
+                                for(int i=1; i<5; i++){
+                                    to_send[i]=idbuffer%256;
+                                    idbuffer=idbuffer>>8;
+                                }
+                                for(int i=5; i<25; i++){
+                                    if(i-5<roomnameinput.getString().getSize()){
+                                        to_send[i]=roomnameinput.getString()[i-5];
+                                    }else
+                                    to_send[i]=0;
+                                }
+                                to_send[25]=passwordinput.getString().getSize();
+                                for(int i=26; i<to_send[25]+26; i++){
+                                    to_send[i]=passwordinput.getString()[i-26];
+                                }
+                                if(clientsocket.send(to_send, 26+(passwordinput.getString().getSize()))==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
                             }else cout<<"not connected, can not create room\n";
+                            inputpointer=0;
                         }
                     }
                     if(inputpointer){
@@ -410,6 +447,14 @@ int main(){
                         {
                             (*inputpointer).setString((*inputpointer).getString()+event.text.unicode);
                         }
+                    }
+                }
+            }else
+            if(mode==lobby){
+                if(event.type==sf::Event::MouseButtonPressed){
+                    if((event.mouseButton.x>=lobbyouts.getPosition().x)&&(event.mouseButton.x<=lobbyouts.getPosition().x+lobbyouts.getLocalBounds().width)&&(event.mouseButton.y>=lobbyouts.getPosition().y)&&(event.mouseButton.y<=lobbyouts.getPosition().y+lobbyouts.getLocalBounds().height)){
+                        mode=connectroom;
+
                     }
                 }
             }
@@ -463,9 +508,24 @@ int main(){
                         deltareceive=i+1;
                         break;
                     }
+                    if(data[i]==8){
+                        i++;
+                        if(i<received){
+                            if(data[i]){
+                                mode=lobby;
+                                lobbyname=roomnameinput.getString();
+                                lobbynamet.setString(lobbyname);
+                                cout<<"room accepted\n"<<char(7);
+                            }else{
+                                cout<<"room denited\n";
+                            }
+                        }
+                        continue;
+                    }
                     cout<<"recieved unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
             }
+
             if(receiving==2){
                 for(int i=deltareceive; i<deltareceive+4; i++){
                     if(i>=received){
@@ -491,7 +551,7 @@ int main(){
                         to_receive+=data[i];
                     }
                     to_receive*=24;
-                    deltareceive+=3;
+                    deltareceive+=4;
                 }
                 for(int i=deltareceive; i<received; i++){
                     if(to_receive==0){
@@ -519,10 +579,19 @@ int main(){
                     }
                     if(!to_receive){
                         (*j).update();
+                        receiving=0;
+                        deltareceive=0;
                         break;
                     }
                 }
                 deltareceive=0;
+            }
+        }
+        frame++;
+        if(frame%120){
+            if(clientsocket.getRemoteAddress()==sf::IpAddress::None){
+                connected=0;
+                connectionS.setTexture(offt);
             }
         }
 
@@ -560,6 +629,11 @@ int main(){
             window.draw(okconnects);
             window.draw(reloadgamelists);
             window.draw(connectionS);
+        }else
+        if(mode==lobby){
+            window.draw(connectionS);
+            window.draw(lobbynamet);
+            window.draw(lobbyouts);
         }
         }window.display();
     }
