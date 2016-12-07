@@ -5,8 +5,10 @@
 0x4 + bool ( nickname status ) - accept nickname (server)
 0x5 - list games (client)
 0x6 + 4 bytes (games count) + (4bytes (game id) + 20 bytes (game name)) * games count - list games ( server )
-0x7 + 4 bytes (id) + 20 bytes (game name) + 1 byte ( password_length ) + password_length bytes (password ) - create game (client)
+0x7 + 4 bytes (id) + 20 bytes (game name) + 1 byte ( password_length ) + password_length bytes ( password ) - create game (client)
 0x8 + bool ( game name status ) - accept game creating (server)
 0x9 + 4 bytes (id) + 4 bytes (map_id) + 1 byte ( players_count, allowed values [2,3,4] ) - set game settings ( client )
 0xa + bool ( game settings status ) - accept game setting ( server )
 
+0x10 + 4 bytes ( id ) + 4 bytes ( game id ) + + 1 byte ( password_length ) + password_length bytes ( password ) - join game ( client )
+0x11 + bool ( join game status ) + 4 bytes ( mapID [if true only] ) - accept join game ( server )
