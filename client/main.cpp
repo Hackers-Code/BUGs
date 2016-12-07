@@ -7,7 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 
-#define INFO_AMOUNT 7
+#define INFO_AMOUNT 12
 
 using namespace std;
 
@@ -70,7 +70,7 @@ sf::RenderWindow window(sf::VideoMode(1200, 720), "worms");
 sf::Event event;
 sf::Color bgcolor(40,40,40), checkedclr(0,255,255), normalclr(0,255,0);
 sf::Texture backgroundt, inputbart, binputbart, okt, bgplanet, reloadgamelistt;
-sf::Sprite  backgrounds, inputbars, binputbars, okconnects, bgplanes, reloadgamelists;
+sf::Sprite  backgrounds, inputbars, binputbars, okconnects, oknicks, okcreaterooms, bgplanes, reloadgamelists;
 sf::Image backgroundi, bgplanei;
 sf::Font mainfont;
 sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwordinput;
@@ -78,7 +78,7 @@ float mapscale=1;
 bool bounds[4];//up,right,down,left
 enum modes{ingame, connectroom, lobby};
 enum textboxes{none=0, ip, port, nick, roomname, password};
-modes mode=connectroom;
+modes mode=lobby;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol;
 size_t received=0;
@@ -88,9 +88,10 @@ float deltagamelist=120;
 
 //zmienne do lobby
 string lobbyname;
-sf::Text lobbynamet;
-sf::Texture lobbyoutt;
-sf::Sprite  lobbyouts;
+sf::Text lobbynamet, seedinput;
+sf::Texture lobbyoutt, checkboxon, checkboxoff;
+sf::Sprite  lobbyouts, cb2players, cb3players, cb4players;
+int playersamount=2;
 
 
 class gamelistelements{public:
@@ -188,6 +189,50 @@ void createmap(unsigned int seed){
     backgrounds.setTexture(backgroundt);
     window.setFramerateLimit(60);
 }
+
+void protocol3(string buffer, unsigned int idbuffer){
+    if(buffer.length()<=20){
+        if(connected){
+            unsigned char to_send[25]={0};
+            to_send[0]=3;
+            for(int i=4; i>0; i--){
+                to_send[i]=idbuffer%256;
+                idbuffer=idbuffer>>8;
+            }
+            for(int i=0; i<buffer.length(); i++){
+                to_send[i+5]=buffer[i];
+            }
+            if(clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
+        }else cout<<"not connected, cannot get nick\n";
+    }else cout<<"nick must have no more than 20 letters\n";
+}
+
+void protocol7(string buffer, unsigned int idbuffer, string buffer2){
+    if(connected){
+        unsigned char to_send[26+(buffer.length())];
+        to_send[0]=7;
+        for(int i=4; i>0; i--){
+            to_send[i]=idbuffer%256;
+            idbuffer=idbuffer>>8;
+        }
+        for(int i=5; i<25; i++){
+            if(i-5<buffer2.length()){
+                to_send[i]=buffer2[i-5];
+            }else
+                to_send[i]=0;
+        }
+        to_send[25]=buffer.length();
+        for(int i=26; i<to_send[25]+26; i++){
+            to_send[i]=buffer[i-26];
+        }
+        if(clientsocket.send(to_send, 26+(buffer.length()))==sf::Socket::Done) cout<<"poszlo\n";
+        else cout<<"sending error\n";
+    }else cout<<"not connected, can not create room\n";
+}
+
+void protocol9(unsigned int idbuffer, unsigned int seed, unsigned char playersamount){
+
+}
 //}
 
 int main(){
@@ -201,6 +246,10 @@ int main(){
         okt.loadFromFile("img/ok.bmp");
         okconnects.setTexture(okt);
         okconnects.setPosition(0,60);
+        oknicks.setTexture(okt);
+        oknicks.setPosition(200,30);
+        okcreaterooms.setTexture(okt);
+        okcreaterooms.setPosition(500,60);
         ont.loadFromFile("img/on.bmp");
         offt.loadFromFile("img/off.bmp");
         connectionS.setTexture(offt);
@@ -216,6 +265,14 @@ int main(){
         lobbyoutt.loadFromFile("img/back.bmp");
         lobbyouts.setTexture(lobbyoutt);
         lobbyouts.setPosition(0,0);
+        checkboxon.loadFromFile("img/checkboxon.bmp");
+        checkboxoff.loadFromFile("img/checkboxoff.bmp");
+        cb2players.setTexture(checkboxon);
+        cb2players.setPosition(0,98);
+        cb3players.setTexture(checkboxoff);
+        cb3players.setPosition(0,128);
+        cb4players.setTexture(checkboxoff);
+        cb4players.setPosition(0,158);
 
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
@@ -244,9 +301,15 @@ int main(){
         passwordinput.setPosition(508,38);
         passwordinput.setColor(normalclr);
         lobbynamet.setFont(mainfont);
+        lobbynamet.setString("");
         lobbynamet.setCharacterSize(16);
         lobbynamet.setColor(normalclr);
         lobbynamet.setPosition(38,8);
+        seedinput.setFont(mainfont);
+        seedinput.setString("1234567");
+        seedinput.setCharacterSize(12);
+        seedinput.setColor(normalclr);
+        seedinput.setPosition(8,38);
         for(int i=0; i<INFO_AMOUNT; i++){
             info[i].setFont(mainfont);
             info[i].setCharacterSize(12);
@@ -266,6 +329,16 @@ int main(){
         info[5].setPosition(8, 98);
         info[6].setString("game name");
         info[6].setPosition(158, 98);
+        info[7].setString("seed");
+        info[7].setPosition(150,38);
+        info[8].setString("players");
+        info[8].setPosition(0,68);
+        info[9].setString("2");
+        info[9].setPosition(20,98);
+        info[10].setString("3");
+        info[10].setPosition(20,128);
+        info[11].setString("4");
+        info[11].setPosition(20,158);
     }
     while(window.isOpen()){
         while(window.pollEvent(event)){
@@ -342,6 +415,12 @@ int main(){
                             cout<<"connected\n";
                         }
                     }else
+                    if((event.mouseButton.x>=oknicks.getPosition().x)&&(event.mouseButton.x<=oknicks.getPosition().x+oknicks.getLocalBounds().width)&&(event.mouseButton.y>=oknicks.getPosition().y)&&(event.mouseButton.y<=oknicks.getPosition().y+oknicks.getLocalBounds().height)){
+                        protocol3(nickinput.getString(), myid);
+                    }else
+                    if((event.mouseButton.x>=okcreaterooms.getPosition().x)&&(event.mouseButton.x<=okcreaterooms.getPosition().x+okcreaterooms.getLocalBounds().width)&&(event.mouseButton.y>=okcreaterooms.getPosition().y)&&(event.mouseButton.y<=okcreaterooms.getPosition().y+okcreaterooms.getLocalBounds().height)){
+                        protocol7(passwordinput.getString(), myid, roomnameinput.getString());
+                    }else
                     if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
                         if(connected){unsigned char gfhahdsgfgdj[1]={5};
                             if(clientsocket.send(gfhahdsgfgdj,1)!=sf::Socket::Done) cout<<"error while sending request 5\n";
@@ -372,22 +451,7 @@ int main(){
                     }else
                     if(textbox==nick){inputpointer=&nickinput;
                         if(event.text.unicode==13){
-                            buffer=nickinput.getString();
-                            if(buffer.length()<=20){//parser do protoko³u 3
-                                if(connected){
-                                    unsigned char to_send[25]={0};
-                                    unsigned int nickbuffer=myid;
-                                    to_send[0]=3;
-                                    for(int i=4; i>0; i--){
-                                        to_send[i]=nickbuffer%256;
-                                        nickbuffer=nickbuffer>>8;
-                                    }
-                                    for(int i=0; i<buffer.length(); i++){
-                                        to_send[i+5]=buffer[i];
-                                    }
-                                    if(clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
-                                }else cout<<"not connected, cannot get nick\n";
-                            }else cout<<"nick must have no more than 20 letters\n";
+                            protocol3(nickinput.getString(), myid);
                             nickinput.setColor(normalclr);
                             inputpointer=0;
                         }
@@ -401,26 +465,7 @@ int main(){
                     }else
                     if(textbox==password){inputpointer=&passwordinput;
                         if(event.text.unicode==13){
-                            if(connected){//parser do protoko³u 7
-                                unsigned char to_send[26+(passwordinput.getString().getSize())];
-                                unsigned int idbuffer=myid;
-                                to_send[0]=7;
-                                for(int i=1; i<5; i++){
-                                    to_send[i]=idbuffer%256;
-                                    idbuffer=idbuffer>>8;
-                                }
-                                for(int i=5; i<25; i++){
-                                    if(i-5<roomnameinput.getString().getSize()){
-                                        to_send[i]=roomnameinput.getString()[i-5];
-                                    }else
-                                    to_send[i]=0;
-                                }
-                                to_send[25]=passwordinput.getString().getSize();
-                                for(int i=26; i<to_send[25]+26; i++){
-                                    to_send[i]=passwordinput.getString()[i-26];
-                                }
-                                if(clientsocket.send(to_send, 26+(passwordinput.getString().getSize()))==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
-                            }else cout<<"not connected, can not create room\n";
+                            protocol7(passwordinput.getString(), myid, roomnameinput.getString());
                             inputpointer=0;
                         }
                     }
@@ -454,7 +499,42 @@ int main(){
                 if(event.type==sf::Event::MouseButtonPressed){
                     if((event.mouseButton.x>=lobbyouts.getPosition().x)&&(event.mouseButton.x<=lobbyouts.getPosition().x+lobbyouts.getLocalBounds().width)&&(event.mouseButton.y>=lobbyouts.getPosition().y)&&(event.mouseButton.y<=lobbyouts.getPosition().y+lobbyouts.getLocalBounds().height)){
                         mode=connectroom;
-
+                    }else
+                    if((event.mouseButton.x>=cb2players.getPosition().x)&&(event.mouseButton.x<=cb2players.getPosition().x+cb2players.getLocalBounds().width)&&(event.mouseButton.y>=cb2players.getPosition().y)&&(event.mouseButton.y<=cb2players.getPosition().y+cb2players.getLocalBounds().height)){
+                        switch(playersamount){
+                            case 3:
+                                cb3players.setTexture(checkboxoff);
+                            break;
+                            case 4:
+                                cb4players.setTexture(checkboxoff);
+                            break;
+                        }
+                        cb2players.setTexture(checkboxon);
+                        playersamount=2;
+                    }else
+                    if((event.mouseButton.x>=cb3players.getPosition().x)&&(event.mouseButton.x<=cb3players.getPosition().x+cb3players.getLocalBounds().width)&&(event.mouseButton.y>=cb3players.getPosition().y)&&(event.mouseButton.y<=cb3players.getPosition().y+cb3players.getLocalBounds().height)){
+                        switch(playersamount){
+                            case 2:
+                                cb2players.setTexture(checkboxoff);
+                            break;
+                            case 4:
+                                cb4players.setTexture(checkboxoff);
+                            break;
+                        }
+                        cb3players.setTexture(checkboxon);
+                        playersamount=3;
+                    }else
+                    if((event.mouseButton.x>=cb4players.getPosition().x)&&(event.mouseButton.x<=cb4players.getPosition().x+cb4players.getLocalBounds().width)&&(event.mouseButton.y>=cb4players.getPosition().y)&&(event.mouseButton.y<=cb4players.getPosition().y+cb4players.getLocalBounds().height)){
+                        switch(playersamount){
+                            case 2:
+                                cb2players.setTexture(checkboxoff);
+                            break;
+                            case 3:
+                                cb3players.setTexture(checkboxoff);
+                            break;
+                        }
+                        cb4players.setTexture(checkboxon);
+                        playersamount=4;
                     }
                 }
             }
@@ -624,9 +704,11 @@ int main(){
             for(int i=0; i<5; i++)
                 window.draw(info[i]);
             if(connected)
-                for(int i=5; i<INFO_AMOUNT; i++)
+                for(int i=5; i<7; i++)
                     window.draw(info[i]);
             window.draw(okconnects);
+            window.draw(oknicks);
+            window.draw(okcreaterooms);
             window.draw(reloadgamelists);
             window.draw(connectionS);
         }else
@@ -634,6 +716,14 @@ int main(){
             window.draw(connectionS);
             window.draw(lobbynamet);
             window.draw(lobbyouts);
+            for(int i=7; i<INFO_AMOUNT; i++)
+                window.draw(info[i]);
+            inputbars.setPosition(seedinput.getPosition()+sf::Vector2f(-8,-8));
+            window.draw(inputbars);
+            window.draw(seedinput);
+            window.draw(cb2players);
+            window.draw(cb3players);
+            window.draw(cb4players);
         }
         }window.display();
     }
