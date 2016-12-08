@@ -12,3 +12,6 @@
 
 0x10 + 4 bytes ( id ) + 4 bytes ( game id ) + 1 byte ( password_length ) + password_length bytes ( password ) - join game ( client )
 0x11 + bool ( join game status ) + 4 bytes ( mapID [if true only] ) - accept join game ( server )
+0x12 + 4 bytes ( id ) - confirm joining game ( client )
+0x13 + bool ( status ) - confirm that server received confirmation ( server )
+0x14 - all players confirmed, load the map ( server )
