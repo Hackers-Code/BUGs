@@ -77,32 +77,34 @@ sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwo
 float mapscale=1;
 bool bounds[4];//up,right,down,left
 enum modes{ingame, connectroom, lobby};
-enum textboxes{none=0, ip, port, nick, roomname, password};
-modes mode=lobby;
+enum textboxes{none=0, ipbox, portbox, nickbox, roomnamebox, passwordbox, seedbox, listbox};
+modes mode=connectroom;
 textboxes textbox=none;
-string buffer, nickname, restofprotocol;
+string buffer, nickname, restofprotocol, protbuffers[3];
 size_t received=0;
-unsigned int myid=0, to_receive=0, to_ignore=0, lastgamelistelement=0, frame=0;
+unsigned int myid=0, to_receive=0, to_ignore=0, lastgamelistelement=0, frame=0, protbufferi[3];
 float deltagamelist=120;
 
 
 //zmienne do lobby
 string lobbyname;
 sf::Text lobbynamet, seedinput;
-sf::Texture lobbyoutt, checkboxon, checkboxoff;
-sf::Sprite  lobbyouts, cb2players, cb3players, cb4players;
+sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2;
+sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys;
 int playersamount=2;
+bool ready=0;
 
 
 class gamelistelements{public:
     unsigned int id, pos;
-    string name;
-    sf::Text namet, idt;
+    string name, password;
+    sf::Text namet, idt, passwordt;
 
-    gamelistelements(unsigned int posin=1, unsigned int idin=0, string namein=""){
+    gamelistelements(unsigned int posin=1, unsigned int idin=0, string namein="", string passwordin="haslo"){
         pos=posin;
         id=idin;
         name=namein;
+        password=passwordin;
 
         namet.setFont(mainfont);
         namet.setColor(normalclr);
@@ -112,19 +114,26 @@ class gamelistelements{public:
         idt.setColor(normalclr);
         idt.setCharacterSize(12);
         idt.setString(to_string(id));
+        passwordt.setFont(mainfont);
+        passwordt.setColor(normalclr);
+        passwordt.setCharacterSize(12);
+        passwordt.setString(password);
     }
 
     gamelistelements operator =(gamelistelements &input){
         input.id=id;
         input.name=name;
         input.pos=pos;
+        input.password=password;
         input.namet.setString(name);
         input.idt.setString(to_string(id));
+        input.passwordt.setString(password);
     }
 
     void update(){
         namet.setString(name);
         idt.setString(to_string(id));
+        passwordt.setString(password);
     }
 
     void draw(sf::RenderWindow &window, sf::Sprite &sprite, sf::Sprite &bsprite){
@@ -132,6 +141,10 @@ class gamelistelements{public:
         window.draw(sprite);
         bsprite.setPosition(sprite.getLocalBounds().width, deltagamelist+pos*sprite.getLocalBounds().height);
         window.draw(bsprite);
+        sprite.setPosition(bsprite.getLocalBounds().width+sprite.getLocalBounds().width, deltagamelist+pos*sprite.getLocalBounds().height);
+        window.draw(sprite);
+        passwordt.setPosition(bsprite.getLocalBounds().width+sprite.getLocalBounds().width+8, deltagamelist+pos*sprite.getLocalBounds().height+8);
+        window.draw(passwordt);
         namet.setPosition(sprite.getLocalBounds().width+8, deltagamelist+pos*sprite.getLocalBounds().height+8);
         window.draw(namet);
         idt.setPosition(8, deltagamelist+pos*sprite.getLocalBounds().height+8);
@@ -139,6 +152,7 @@ class gamelistelements{public:
     }
 };
 list<gamelistelements> gamelist;
+gamelistelements *gamelistpointer;
 
 void placek(sf::Image &image, int x, int y,unsigned int r){cout<<x<<", "<<y<<", "<<r;
     sf::Vector2f margins;
@@ -230,8 +244,8 @@ void protocol7(string buffer, unsigned int idbuffer, string buffer2){
     }else cout<<"not connected, can not create room\n";
 }
 
-void protocol9((unsigned int idbuffer, unsigned int seed, unsigned char playersamoun){
-	if(connected){
+void protocol9(unsigned int idbuffer, unsigned int seed, unsigned char playersamount){
+    if(connected){
 		unsigned char to_send[10];
 		to_send[0]=9;
 		for(int i=4; i>0; i--){
@@ -245,7 +259,47 @@ void protocol9((unsigned int idbuffer, unsigned int seed, unsigned char playersa
 		to_send[9]=playersamount;
 		if(clientsocket.send(to_send, 10)==sf::Socket::Done) cout<<"poszlo\n";
 		else cout<<"sending error\n";
-	}else cout<<"not connected, cannot change settings\n";
+    }else cout<<"not connected, cannot change settings\n";
+}
+
+void protocol10(unsigned int id, unsigned int gameid, string password){
+    if(password.length()<256){
+        if(connected){
+            unsigned char length=password.length(), to_send[10+length];
+            to_send[0]=0x10;
+            for(int i=4; i>0; i--){
+                to_send[i]=id%256;
+                id=id>>8;
+            }
+            protbufferi[0]=gameid;
+            for(int i=8; i>4; i--){
+                to_send[i]=gameid%256;
+                gameid=gameid>>8;
+            }
+            protbuffers[0]=password;
+            to_send[9]=length;
+            for(int i=0; i<length; i++){
+                to_send[i+10]=password[i];
+            }
+            if(clientsocket.send(to_send, 10+length)==sf::Socket::Done){
+                cout<<"poszlo\n";
+            }else cout<<"sending error 0x10\n";
+        }else cout<<"not connected, cannot join\n";
+    }else cout<<"password too long (255 chars max)\n";
+}
+
+void protocol12(unsigned int id){
+    if(connected){
+        unsigned char to_send[5];
+        to_send[0]=0x12;
+        for(int i=4; i>0; i--){
+            to_send[i]=id%256;
+            id=id>>8;
+        }
+        if(clientsocket.send(to_send, 5)==sf::Socket::Done){
+            cout<<"poszlo\n";
+        }else cout<<"sending error 0x10\n";
+    }else cout<<"not connected, cannot get ready\n";
 }
 //}
 
@@ -264,6 +318,8 @@ int main(){
         oknicks.setPosition(200,30);
         okcreaterooms.setTexture(okt);
         okcreaterooms.setPosition(500,60);
+        oksettings.setTexture(okt);
+        oksettings.setPosition(0,180);
         ont.loadFromFile("img/on.bmp");
         offt.loadFromFile("img/off.bmp");
         connectionS.setTexture(offt);
@@ -287,6 +343,10 @@ int main(){
         cb3players.setPosition(0,128);
         cb4players.setTexture(checkboxoff);
         cb4players.setPosition(0,158);
+        ready1.loadFromFile("img/ready1.bmp");
+        ready2.loadFromFile("img/ready2.bmp");
+        readys.setTexture(ready2);
+        readys.setPosition(200,30);
 
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
@@ -353,6 +413,7 @@ int main(){
         info[10].setPosition(20,128);
         info[11].setString("4");
         info[11].setPosition(20,158);
+        lastgamelistelement++; gamelist.push_back(gamelistelements(lastgamelistelement));
     }
     while(window.isOpen()){
         while(window.pollEvent(event)){
@@ -386,76 +447,105 @@ int main(){
             }else
             if(mode==connectroom){
                 if(event.type==sf::Event::MouseButtonPressed){
-                    if(textbox==ip){
+                    if(textbox==ipbox){
                         ipinput.setColor(normalclr);
                     }else
-                    if(textbox==port){
+                    if(textbox==portbox){
                         portinput.setColor(normalclr);
                     }else
-                    if(textbox==nick){
+                    if(textbox==nickbox){
                         nickinput.setColor(normalclr);
                     }else
-                    if(textbox==roomname){
+                    if(textbox==roomnamebox){
                         roomnameinput.setColor(normalclr);
                     }else
-                    if(textbox==password){
+                    if(textbox==passwordbox){
                         passwordinput.setColor(normalclr);
+                    }else
+                    if(textbox==listbox){
+                        (*gamelistpointer).passwordt.setColor(normalclr);
+                        gamelistpointer=0;
                     }
                     textbox=none;
 
-
-                    if((event.mouseButton.x>=ipinput.getPosition().x-8)&&(event.mouseButton.x<=ipinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=ipinput.getPosition().y-8)&&(event.mouseButton.y<=ipinput.getPosition().y-8+inputbars.getLocalBounds().height)){
-                        textbox=ip;
-                        ipinput.setColor(checkedclr);
-                    }else
-                    if((event.mouseButton.x>=portinput.getPosition().x-8)&&(event.mouseButton.x<=portinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=portinput.getPosition().y-8)&&(event.mouseButton.y<=portinput.getPosition().y-8+inputbars.getLocalBounds().height)){
-                        textbox=port;
-                        portinput.setColor(checkedclr);
-                    }else
-                    if((event.mouseButton.x>=nickinput.getPosition().x-8)&&(event.mouseButton.x<=nickinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=nickinput.getPosition().y-8)&&(event.mouseButton.y<=nickinput.getPosition().y-8+binputbars.getLocalBounds().height)){
-                        textbox=nick;
-                        nickinput.setColor(checkedclr);
-                    }else
-                    if((event.mouseButton.x>=roomnameinput.getPosition().x-8)&&(event.mouseButton.x<=roomnameinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=roomnameinput.getPosition().y-8)&&(event.mouseButton.y<=roomnameinput.getPosition().y-8+binputbars.getLocalBounds().height)){
-                        textbox=roomname;
-                        roomnameinput.setColor(checkedclr);
-                    }else
-                    if((event.mouseButton.x>=passwordinput.getPosition().x-8)&&(event.mouseButton.x<=passwordinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=passwordinput.getPosition().y-8)&&(event.mouseButton.y<=passwordinput.getPosition().y-8+binputbars.getLocalBounds().height)){
-                        textbox=password;
-                        passwordinput.setColor(checkedclr);
-                    }else
-                    if((event.mouseButton.x>=okconnects.getPosition().x)&&(event.mouseButton.x<=okconnects.getPosition().x+okconnects.getLocalBounds().width)&&(event.mouseButton.y>=okconnects.getPosition().y)&&(event.mouseButton.y<=okconnects.getPosition().y+okconnects.getLocalBounds().height)){
-                        if(connect(ipinput.getString(), portinput.getString())){
-                            cout<<"connected\n";
-                        }
-                    }else
-                    if((event.mouseButton.x>=oknicks.getPosition().x)&&(event.mouseButton.x<=oknicks.getPosition().x+oknicks.getLocalBounds().width)&&(event.mouseButton.y>=oknicks.getPosition().y)&&(event.mouseButton.y<=oknicks.getPosition().y+oknicks.getLocalBounds().height)){
-                        protocol3(nickinput.getString(), myid);
-                    }else
-                    if((event.mouseButton.x>=okcreaterooms.getPosition().x)&&(event.mouseButton.x<=okcreaterooms.getPosition().x+okcreaterooms.getLocalBounds().width)&&(event.mouseButton.y>=okcreaterooms.getPosition().y)&&(event.mouseButton.y<=okcreaterooms.getPosition().y+okcreaterooms.getLocalBounds().height)){
-                        protocol7(passwordinput.getString(), myid, roomnameinput.getString());
-                    }else
-                    if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
-                        if(connected){unsigned char gfhahdsgfgdj[1]={5};
-                            if(clientsocket.send(gfhahdsgfgdj,1)!=sf::Socket::Done) cout<<"error while sending request 5\n";
-                            else {
-                                gamelist.clear();
-                                lastgamelistelement=0;
+                    if(event.mouseButton.y<=120){
+                        if((event.mouseButton.x>=ipinput.getPosition().x-8)&&(event.mouseButton.x<=ipinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=ipinput.getPosition().y-8)&&(event.mouseButton.y<=ipinput.getPosition().y-8+inputbars.getLocalBounds().height)){
+                            textbox=ipbox;
+                            ipinput.setColor(checkedclr);
+                        }else
+                        if((event.mouseButton.x>=portinput.getPosition().x-8)&&(event.mouseButton.x<=portinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=portinput.getPosition().y-8)&&(event.mouseButton.y<=portinput.getPosition().y-8+inputbars.getLocalBounds().height)){
+                            textbox=portbox;
+                            portinput.setColor(checkedclr);
+                        }else
+                        if((event.mouseButton.x>=nickinput.getPosition().x-8)&&(event.mouseButton.x<=nickinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=nickinput.getPosition().y-8)&&(event.mouseButton.y<=nickinput.getPosition().y-8+binputbars.getLocalBounds().height)){
+                            textbox=nickbox;
+                            nickinput.setColor(checkedclr);
+                        }else
+                        if((event.mouseButton.x>=roomnameinput.getPosition().x-8)&&(event.mouseButton.x<=roomnameinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=roomnameinput.getPosition().y-8)&&(event.mouseButton.y<=roomnameinput.getPosition().y-8+binputbars.getLocalBounds().height)){
+                            textbox=roomnamebox;
+                            roomnameinput.setColor(checkedclr);
+                        }else
+                        if((event.mouseButton.x>=passwordinput.getPosition().x-8)&&(event.mouseButton.x<=passwordinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=passwordinput.getPosition().y-8)&&(event.mouseButton.y<=passwordinput.getPosition().y-8+binputbars.getLocalBounds().height)){
+                            textbox=passwordbox;
+                            passwordinput.setColor(checkedclr);
+                        }else
+                        if((event.mouseButton.x>=okconnects.getPosition().x)&&(event.mouseButton.x<=okconnects.getPosition().x+okconnects.getLocalBounds().width)&&(event.mouseButton.y>=okconnects.getPosition().y)&&(event.mouseButton.y<=okconnects.getPosition().y+okconnects.getLocalBounds().height)){
+                            if(connect(ipinput.getString(), portinput.getString())){
+                                cout<<"connected\n";
                             }
-                        }else cout<<"not connected, cannot refresh\n";
+                        }else
+                        if((event.mouseButton.x>=oknicks.getPosition().x)&&(event.mouseButton.x<=oknicks.getPosition().x+oknicks.getLocalBounds().width)&&(event.mouseButton.y>=oknicks.getPosition().y)&&(event.mouseButton.y<=oknicks.getPosition().y+oknicks.getLocalBounds().height)){
+                            protocol3(nickinput.getString(), myid);
+                        }else
+                        if((event.mouseButton.x>=okcreaterooms.getPosition().x)&&(event.mouseButton.x<=okcreaterooms.getPosition().x+okcreaterooms.getLocalBounds().width)&&(event.mouseButton.y>=okcreaterooms.getPosition().y)&&(event.mouseButton.y<=okcreaterooms.getPosition().y+okcreaterooms.getLocalBounds().height)){
+                            protocol7(passwordinput.getString(), myid, roomnameinput.getString());
+                        }else
+                        if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
+                            if(connected){unsigned char gfhahdsgfgdj[1]={5};
+                                if(clientsocket.send(gfhahdsgfgdj,1)!=sf::Socket::Done) cout<<"error while sending request 5\n";
+                                else {
+                                    gamelist.clear();
+                                    lastgamelistelement=0;
+                                    deltagamelist=120;
+                                }
+                            }else cout<<"not connected, cannot refresh\n";
+                        }
+                    }
+                    else{
+                        int listelementbuffer=int(event.mouseButton.y-deltagamelist)/int(inputbars.getLocalBounds().height);
+                        if((listelementbuffer<=lastgamelistelement)&&(listelementbuffer>0)){
+                            if(event.mouseButton.x<=inputbars.getLocalBounds().width+binputbars.getLocalBounds().width){
+                                for(list<gamelistelements>::iterator i=gamelist.begin(); i!=gamelist.end(); ++i){
+                                    if((*i).pos==listelementbuffer){
+                                        protocol10(myid, (*i).id, (*i).password);
+                                        break;
+                                    }
+                                }
+                            }else
+                            if(event.mouseButton.x<=inputbars.getLocalBounds().width*2+binputbars.getLocalBounds().width){
+                                textbox=listbox;
+                                for(list<gamelistelements>::iterator i=gamelist.begin(); i!=gamelist.end(); ++i){
+                                    if((*i).pos==listelementbuffer){
+                                        gamelistpointer=&(*i);
+                                        (*gamelistpointer).passwordt.setColor(checkedclr);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }else
                 if(event.type==sf::Event::TextEntered){sf::Text* inputpointer=0;
-                    if(textbox==ip){inputpointer=&ipinput;
+                    if(textbox==ipbox){inputpointer=&ipinput;
                         if((event.text.unicode==13)||(event.text.unicode==9)){
-                            textbox=port;
+                            textbox=portbox;
                             portinput.setColor(checkedclr);
                             ipinput.setColor(normalclr);
                         }
                     }else
-                    if(textbox==port){inputpointer=&portinput;
+                    if(textbox==portbox){inputpointer=&portinput;
                         if(event.text.unicode==9){
-                            textbox=ip;
+                            textbox=ipbox;
                             portinput.setColor(normalclr);
                             ipinput.setColor(checkedclr);
                         }else
@@ -463,24 +553,54 @@ int main(){
                             if(connect(ipinput.getString(), portinput.getString())) cout<<"connected\n";
                         }
                     }else
-                    if(textbox==nick){inputpointer=&nickinput;
+                    if(textbox==nickbox){inputpointer=&nickinput;
                         if(event.text.unicode==13){
                             protocol3(nickinput.getString(), myid);
                             nickinput.setColor(normalclr);
                             inputpointer=0;
                         }
                     }else
-                    if(textbox==roomname){inputpointer=&roomnameinput;
+                    if(textbox==roomnamebox){inputpointer=&roomnameinput;
                         if((event.text.unicode==13)&&(event.text.unicode==9)){
-                            textbox=password;
+                            textbox=passwordbox;
                             passwordinput.setColor(checkedclr);
                             roomnameinput.setColor(normalclr);
                         }
                     }else
-                    if(textbox==password){inputpointer=&passwordinput;
+                    if(textbox==passwordbox){inputpointer=&passwordinput;
                         if(event.text.unicode==13){
                             protocol7(passwordinput.getString(), myid, roomnameinput.getString());
                             inputpointer=0;
+                        }
+                    }else
+                    if(textbox==listbox){
+                        if(event.text.unicode==13){
+                            (*gamelistpointer).passwordt.setColor(normalclr);
+                            textbox=none;
+                        }else
+                        if(event.text.unicode==8){
+                            if((*gamelistpointer).password.length()){
+                                (*gamelistpointer).password.erase((*gamelistpointer).password.length()-1);
+                                (*gamelistpointer).update();
+                            }
+                        }else
+                        if((event.text.unicode==127)&&((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))||(sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))){
+                            (*gamelistpointer).password="";
+                            (*gamelistpointer).update();
+                        }else
+                        if((event.text.unicode==3)&&((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))||(sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))){
+                            copyToClipboard((*gamelistpointer).password);
+                        }else
+                        if((event.text.unicode==22)&&((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))||(sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))){
+                            if(OpenClipboard(0)){
+                                (*gamelistpointer).password=((*gamelistpointer).password+(char*)(GetClipboardData(CF_TEXT)));
+                                CloseClipboard();
+                                (*gamelistpointer).update();
+                            }
+                        }else
+                        {
+                            (*gamelistpointer).password+=event.text.unicode;
+                            (*gamelistpointer).update();
                         }
                     }
                     if(inputpointer){
@@ -507,10 +627,18 @@ int main(){
                             (*inputpointer).setString((*inputpointer).getString()+event.text.unicode);
                         }
                     }
+                }else
+                if(event.type==sf::Event::MouseWheelMoved){
+                    if(connected)
+                        deltagamelist-=event.mouseWheel.delta*10;
                 }
             }else
             if(mode==lobby){
                 if(event.type==sf::Event::MouseButtonPressed){
+                    if(textbox==seedbox){
+                        seedinput.setColor(normalclr);
+                    }
+
                     if((event.mouseButton.x>=lobbyouts.getPosition().x)&&(event.mouseButton.x<=lobbyouts.getPosition().x+lobbyouts.getLocalBounds().width)&&(event.mouseButton.y>=lobbyouts.getPosition().y)&&(event.mouseButton.y<=lobbyouts.getPosition().y+lobbyouts.getLocalBounds().height)){
                         mode=connectroom;
                     }else
@@ -549,6 +677,56 @@ int main(){
                         }
                         cb4players.setTexture(checkboxon);
                         playersamount=4;
+                    }else
+                    if((event.mouseButton.x>=oksettings.getPosition().x)&&(event.mouseButton.x<=oksettings.getPosition().x+oksettings.getLocalBounds().width)&&(event.mouseButton.y>=oksettings.getPosition().y)&&(event.mouseButton.y<=oksettings.getPosition().y+oksettings.getLocalBounds().height)){
+                        if(seedinput.getString().getSize()<10) protocol9(myid, atoi(seedinput.getString().toAnsiString().c_str()), playersamount);
+                        else cout<<"seed is too big\n";
+                    }else
+                    if((event.mouseButton.x>=readys.getPosition().x)&&(event.mouseButton.x<=readys.getPosition().x+readys.getLocalBounds().width)&&(event.mouseButton.y>=readys.getPosition().y)&&(event.mouseButton.y<=readys.getPosition().y+readys.getLocalBounds().height)){
+                        if(!ready)
+                            protocol12(myid);
+                    }else
+                    if((event.mouseButton.x>=seedinput.getPosition().x-8)&&(event.mouseButton.x<=seedinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=seedinput.getPosition().y-8)&&(event.mouseButton.y<=seedinput.getPosition().y-8+inputbars.getLocalBounds().height)){
+                        seedinput.setColor(checkedclr);
+                        textbox=seedbox;
+                    }
+                }else
+                if(event.type==sf::Event::TextEntered){sf::Text* inputpointer=0;
+                    if(textbox==seedbox){
+                        if(event.text.unicode==13){
+                            seedinput.setColor(normalclr);
+                            inputpointer=0;
+                        }else
+                        if((event.text.unicode>='0')&&(event.text.unicode<='9')&&(seedinput.getString().getSize()<10)){
+                            seedinput.setString(seedinput.getString()+event.text.unicode);
+                        }else
+                        if(event.text.unicode==8) inputpointer=&seedinput;
+                        else cout<<", "<<int(event.text.unicode);
+                    }
+
+                    if(inputpointer){
+                        if(event.text.unicode==8){
+                            buffer=(*inputpointer).getString();
+                            if(buffer.length()){
+                                buffer.erase(buffer.length()-1);
+                                (*inputpointer).setString(buffer);
+                            }
+                        }else
+                        if((event.text.unicode==127)&&((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))||(sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))){
+                            (*inputpointer).setString("");
+                        }else
+                        if((event.text.unicode==3)&&((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))||(sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))){
+                            copyToClipboard((*inputpointer).getString());
+                        }else
+                        if((event.text.unicode==22)&&((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))||(sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))){
+                            if(OpenClipboard(0)){
+                                (*inputpointer).setString((*inputpointer).getString()+(char*)(GetClipboardData(CF_TEXT)));
+                                CloseClipboard();
+                            }
+                        }else
+                        {
+                            (*inputpointer).setString((*inputpointer).getString()+event.text.unicode);
+                        }
                     }
                 }
             }
@@ -594,7 +772,7 @@ int main(){
                             }else{
                                 cout<<"nick denited\n";
                             }
-                        }
+                        }else cout<<"lost response 0x4\n";
                         continue;
                     }
                     if(data[i]==6){
@@ -613,9 +791,59 @@ int main(){
                             }else{
                                 cout<<"room denited\n";
                             }
-                        }
+                        }else cout<<"lost response 0x8\n";
                         continue;
-                    }
+                    }else
+                    if(data[i]==10){
+                        i++;
+                        if(i<received){
+                            if(data[i]){
+                                mode=lobby;
+                                lobbyname=roomnameinput.getString();
+                                lobbynamet.setString(lobbyname);
+                                cout<<"settings accepted\n"<<char(7);
+                            }else{
+                                cout<<"settings denited\n";
+                            }
+                        }else cout<<"lost response 0xa\n";
+                        continue;
+                    }else
+                    if(data[i]==0x11){
+                        receiving=0x11;
+                        deltareceive=i+1;
+                        to_receive=5;
+                        protbufferi[2]=0;
+                        passwordinput.setString(protbuffers[0]);
+                        for(list<gamelistelements>::iterator i=gamelist.begin(); i!=gamelist.end(); ++i){
+                            if(protbufferi[0]==(*i).id){
+                                lobbyname=(*i).name;
+                                lobbynamet.setString(lobbyname);
+                                break;
+                            }
+                        }
+                        break;
+                    }else
+                    if(data[i]==0x13){
+                        i++;
+                        if(i<received){
+                            if(data[i]){
+                                readys.setTexture(ready1);
+                                ready=1;
+                                cout<<"ready\n"<<char(7);
+                            }else{
+                                readys.setTexture(ready2);
+                                ready=0;
+                                connected=0;
+                                clientsocket.disconnect();
+                                connectionS.setTexture(offt);
+                                cout<<"not ready?\nso disconnect\n";
+                            }
+                        }else cout<<"lost response 0x13\n";
+                        continue;
+                    }else
+                    if(data[i]==0x14){
+                        //starting game
+                    }else
                     cout<<"recieved unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
             }
@@ -632,7 +860,7 @@ int main(){
                 }
                 receiving=0;
                 cout<<"myid="<<myid<<"\n";
-            }
+            }else
             if(receiving==6){
                 if(deltareceive){
                     for(int i=deltareceive; i<deltareceive+4; i++){
@@ -647,38 +875,62 @@ int main(){
                     to_receive*=24;
                     deltareceive+=4;
                 }
-                for(int i=deltareceive; i<received; i++){
-                    if(to_receive==0){
-                        cout<<"roomlist is empty\n";
-                        receiving=0;
-                        deltareceive=0;
-                        break;
-                    }
-                    if(to_receive%24==0){
-                        lastgamelistelement++;
-                        if(!gamelist.empty()){
-                            list<gamelistelements>::iterator j=gamelist.end(); j--;
-                            (*j).update();
+                if(to_receive==0){
+                    cout<<"roomlist is empty\n";
+                    receiving=0;
+                    deltareceive=0;
+                }else
+                    for(int i=deltareceive; i<received; i++){
+                        if(to_receive%24==0){
+                            lastgamelistelement++;
+                            if(!gamelist.empty()){
+                                list<gamelistelements>::iterator j=gamelist.end(); j--;
+                                (*j).update();
+                            }
+                            gamelist.push_back(gamelistelements(lastgamelistelement));
                         }
-                        gamelist.push_back(gamelistelements(lastgamelistelement));
+                        to_receive--;
+                        list<gamelistelements>::iterator j=gamelist.end(); j--;
+                        if(to_receive%24>19){
+                            (*j).id=(*j).id<<8;
+                            (*j).id+=data[i];
+                        }else{
+                            if(data[i])
+                                (*j).name+=data[i];
+                        }
+                        if(!to_receive){
+                            (*j).update();
+                            receiving=0;
+                            deltareceive=0;
+                            break;
+                        }
                     }
+                deltareceive=0;
+            }else
+            if(receiving==0x11){
+                for(int i=deltareceive; ((i<received)||(to_receive>0)); i++){
+                    if(to_receive==5){
+                        if(data[i]){
+                            cout<<"joined\n"<<char(7);
+                            mode=lobby;
+                        }else{
+                            cout<<"not joined\n";
+                            to_receive=0;
+                            break;
+                        }
+                    }
+                    else{
+                        protbufferi[2]=protbufferi[2]<<8;
+                        protbufferi[2]+=data[i];
+                    }
+
                     to_receive--;
-                    list<gamelistelements>::iterator j=gamelist.end(); j--;
-                    if(to_receive%24>19){
-                        (*j).id=(*j).id<<8;
-                        (*j).id+=data[i];
-                    }else{
-                        if(data[i])
-                            (*j).name+=data[i];
-                    }
-                    if(!to_receive){
-                        (*j).update();
-                        receiving=0;
-                        deltareceive=0;
-                        break;
-                    }
                 }
                 deltareceive=0;
+                if(!to_receive){
+                    seedinput.setString(to_string(protbufferi[2]));
+                    receiving=0;
+                }
             }
         }
         frame++;
@@ -738,8 +990,11 @@ int main(){
             window.draw(cb2players);
             window.draw(cb3players);
             window.draw(cb4players);
+            window.draw(oksettings);
+            window.draw(readys);
         }
         }window.display();
     }
     return 0;
 }
+//dodaæ muzyczkê w poczekalni, bo bêdzie weselej
