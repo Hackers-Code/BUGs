@@ -7,19 +7,19 @@ class UniqueNameStorage {
 
 	checkName( name )
 	{
-		if( !name instanceof Buffer)
+		if( !name instanceof Buffer )
 		{
-			console.log('Name must be a buffer');
+			console.log( 'Name must be a buffer' );
 			return false;
 		}
 		if( name.length !== this.nameLength )
 		{
-			console.log('Name is not correct size');
+			console.log( 'Name is not correct size' );
 			return false;
 		}
 		for( let i = 0 ; i < this.storedNames.length ; i++ )
 		{
-			if( this.storedNames[ i ].compare( key ) === 0 )
+			if( this.storedNames[ i ].compare( name ) === 0 )
 			{
 				return false;
 			}

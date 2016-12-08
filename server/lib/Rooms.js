@@ -3,39 +3,125 @@ const UniqueID = require( './UniqueKeyGenerator.js' );
 const UniqueName = require( './UniqueNameStorage.js' );
 
 class Rooms {
-	constructor()
+	constructor( players )
 	{
 		this.rooms = [];
 		this.keyGenerator = new UniqueID( 4 );
 		this.nameStorage = new UniqueName( 20 );
+		this.players = players;
 	}
 
-	addRoom( name, ownerID )
+	addRoom( name, password, ownerID )
 	{
-		if( this.nameStorage.checkName( name ) )
+		if( this.players.isFree( ownerID ) )
 		{
-			let room = new Room( this.keyGenerator.generateKey(), name, ownerID );
-			this.rooms.push( room );
-			return true;
+			if( this.nameStorage.checkName( name ) )
+			{
+				let gameID = this.keyGenerator.generateKey();
+				let room = new Room( gameID, name, password, ownerID );
+				this.players.addGameToPlayer( ownerID, gameID );
+				this.rooms.push( room );
+				return true;
+			}
+			console.log( 'Room name is not unique' );
+			return false;
 		}
-		console.log( 'Room name is not unique' );
-		return false;
+		else
+		{
+			console.log( 'Player is not free' );
+			return false;
+		}
+	}
+
+	loginToRoom( playerID, roomID, password )
+	{
+		console.log( 'PlayerID: ' + playerID.toString( 'hex' ) );
+		console.log( 'RoomID: ' + roomID.toString( 'hex' ) );
+		console.log( 'Password: ' + password.toString( 'hex' ) );
+		if( this.players.isFree( playerID ) )
+		{
+			let index = this.findRoomByID( roomID );
+			if( index !== -1 )
+			{
+				if( this.rooms[ index ].loginToRoom( playerID, password ) )
+				{
+					if( this.players.addGameToPlayer( playerID, roomID ) )
+					{
+						return this.rooms[ index ].getCurrentMap();
+					}
+					else
+					{
+						console.log( 'Add game to player failed' );
+						return false;
+					}
+				}
+				else
+				{
+					console.log( 'Login failed' );
+					return false;
+				}
+			}
+			else
+			{
+				console.log( 'Room: ' + roomID + ' not found' );
+				return false;
+			}
+		}
+		else
+		{
+			console.log( 'Player is not free' );
+			return false;
+		}
+	}
+
+	configRoom( playerID, mapID, maxPlayers )
+	{
+		let index = this.findRoomByID( this.players.getPlayerGame( playerID ) );
+		if( index !== -1 )
+		{
+			return this.rooms[ index ].setConfig( playerID, mapID, maxPlayers )
+		}
+		else
+		{
+			console.log( 'Not found room' );
+			return false;
+		}
 	}
 
 	getRooms()
 	{
-		let gamesCount = this.rooms.length;
+		let gamesCount = 0;
 		let retval = Buffer.allocUnsafe( 4 );
-		retval.writeInt32BE( gamesCount, 0 );
-		for( let i = 0 ; i < gamesCount ; i++ )
+		for( let i = 0 ; i < this.rooms.length ; i++ )
 		{
-			retval = Buffer.concat( [
-				retval,
-				this.rooms[ i ].id,
-				this.rooms[ i ].name
-			] );
+			let game = this.rooms[ i ].isWaitingForPlayers();
+			if( game !== false )
+			{
+				gamesCount++;
+				console.log( 'Game number ' + gamesCount + ' with name ' + game.name.toString(
+						'ascii' ) + ' has id ' + game.id.toString( 'hex' ) );
+				retval = Buffer.concat( [
+					retval,
+					game.id,
+					game.name
+				] );
+			}
 		}
+		retval.writeInt32BE( gamesCount, 0 );
 		return retval;
+	}
+
+	findRoomByID( id )
+	{
+		console.log( 'Looking for player with id ' + id.toString( 'hex' ) );
+		for( let i = 0 ; i < this.rooms.length ; i++ )
+		{
+			if( id.compare( this.rooms[ i ].id ) === 0 )
+			{
+				return i;
+			}
+		}
+		return -1;
 	}
 }
 

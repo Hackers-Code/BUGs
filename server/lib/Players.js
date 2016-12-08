@@ -10,6 +10,49 @@ class Players {
 		this.nameStorage = new UniqueName( 20 );
 	}
 
+	isFree( id )
+	{
+		let index = this.findPlayerById( id );
+		if( index !== -1 )
+		{
+			return this.players[ index ].isFree();
+		}
+		else
+		{
+			console.log( 'Player with id: ' + id.toString( 'hex' ) + ' not found' );
+			return false;
+		}
+	}
+
+	addGameToPlayer( playerID, gameID )
+	{
+		let index = this.findPlayerById( playerID );
+		if( index !== -1 )
+		{
+			this.players[ index ].addToGame( gameID );
+			return true;
+		}
+		else
+		{
+			console.log( 'Player with id: ' + id.toString( 'hex' ) + ' not found' );
+			return false;
+		}
+	}
+
+	getPlayerGame( playerID )
+	{
+		let index = this.findPlayerById( playerID );
+		if( index !== -1 )
+		{
+			return this.players[ index ].getGame();
+		}
+		else
+		{
+			console.log( 'Player with id: ' + id.toString( 'hex' ) + ' not found' );
+			return false;
+		}
+	}
+
 	addPlayer( socket )
 	{
 		let player = new Player( socket );
@@ -33,7 +76,7 @@ class Players {
 
 	}
 
-	addNickname( name, id )
+	addNickname( id, name )
 	{
 		let index = this.findPlayerById( id );
 		if( index !== -1 )
@@ -58,7 +101,7 @@ class Players {
 
 	findPlayerById( id )
 	{
-		console.log( 'Looking for player with id ' + id );
+		console.log( 'Looking for player with id ' + id.toString( 'hex' ) );
 		for( let i = 0 ; i < this.players.length ; i++ )
 		{
 			if( id.compare( this.players[ i ].id ) === 0 )
