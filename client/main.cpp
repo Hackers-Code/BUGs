@@ -230,8 +230,21 @@ void protocol7(string buffer, unsigned int idbuffer, string buffer2){
     }else cout<<"not connected, can not create room\n";
 }
 
-void protocol9(unsigned int idbuffer, unsigned int seed, unsigned char playersamount){
-
+void protocol9((unsigned int idbuffer, unsigned int seed, unsigned char playersamoun){
+	if(connected){
+		unsigned char to_send[10];
+		to_send[0]=9;
+		for(int i=4; i>0; i--){
+			to_send[i]=idbuffer%256;
+			idbuffer=idbuffer>>8;
+		}
+		for(int i=8; i>4; i--){
+			to_send[i]=seed%256;
+			seed=seed>>8;
+		}
+		to_send[9]=playersamount;
+		if(!clientsocket.send(to_send, 10)) cout<<"sending error\n";
+	}else cout<<"not connected, cannot change settings\n";
 }
 //}
 
