@@ -243,7 +243,8 @@ void protocol9((unsigned int idbuffer, unsigned int seed, unsigned char playersa
 			seed=seed>>8;
 		}
 		to_send[9]=playersamount;
-		if(!clientsocket.send(to_send, 10)) cout<<"sending error\n";
+		if(clientsocket.send(to_send, 10)==sf::Socket::Done) cout<<"poszlo\n";
+		else cout<<"sending error\n";
 	}else cout<<"not connected, cannot change settings\n";
 }
 //}
