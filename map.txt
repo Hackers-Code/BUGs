@@ -4,4 +4,4 @@ meta data:
 
 data:
 0x1 + 4 bytes ( x ) + 4 bytes ( y ) - spawn point
-0x2 + 4 bytes ( x) + 4 bytes ( y ) + 4 bytes ( width ) + 4 bytes ( height ) - rectangle
+0x2 + 4 bytes ( x) + 4 bytes ( y ) + 4 bytes ( width ) + 4 bytes ( height ) - block
