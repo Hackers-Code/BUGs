@@ -1,2 +1,6 @@
+meta data:
 4 bytes - width
 4 bytes - height
+
+data:
+0x1 + 4 bytes ( x ) + 4 bytes ( y ) - spawn point
