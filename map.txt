@@ -1,0 +1,2 @@
+4 bytes - width
+4 bytes - height
