@@ -5,11 +5,36 @@ class Player {
 		this.name = null;
 		this.socket = socket;
 		this.roomID = null;
+		this.confirmedGame = false;
 	}
 
 	addToGame( id )
 	{
 		this.roomID = Buffer.from( id );
+	}
+
+	changeSocket( socket )
+	{
+		this.socket = socket;
+	}
+
+	getSocket()
+	{
+		return this.socket;
+	}
+
+	confirmGame()
+	{
+		if( this.confirmedGame !== true && this.roomID !== null )
+		{
+			this.confirmedGame = true;
+			return true;
+		}
+		else
+		{
+			console.log( 'Player already accepted game!' );
+			return false;
+		}
 	}
 
 	getGame()

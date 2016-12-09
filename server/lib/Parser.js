@@ -4,100 +4,209 @@ class Parser {
 		this.defaultRule = defRule;
 	}
 
-	static validateBuffer( rule, buffer )
-	{
-		let offset = 0;
-		let object = {};
-		for( let i = 0 ; i < rule.length ; i++ )
-		{
-			if( isNaN( parseInt( rule[ i ].length ) ) )
-			{
-				rule[ i ].length = object[ rule[ i ].length ].readInt8( 0 );
-			}
-			if( typeof rule[ i ].conditionName !== 'undefined' )
-			{
-				if( object[ rule[ i ].conditionName ] !== rule[ i ].conditionValue )
-				{
-					continue;
-				}
-			}
-			object[ rule[ i ].name ] = buffer.slice( offset, offset += parseInt( rule[ i ].length ) );
-			if( buffer.length < offset )
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
 	encode( ruleString, object )
 	{
-		let rule = this.createRule( ruleString );
-		let buffer = Buffer.from( [] );
-		for( let i = 0 ; i < rule.length ; i++ )
+		let rules = this.createRule( ruleString );
+		if( rules === false )
 		{
-			if( isNaN( parseInt( rule[ i ].length ) ) )
+			return false;
+		}
+		let offset = 0;
+		let buffer = Buffer.from( [] );
+		for( let i = 0 ; i < rules.length ; i++ )
+		{
+			let rule = rules[ i ];
+			if( rule.type === 'normal' )
 			{
-				rule[ i ].length = object[ rule[ i ].length ].readInt8( 0 );
-			}
-			if( typeof rule[ i ].conditionName !== 'undefined' )
-			{
-				if( Buffer.compare( object[ rule[ i ].conditionName ], rule[ i ].conditionValue ) !== 0 )
+				if( isNaN( parseInt( rule.length ) ) )
 				{
-					continue;
+					rule.length = object[ rule.length ].readInt8( 0 );
+				}
+				if( object[ rule.name ] instanceof Buffer )
+				{
+					buffer = Buffer.concat( [
+						buffer,
+						object[ rule.name ]
+					] );
+				}
+				else
+				{
+					console.log( object[ rule.name ] );
+					console.log( 'Object properties must be the buffers!' );
+					return false;
 				}
 			}
-			if( object[ rule[ i ].name ] instanceof Buffer )
+			else if( rule.type === 'condition' )
 			{
-				buffer = Buffer.concat( [
-					buffer,
-					object[ rule[ i ].name ]
-				] );
+				if( typeof object[ rule.required_parameter ] !== 'undefined' && Buffer.compare(
+						object[ rule.required_parameter ], Buffer.from( [ parseInt( rule.required_value ) ] ) ) === 0 )
+				{
+					if( isNaN( parseInt( rule.length ) ) )
+					{
+						rule.length = object[ rule.length ].readInt8( 0 );
+					}
+					if( object[ rule.name ] instanceof Buffer )
+					{
+						buffer = Buffer.concat( [
+							buffer,
+							object[ rule.name ]
+						] );
+					}
+					else
+					{
+						console.log( 'Object properties must be the buffers!' );
+						return false;
+					}
+				}
+			}
+			else if( rule.type === 'restricted' )
+			{
+				for( let i = 0 ; i < rule.allowedValues.length ; i++ )
+				{
+					if( Buffer.compare( object[ rule.name ],
+							Buffer.from( [ parseInt( rule.allowedValues[ i ] ) ] ) ) === 0 )
+					{
+						break;
+					}
+					if( i + 1 === rule.allowedValues.length )
+					{
+						console.log( 'Not allowed value' );
+						return false;
+					}
+				}
+				if( isNaN( parseInt( rule.length ) ) )
+				{
+					rule.length = object[ rule.length ].readInt8( 0 );
+				}
+				if( object[ rule.name ] instanceof Buffer )
+				{
+					buffer = Buffer.concat( [
+						buffer,
+						object[ rule.name ]
+					] );
+				}
+				else
+				{
+					console.log( 'Object properties must be the buffers!' );
+					return false;
+				}
+			}
+			else if( rule.type === 'array' )
+			{
+				for( let i = 0 ; i < object[ rule.multiplier ].readInt32BE( 0 ) ; i++ )
+				{
+					for( let j = 0 ; j < rule.properties.length ; j++ )
+					{
+						if( object[ rule.arrayName ][ i ][ rule.properties[ j ].name ] instanceof Buffer )
+						{
+
+							buffer = Buffer.concat( [
+								buffer,
+								object[ rule.arrayName ][ i ][ rule.properties[ j ].name ]
+							] );
+						}
+						else
+						{
+							console.log( 'Object properties must be the buffers!' );
+							return false;
+						}
+					}
+				}
 			}
 			else
 			{
-				console.log( 'Object properties must be the buffers!' );
+				console.log( 'Unresolved rule type' );
+				return false;
+			}
+			if( offset > buffer.length )
+			{
+				console.log( 'Not enough data in buffer' );
 				return false;
 			}
 		}
-		if( Parser.validateBuffer( rule, buffer ) )
-		{
-			return buffer;
-		}
-		else
-		{
-			console.log( 'Unable to create buffer from this rule' );
-			console.log( 'Buffer rule: ' + ruleString );
-			console.log( 'Object: ' + JSON.stringify( object ) );
-			console.log( 'Buffer: ' + buffer.toString( 'hex' ) );
-			return false;
-		}
+		return buffer;
 	}
 
 	decode( ruleString, buffer )
 	{
-		let rule = this.createRule( ruleString );
-		if( Parser.validateBuffer( rule, buffer ) )
+		let rules = this.createRule( ruleString );
+		if( rules === false )
 		{
-			let offset = 0;
-			let object = {};
-			for( let i = 0 ; i < rule.length ; i++ )
-			{
-				if( isNaN( parseInt( rule[ i ].length ) ) )
-				{
-					rule[ i ].length = object[ rule[ i ].length ].readInt8( 0 );
-				}
-				object[ rule[ i ].name ] = buffer.slice( offset, offset += parseInt( rule[ i ].length ) );
-			}
-			return object;
-		}
-		else
-		{
-			console.log( 'Unable to parse buffer' );
-			console.log( 'Parsing rule: ' + ruleString );
-			console.log( 'Buffer: ' + buffer.toString( 'hex' ) );
 			return false;
 		}
+		let offset = 0;
+		let object = {};
+		for( let i = 0 ; i < rules.length ; i++ )
+		{
+			let rule = rules[ i ];
+			if( rule.type === 'normal' )
+			{
+				if( isNaN( parseInt( rule.length ) ) )
+				{
+					rule.length = object[ rule.length ].readInt8( 0 );
+				}
+				object[ rule.name ] = buffer.slice( offset, offset += parseInt( rule.length ) );
+			}
+			else if( rule.type === 'condition' )
+			{
+				if( typeof object[ rule.required_parameter ] !== 'undefined' && Buffer.compare(
+						object[ rule.required_parameter ], Buffer.from( [ parseInt( rule.required_value ) ] ) ) === 0 )
+				{
+					if( isNaN( parseInt( rule.length ) ) )
+					{
+						rule.length = object[ rule.length ].readInt8( 0 );
+					}
+					object[ rule.name ] = buffer.slice( offset, offset += parseInt( rule.length ) );
+				}
+			}
+			else if( rule.type === 'restricted' )
+			{
+				if( isNaN( parseInt( rule.length ) ) )
+				{
+					rule.length = object[ rule.length ].readInt8( 0 );
+				}
+				object[ rule.name ] = buffer.slice( offset, offset += parseInt( rule.length ) );
+				for( let i = 0 ; i < rule.allowedValues.length ; i++ )
+				{
+					if( Buffer.compare( object[ rule.name ],
+							Buffer.from( [ parseInt( rule.allowedValues[ i ] ) ] ) ) === 0 )
+					{
+						break;
+					}
+					if( i + 1 === rule.allowedValues.length )
+					{
+						console.log( 'Not allowed value' );
+						return false;
+					}
+				}
+			}
+			else if( rule.type === 'array' )
+			{
+				let games = [];
+				for( let i = 0 ; i < object[ rule.multiplier ].readInt32BE( 0 ) ; i++ )
+				{
+					let tmp = {};
+					for( let j = 0 ; j < rule.properties.length ; j++ )
+					{
+						tmp[ rule.properties[ j ].name ] = buffer.slice( offset,
+							offset += parseInt( rule.properties[ j ].length ) );
+					}
+					games.push( tmp );
+				}
+				object[ rule.arrayName ] = games;
+			}
+			else
+			{
+				console.log( 'Unresolved rule type' );
+				return false;
+			}
+			if( offset > buffer.length )
+			{
+				console.log( 'Not enough data in buffer' );
+				return false;
+			}
+		}
+		return object;
 	}
 
 	concatRule( rule )
@@ -118,27 +227,69 @@ class Parser {
 		let rule = [];
 		ruleString = this.concatRule( ruleString );
 		ruleString = ruleString.split( ';' );
+		let normalRuleRegexp = /^\w+:\w+$/;
+		let conditionRuleRegexp = /^\w+:\w+&\w+=[0-9]*$/;
+		let arrayRuleRegexp = /^\w+\([A-Za-z0-9,:]+\)\*\w+$/;
+		let restrictedRuleRegexp = /^\w+:\w+\[[A-Za-z0-9,]+]$/;
 		for( let i = 0 ; i < ruleString.length ; i++ )
 		{
-			let data = ruleString[ i ].split( ':' );
-			if( data[ 1 ].split( '&' ).length > 1 )
+			if( ruleString[ i ].match( normalRuleRegexp ) )
 			{
+				let tmp = ruleString[ i ].split( ':' );
 				rule.push( {
-					name : data[ 0 ],
-					length : data[ 1 ].split( '&' )[ 0 ],
-					conditionName : data[ 1 ].split( '&' )[ 1 ].split( '=' )[ 0 ],
-					conditionValue : Buffer.from( [ data[ 1 ].split( '&' )[ 1 ].split( '=' )[ 1 ] ] )
+					type : 'normal',
+					name : tmp[ 0 ],
+					length : tmp[ 1 ]
+				} );
+			}
+			else if( ruleString[ i ].match( conditionRuleRegexp ) )
+			{
+				let tmp = ruleString[ i ].split( '&' );
+				rule.push( {
+					type : 'condition',
+					name : tmp[ 0 ].split( ':' )[ 0 ],
+					length : tmp[ 0 ].split( ':' )[ 1 ],
+					required_parameter : tmp[ 1 ].split( '=' )[ 0 ],
+					required_value : tmp[ 1 ].split( '=' )[ 1 ]
+				} );
+			}
+			else if( ruleString[ i ].match( restrictedRuleRegexp ) )
+			{
+				let tmp = ruleString[ i ].match( /^(\w+):(\w+)\[([A-Za-z0-9,]+)]$/ );
+				rule.push( {
+					type : 'restricted',
+					name : tmp[ 1 ],
+					length : tmp[ 2 ],
+					allowedValues : tmp[ 3 ].split( ',' )
+				} );
+			}
+			else if( ruleString[ i ].match( arrayRuleRegexp ) )
+			{
+				let tmp = ruleString[ i ].match( /^(\w+)\(([A-Za-z0-9,:]+)\)\*(\w+)$/ );
+				let data = tmp[ 2 ].split( ',' );
+				let properties = [];
+				for( let i = 0 ; i < data.length ; i++ )
+				{
+					properties.push( {
+						name : data[ i ].split( ':' )[ 0 ],
+						length : data[ i ].split( ':' )[ 1 ]
+					} )
+				}
+				rule.push( {
+					type : 'array',
+					arrayName : tmp[ 1 ],
+					properties : properties,
+					multiplier : tmp[ 3 ]
 				} );
 			}
 			else
 			{
-				rule.push( {
-					name : data[ 0 ],
-					length : data[ 1 ]
-				} );
+				console.log( 'Wrong rule string' );
+				return false;
 			}
 		}
 		return rule;
 	}
 }
+
 module.exports = Parser;

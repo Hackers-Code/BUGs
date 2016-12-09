@@ -24,12 +24,55 @@ class Players {
 		}
 	}
 
+	getSocket( id )
+	{
+		let index = this.findPlayerById( id );
+		if( index !== -1 )
+		{
+			return this.players[ index ].getSocket();
+		}
+		else
+		{
+			console.log( 'Player with id: ' + id.toString( 'hex' ) + ' not found' );
+			return false;
+		}
+	}
+
+	confirmGame( id )
+	{
+		let index = this.findPlayerById( id );
+		if( index !== -1 )
+		{
+			return this.players[ index ].confirmGame();
+		}
+		else
+		{
+			console.log( 'Player with id: ' + id.toString( 'hex' ) + ' not found' );
+			return false;
+		}
+	}
+
 	addGameToPlayer( playerID, gameID )
 	{
 		let index = this.findPlayerById( playerID );
 		if( index !== -1 )
 		{
 			this.players[ index ].addToGame( gameID );
+			return true;
+		}
+		else
+		{
+			console.log( 'Player with id: ' + id.toString( 'hex' ) + ' not found' );
+			return false;
+		}
+	}
+
+	updateSocket( playerID, socket )
+	{
+		let index = this.findPlayerById( playerID );
+		if( index !== -1 )
+		{
+			this.players[ index ].changeSocket( socket );
 			return true;
 		}
 		else

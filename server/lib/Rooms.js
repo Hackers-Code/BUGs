@@ -33,6 +33,20 @@ class Rooms {
 		}
 	}
 
+	confirmGame( playerID )
+	{
+		let index = this.findRoomByID( this.players.getPlayerGame( playerID ) );
+		if( index !== -1 )
+		{
+			return this.rooms[ index ].confirmGame();
+		}
+		else
+		{
+			console.log( 'Not found room' );
+			return false;
+		}
+	}
+
 	loginToRoom( playerID, roomID, password )
 	{
 		console.log( 'PlayerID: ' + playerID.toString( 'hex' ) );
@@ -91,7 +105,7 @@ class Rooms {
 	getRooms()
 	{
 		let gamesCount = 0;
-		let retval = Buffer.allocUnsafe( 4 );
+		let games = [];
 		for( let i = 0 ; i < this.rooms.length ; i++ )
 		{
 			let game = this.rooms[ i ].isWaitingForPlayers();
@@ -100,15 +114,18 @@ class Rooms {
 				gamesCount++;
 				console.log( 'Game number ' + gamesCount + ' with name ' + game.name.toString(
 						'ascii' ) + ' has id ' + game.id.toString( 'hex' ) );
-				retval = Buffer.concat( [
-					retval,
-					game.id,
-					game.name
-				] );
+				games.push( {
+					id : game.id,
+					name : game.name
+				} );
 			}
 		}
-		retval.writeInt32BE( gamesCount, 0 );
-		return retval;
+		let count = Buffer.alloc( 4 );
+		count.writeInt32BE( gamesCount, 0 );
+		return {
+			count : count,
+			games : games
+		};
 	}
 
 	findRoomByID( id )

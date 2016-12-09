@@ -15,7 +15,20 @@ class Room {
 		this.players = [ ownerID ];
 		this.status = RoomStatus.notInitialized;
 		this.maxPlayers = 0;
+		this.confirmedPlayers = 0;
 		this.mapID = null;
+	}
+
+	confirmGame()
+	{
+		this.confirmedPlayers++;
+		if( this.confirmedPlayers === this.maxPlayers )
+		{
+			this.status = RoomStatus.inGame;
+			console.log( 'Room is in game now' );
+			return this.players;
+		}
+		return false;
 	}
 
 	checkPrivileges( playerID )
@@ -42,6 +55,7 @@ class Room {
 					this.mapID = mapID;
 					this.maxPlayers = maxPlayers.readInt8( 0 );
 					this.status = RoomStatus.waitingForPlayers;
+					console.log( 'Room is waiting for players now' );
 					return true;
 				}
 				else
@@ -71,6 +85,7 @@ class Room {
 				this.players.push( id );
 				if( this.players.length === this.maxPlayers )
 				{
+					console.log( 'Room is waiting for confirming game by players now' );
 					this.status = RoomStatus.waitingForAccepting;
 				}
 				return true;

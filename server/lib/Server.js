@@ -2,7 +2,7 @@ const net = require( 'net' );
 const Rooms = require( './Rooms.js' );
 const Players = require( './Players.js' );
 const Parser = require( './Parser.js' );
-const Response = require( './Response.js' );
+const Map = require( './Map.js' );
 class Server {
 	constructor()
 	{
@@ -17,9 +17,10 @@ class Server {
 		}, this.displayWelcomeMessage.bind( this ) );
 		this.players = new Players();
 		this.rooms = new Rooms( this.players );
-		this.response = new Response();
 		this.parser = new Parser( 'opcode:1' );
 		this.socketID = 0;
+		let map = new Map();
+		map.loadMap( 'maps/1.map', map.parse );
 	}
 
 	connectionHandler( socket )
@@ -61,6 +62,14 @@ class Server {
 				case 0x10:
 					rule = 'playerID:4;roomID:4;passwordLength:1;password:passwordLength';
 					callback = this.loginToGame.bind( this );
+					break;
+				case 0x12:
+					rule = 'id:4';
+					callback = this.confirmGame.bind( this );
+					break;
+				case 0xfe:
+					rule = 'id:4';
+					callback = this.updateSocket.bind( this );
 					break;
 			}
 			callback( socket, this.parser.decode( rule, data ) );
@@ -133,7 +142,9 @@ class Server {
 	listGames( socket )
 	{
 		console.log( 'Listing games for ' + socket.id );
-		this.response.sendOld( socket, 0x6, this.rooms.getRooms() );
+		let object = this.rooms.getRooms();
+		object.opcode = Buffer.from( [ 0x6 ] );
+		this.send( socket, 'count:4;games(id:4,name:20)*count', object );
 	}
 
 	configRoom( socket, data )
@@ -162,6 +173,47 @@ class Server {
 			object.mapID = map;
 		}
 		this.send( socket, 'status:1;mapID:4&status=1', object );
+	}
+
+	confirmGame( socket, data )
+	{
+		let object = {
+			opcode : Buffer.from( [ 0x13 ] ),
+			status : Buffer.from( [ 0 ] )
+		};
+		let players = false;
+		if( this.players.confirmGame( data.id ) !== false )
+		{
+			players = this.rooms.confirmGame( data.id );
+			object.status = Buffer.from( [ 1 ] );
+		}
+		this.send( socket, 'status:1', object );
+		if( players !== false )
+		{
+			for( let i = 0 ; i < players.length ; i++ )
+			{
+				let socket = this.players.getSocket( players[ i ] );
+				if( socket !== false )
+				{
+					this.send( socket, '', {
+						opcode : Buffer.from( [ 0x14 ] )
+					} );
+				}
+			}
+		}
+	}
+
+	updateSocket( socket, data )
+	{
+		let object = {
+			opcode : Buffer.from( [ 0xff ] ),
+			status : Buffer.from( [ 0 ] )
+		};
+		if( this.players.updateSocket( data.id, socket ) !== false )
+		{
+			object.status = Buffer.from( [ 1 ] );
+		}
+		this.send( socket, 'status:1', object );
 	}
 }
 
