@@ -15,6 +15,8 @@
 0x12 + 4 bytes ( id ) - confirm joining game ( client )
 0x13 + bool ( status ) - confirm that server received confirmation ( server )
 0x14 - all players confirmed, load the map ( server )
+0x15 + 4 bytes ( id ) - get players ( client )
+0x16 + 1 byte ( players_count ) + (1 byte(id) + 20 bytes(name))*players_count - list players in game ( server )
 
 0xfe + 4 bytes ( id ) - update socket ( client )
 0xff + bool ( status ) - updating player socket status ( server )
