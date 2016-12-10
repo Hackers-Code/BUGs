@@ -14,6 +14,7 @@
 using namespace std;
 
 sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
+    spawnpoints.clear();
     fstream plik;
     sf::Image output;
     if(!track.length()){
@@ -294,12 +295,9 @@ void placek(sf::Image &image, int x, int y,unsigned int r){cout<<x<<", "<<y<<", 
 
 void createmap(unsigned int seed){
     if(seed==1){
-        backgroundi.create(6000, 3600, sf::Color(0,0,0,0));
-        for(int i=0; i<6000; i++)
-            for(int j=1300; j<3600; j++)
-                backgroundi.setPixel(i, j, sf::Color(80, 100, 0));
-    }
-    else{
+        backgroundt.loadFromImage(loadMap("1.map", spawnpoints));
+        backgrounds.setTexture(backgroundt);
+    }else{
         srand(seed);
         backgroundi.create(6000, 3600, sf::Color(0,0,0,0));
         for(int i=0; i<6000; i++){
@@ -470,55 +468,6 @@ void save(string track, string &input){
 
 int main(){
     {
-        /*string a="1.map", b;
-        unsigned int c=6000;
-        unsigned char ch[4];
-        for(int i=3; i>=0; i--){
-            ch[i]=static_cast<unsigned char>(c%256);
-            c=c>>8;
-        }for(int i=0; i<4; i++)b+=ch[i];
-                                                c=3600;
-        for(int i=3; i>=0; i--){
-            ch[i]=static_cast<unsigned char>(c%256);
-            c=c>>8;
-        }for(int i=0; i<4; i++)b+=ch[i];
-                                                b+=char(2);
-                                                c=0;
-        for(int i=3; i>=0; i--){
-            ch[i]=static_cast<unsigned char>(c%256);
-            c=c>>8;
-        }for(int i=0; i<4; i++)b+=ch[i];
-                                                c=1300;
-        for(int i=3; i>=0; i--){
-            ch[i]=static_cast<unsigned char>(c%256);
-            c=c>>8;
-        }for(int i=0; i<4; i++)b+=ch[i];
-                                                c=6000;
-        for(int i=3; i>=0; i--){
-            ch[i]=static_cast<unsigned char>(c%256);
-            c=c>>8;
-        }for(int i=0; i<4; i++)b+=ch[i];
-                                                c=2300;
-        for(int i=3; i>=0; i--){
-            ch[i]=static_cast<unsigned char>(c%256);
-            c=c>>8;
-        }for(int i=0; i<4; i++)b+=ch[i];
-        for(int j=0; j<30; j++){
-                                                b+=char(1);
-                                                c=j*200;
-        for(int i=3; i>=0; i--){
-            ch[i]=static_cast<unsigned char>(c%256);
-            c=c>>8;
-        }for(int i=0; i<4; i++)b+=ch[i];
-                                                c=1180;
-        for(int i=3; i>=0; i--){
-            ch[i]=static_cast<unsigned char>(c%256);
-            c=c>>8;
-        }for(int i=0; i<4; i++)b+=ch[i];}
-        save(a,b);*/
-        backgroundt.loadFromImage(loadMap("1.map", spawnpoints));
-        backgrounds.setTexture(backgroundt);
-
         system("color 0a");
         window.setFramerateLimit(60);
         soundtrack.openFromFile("snd/music.ogg");
@@ -927,6 +876,12 @@ int main(){
                         if(!ready)
                             protocol12(myid);
                     }else
+                    if((event.mouseButton.x>=soundpointers.getPosition().x)&&(event.mouseButton.x<=soundpointers.getPosition().x+soundpointers.getLocalBounds().width)&&(event.mouseButton.y>=soundpointers.getPosition().y)&&(event.mouseButton.y<=soundpointers.getPosition().y+soundpointers.getLocalBounds().height)){
+                        soundpointerpressed=1;
+                    }else
+                    if((event.mouseButton.x>=soundicons.getPosition().x)&&(event.mouseButton.x<=soundicons.getPosition().x+soundicons.getLocalBounds().width)&&(event.mouseButton.y>=soundicons.getPosition().y)&&(event.mouseButton.y<=soundicons.getPosition().y+soundicons.getLocalBounds().height)){
+                        soundbarexchanged=!soundbarexchanged;
+                    }else
                     if((changingsettings)&&(event.mouseButton.x>=seedinput.getPosition().x-8)&&(event.mouseButton.x<=seedinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=seedinput.getPosition().y-8)&&(event.mouseButton.y<=seedinput.getPosition().y-8+inputbars.getLocalBounds().height)){
                         seedinput.setColor(checkedclr);
                         textbox=seedbox;
@@ -968,6 +923,15 @@ int main(){
                         {
                             (*inputpointer).setString((*inputpointer).getString()+event.text.unicode);
                         }
+                    }
+                }else
+                if(event.type==sf::Event::MouseButtonReleased){
+                    soundpointerpressed=0;
+                }else
+                if(event.type==sf::Event::MouseMoved){
+                    if(soundpointerpressed){
+                        soundtrack.setVolume((event.mouseMove.y-30)*(event.mouseMove.y>30)-(event.mouseMove.y-130)*(event.mouseMove.y>130));
+                        soundpointers.setPosition(1139, 24+soundtrack.getVolume());
                     }
                 }
             }
@@ -1361,6 +1325,11 @@ int main(){
                 window.draw(oksettings);
             }
             window.draw(readys);
+            window.draw(soundicons);
+            if(soundbarexchanged){
+                window.draw(soundbars);
+                window.draw(soundpointers);
+            }
         }
         }window.display();
     }
