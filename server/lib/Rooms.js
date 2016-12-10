@@ -40,7 +40,8 @@ class Rooms {
 		{
 			let players = this.rooms[ index ].getPlayers();
 			let playersList = [];
-			let playersCount = Buffer.alloc( 4 ).writeInt32BE( players.length, 0 );
+			let playersCount = Buffer.alloc( 4 );
+			playersCount.writeInt32BE( players.length, 0 );
 			for( let i = 0 ; i < players.length ; i++ )
 			{
 				playersList.push( {
@@ -120,7 +121,7 @@ class Rooms {
 		let index = this.findRoomByID( this.players.getPlayerGame( playerID ) );
 		if( index !== -1 )
 		{
-			return this.rooms[ index ].setConfig( playerID, mapID, maxPlayers )
+			return this.rooms[ index ].setConfig( playerID, mapID, maxPlayers );
 		}
 		else
 		{
@@ -153,6 +154,37 @@ class Rooms {
 			count : count,
 			games : games
 		};
+	}
+
+	getWorms( playerID )
+	{
+		let index = this.findRoomByID( this.players.getPlayerGame( playerID ) );
+		if( index !== -1 )
+		{
+			let worms = this.rooms[ index ].getWorms();
+			let wormsList = [];
+			let wormsCount = Buffer.alloc( 4 );
+			wormsCount.writeInt32BE( worms.length, 0 );
+			for( let i = 0 ; i < players.length ; i++ )
+			{
+				wormsList.push( {
+					owner_id : worms[ i ].ownerID,
+					worm_id : worms[ i ].id,
+					hp : worms[ i ].hp,
+					x : worms[ i ].x,
+					y : worms[ i ].y
+				} );
+			}
+			return {
+				wormsCount : wormsCount,
+				worms : wormsList
+			};
+		}
+		else
+		{
+			console.log( 'Not found room' );
+			return false;
+		}
 	}
 
 	findRoomByID( id )

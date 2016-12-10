@@ -6,6 +6,7 @@ const RoomStatus = {
 };
 
 const Map = require( './Map.js' );
+const Worm = require( './Worm.js' );
 
 class Room {
 	constructor( id, name, password, ownerID )
@@ -19,6 +20,24 @@ class Room {
 		this.maxPlayers = 0;
 		this.confirmedPlayers = 0;
 		this.mapID = null;
+		this.worms = [];
+		this.mapParser = new Map();
+	}
+
+	startGame()
+	{
+		for( let i = 0 ; i < this.players.length ; i++ )
+		{
+			for( let j = 0 ; j < 5 ; j++ )
+			{
+				this.worms.push( this.players[ i ], i * 5 + j, this.mapParser.getUniqueSpawn() );
+			}
+		}
+	}
+
+	getWorms()
+	{
+		return this.worms;
 	}
 
 	confirmGame()
@@ -27,6 +46,8 @@ class Room {
 		if( this.confirmedPlayers === this.maxPlayers )
 		{
 			this.status = RoomStatus.inGame;
+			this.mapParser.loadMap( 'maps/' + this.mapID.readInt32BE( 0 ) + '.map' );
+			this.startGame();
 			console.log( 'Room is in game now' );
 			return this.players;
 		}

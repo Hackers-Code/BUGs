@@ -68,6 +68,10 @@ class Server {
 					rule = 'id:4';
 					callback = this.listPlayers.bind( this );
 					break;
+				case 0x17:
+					rule = 'id:4';
+					callback = this.listWorms.bind( this );
+					break;
 				case 0xfe:
 					rule = 'id:4';
 					callback = this.updateSocket.bind( this );
@@ -89,7 +93,7 @@ class Server {
 
 	displayWelcomeMessage()
 	{
-		console.log( this.server.address() );
+		console.log( 'Listening on ' + this.server.address().address + ':' + this.server.address().port );
 	}
 
 	send( socket, rule, object )
@@ -214,8 +218,30 @@ class Server {
 		{
 			object.players_count = players.playersCount;
 			object.players = players.players;
+			this.send( socket, 'players_count:1;players(id:1,name:20)*players_count', object );
 		}
-		this.send( socket, 'players_count:1;players(id:1,name:20)*players_count', object );
+		else
+		{
+			console.log( 'Are you in room?' );
+		}
+	}
+
+	listWorms( socket, data )
+	{
+		let object = {
+			opcode : Buffer.from( [ 0x18 ] )
+		};
+		let worms = this.rooms.getWorms( data.id );
+		if( players !== false )
+		{
+			object.worms_count = worms.wormsCount;
+			object.worms = worms.worms;
+			this.send( socket, 'worms_count:1;worms(owner_id:1,x:4,y:4,hp:1,worm_id:1)*worms_count', object );
+		}
+		else
+		{
+			console.log( 'Are you in room?' );
+		}
 	}
 
 	updateSocket( socket, data )

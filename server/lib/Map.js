@@ -29,20 +29,12 @@ class Map {
 		];
 		this.parser = new Parser( 'opcode:1' );
 		this.map = null;
+		this.uniqueSpawns = [];
 	}
 
 	loadMap( fileName )
 	{
-		fs.readFile( fileName, this.setMap.bind( this ) );
-	}
-
-	setMap( error, data )
-	{
-		if( error )
-		{
-			throw error;
-		}
-		this.map = data;
+		this.map = fs.readFileSync( fileName );
 		this.parse();
 	}
 
@@ -62,9 +54,21 @@ class Map {
 		{
 			let object = this.objects[ this.findObject( this.map.readInt8( offset ) ) ];
 			let entity = this.parser.decode( object.rule, this.map.slice( offset, offset += object.length ) );
+			if( object.name === 'spawn' )
+			{
+				this.uniqueSpawns.push( entity );
+			}
 			console.log( object );
 			console.log( entity );
 		}
+	}
+
+	getUniqueSpawn()
+	{
+		let index = Math.floor( Math.random() * this.uniqueSpawns.length );
+		let retval = this.uniqueSpawns[ index ];
+		this.uniqueSpawns.splice( index, 1 );
+		return retval;
 	}
 
 	findObject( opcode )
