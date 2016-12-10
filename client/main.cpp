@@ -457,7 +457,7 @@ void protocol17(unsigned int id){
 }
 //}
 
-void save(string track, string &input){
+void save(string track, string input){
     if((!input.length())||(!track.length()))return;
     fstream plik;
     plik.open(track, ios::out | ios::binary);
@@ -1089,6 +1089,7 @@ int main(){
                     myid+=data[i];
                 }
                 receiving=0;
+                save("sesja.iff", to_string(myid));
                 cout<<"myid="<<myid<<"\n";
             }else
             if(receiving==6){
@@ -1214,7 +1215,7 @@ int main(){
                         protbufferi[1]+=data[i];
                     }else{
                         if(!(to_receive%11)){
-                            if(protbufferi[1]!=40){
+                            if(protbufferi[1]!=40){cout<<"x="<<protbufferi[2]<<", y="<<protbufferi[3]<<", team="<<protbufferi[1]<<", hp="<<protbufferi[4]<<", id="<<protbufferi[5]<<"\n";
                                 players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]));
                             }
                             protbufferi[1]=data[i];
@@ -1248,7 +1249,7 @@ int main(){
                             protbufferi[1]=40;
                         }else
                         {//end of protocol
-                            receiving=0;
+                            receiving=0;cout<<"x="<<protbufferi[2]<<", y="<<protbufferi[3]<<", team="<<protbufferi[1]<<", hp="<<protbufferi[4]<<", id="<<protbufferi[5]<<"\n";
                             players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]));
                             for(int j=1; j<7; j++)
                                 protbufferi[j]=0;
