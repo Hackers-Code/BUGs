@@ -24,6 +24,20 @@ class Players {
 		}
 	}
 
+	getName( id )
+	{
+		let index = this.findPlayerById( id );
+		if( index !== -1 )
+		{
+			return this.players[ index ].getName();
+		}
+		else
+		{
+			console.log( 'Player with id: ' + id.toString( 'hex' ) + ' not found' );
+			return false;
+		}
+	}
+
 	getSocket( id )
 	{
 		let index = this.findPlayerById( id );

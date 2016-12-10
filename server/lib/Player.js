@@ -52,6 +52,11 @@ class Player {
 		this.name = Buffer.from( name );
 	}
 
+	getName()
+	{
+		return this.name;
+	}
+
 	isFree()
 	{
 		return this.roomID === null;

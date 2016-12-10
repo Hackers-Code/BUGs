@@ -33,6 +33,33 @@ class Rooms {
 		}
 	}
 
+	getPlayers( playerID )
+	{
+		let index = this.findRoomByID( this.players.getPlayerGame( playerID ) );
+		if( index !== -1 )
+		{
+			let players = this.rooms[ index ].getPlayers();
+			let playersList = [];
+			let playersCount = Buffer.alloc( 4 ).writeInt32BE( players.length, 0 );
+			for( let i = 0 ; i < players.length ; i++ )
+			{
+				playersList.push( {
+					id : Buffer.from( [ i ] ),
+					name : this.players.getName( players[ i ] )
+				} );
+			}
+			return {
+				playersCount : playersCount,
+				players : playersList
+			};
+		}
+		else
+		{
+			console.log( 'Not found room' );
+			return false;
+		}
+	}
+
 	confirmGame( playerID )
 	{
 		let index = this.findRoomByID( this.players.getPlayerGame( playerID ) );

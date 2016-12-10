@@ -2,7 +2,6 @@ const net = require( 'net' );
 const Rooms = require( './Rooms.js' );
 const Players = require( './Players.js' );
 const Parser = require( './Parser.js' );
-const Map = require( './Map.js' );
 class Server {
 	constructor()
 	{
@@ -19,8 +18,6 @@ class Server {
 		this.rooms = new Rooms( this.players );
 		this.parser = new Parser( 'opcode:1' );
 		this.socketID = 0;
-		let map = new Map();
-		map.loadMap( 'maps/1.map', map.parse );
 	}
 
 	connectionHandler( socket )
@@ -66,6 +63,10 @@ class Server {
 				case 0x12:
 					rule = 'id:4';
 					callback = this.confirmGame.bind( this );
+					break;
+				case 0x15:
+					rule = 'id:4';
+					callback = this.listPlayers.bind( this );
 					break;
 				case 0xfe:
 					rule = 'id:4';
@@ -201,6 +202,20 @@ class Server {
 				}
 			}
 		}
+	}
+
+	listPlayers( socket, data )
+	{
+		let object = {
+			opcode : Buffer.from( [ 0x16 ] )
+		};
+		let players = this.rooms.getPlayers( data.id );
+		if( players !== false )
+		{
+			object.players_count = players.playersCount;
+			object.players = players.players;
+		}
+		this.send( socket, 'players_count:1;players(id:1,name:20)*players_count', object );
 	}
 
 	updateSocket( socket, data )

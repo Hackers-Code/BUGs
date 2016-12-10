@@ -5,6 +5,8 @@ const RoomStatus = {
 	inGame : 4
 };
 
+const Map = require( './Map.js' );
+
 class Room {
 	constructor( id, name, password, ownerID )
 	{
@@ -29,6 +31,11 @@ class Room {
 			return this.players;
 		}
 		return false;
+	}
+
+	getPlayers()
+	{
+		return this.players;
 	}
 
 	checkPrivileges( playerID )
