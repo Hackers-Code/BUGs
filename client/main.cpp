@@ -158,7 +158,7 @@ modes mode=connectroom;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol, protbuffers[3];
 size_t received=0;
-unsigned int myid=0, to_receive=0, to_ignore=0, lastgamelistelement=0, frame=0, protbufferi[3];
+unsigned int myid=0, to_receive=0, to_ignore=0, lastgamelistelement=0, frame=0, protbufferi[6];
 float deltagamelist=120;
 
 
@@ -235,25 +235,42 @@ class player;
 
 class worm{public:
     sf::Vector2f position;
-    unsigned int hp, direction, team;
+    unsigned int hp, direction, team, id;
 
-    worm(sf::Vector2f positionin=sf::Vector2f(0,0), unsigned int teamin=0){
+    worm(sf::Vector2f positionin=sf::Vector2f(0,0), unsigned int teamin=0, unsigned int hpin=200, unsigned int idin=0){
         position=positionin;
         team=teamin;
-        hp=200;
+        hp=hpin;
+        id=idin;
         direction=1;
+    }
+
+    worm operator =(worm &input){
+        position=input.position;
+        hp=input.hp;
+        direction=input.direction;
+        team=input.team;
+        id=input.id;
     }
 };
 
 class player{public:
     worm worms[5];
-    unsigned char id, hp;
+    unsigned char id, hp, emptyworm;
     string name;
 
     player(unsigned int idin=0, string namein="guest"){
         id=idin;
         name=namein;
-        hp=1000;
+        hp=0;
+        emptyworm=0;
+    }
+
+    bool addworm(worm newworm){
+        if(emptyworm>4)return 0;
+
+        emptyworm++;
+        return 1;
     }
 };
 vector<player> players;
@@ -1082,15 +1099,17 @@ int main(){
                         protbufferi[0]=1;
                         cout<<"receiving players\n";
                         break;
-                    }/*
+                    }
                     if(data[i]==0x18){
                         receiving=0x18;
                         deltareceive=i+1;
                         to_receive=4;
                         protbufferi[0]=1;
+                        for(int j=1; j<7; j++)
+                            protbufferi[j]=0;
                         cout<<"receiving worms\n";
                         break;
-                    }*/
+                    }
                     cout<<"recieved unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
             }
@@ -1198,18 +1217,18 @@ int main(){
                     }
                     to_receive--;
                     if(!to_receive){
-                        if(protbufferi[0]){
+                        if(protbufferi[0]){//end of metadata
                             protbufferi[0]=0;
                             to_receive=21*protbufferi[1];
                             if(protbufferi[1]==0){
-                                cout<<"emty player list?\ndisconnecting\n";
+                                cout<<"empty player list?\ndisconnecting\n";
                                 receiving=0;
                                 clientsocket.disconnect();
                                 break;
                             }
                             protbufferi[1]=40;
                         }else
-                        {
+                        {//end of protocol
                             receiving=0;
                             playersamount=protbufferi[1]+1;
                             players.push_back(player(protbufferi[1], protbuffers[0]));
@@ -1218,7 +1237,57 @@ int main(){
                             for(int i=0; i<playersamount; i++){
                                 cout<<"player["<<i<<"]="<<int(players[i].id)<<", "<<players[i].name<<"\n";
                             }
-                            //protocol17(myid);
+                            protocol17(myid);
+                            break;
+                        }
+                    }
+                }
+            }else
+            if(receiving==0x18){
+                for(int i=deltareceive; i<received; i++){//1=team, 2=x, 3=y, 4=hp, 5=id
+                    if(protbufferi[0]){
+                        protbufferi[1]=protbufferi[1]<<8;
+                        protbufferi[1]+=data[i];
+                    }else{
+                        if(!(to_receive%11)){
+                            if(protbufferi[1]!=40){
+                                players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]));
+                            }
+                            protbufferi[1]=data[i];
+                        }else
+                        if((to_receive%11)>=7){
+                            protbufferi[2]=protbufferi[2]<<8;
+                            protbufferi[2]+=data[i];
+                        }else
+                        if((to_receive%11)>=3){
+                            protbufferi[3]=protbufferi[3]<<8;
+                            protbufferi[3]+=data[i];
+                        }else
+                        if((to_receive%11)==2){
+                            protbufferi[4]=data[i];
+                        }else
+                        if((to_receive%11)==1){
+                            protbufferi[5]=data[i];
+                        }
+                    }
+                    to_receive--;
+                    if(!to_receive){
+                        if(protbufferi[0]){//end of metadata
+                            protbufferi[0]=0;
+                            to_receive=11*protbufferi[1];
+                            if(protbufferi[1]==0){
+                                cout<<"empty worms list?\ndisconnecting\n";
+                                receiving=0;
+                                clientsocket.disconnect();
+                                break;
+                            }
+                            protbufferi[1]=40;
+                        }else
+                        {//end of protocol
+                            receiving=0;
+                            players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]));
+                            for(int j=1; j<7; j++)
+                                protbufferi[j]=0;
                             break;
                         }
                     }
