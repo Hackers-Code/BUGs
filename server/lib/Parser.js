@@ -32,6 +32,7 @@ class Parser {
 				else
 				{
 					console.log( object[ rule.name ] );
+					console.log( 'Normal rule' );
 					console.log( 'Object properties must be the buffers!' );
 					return false;
 				}
@@ -54,6 +55,8 @@ class Parser {
 					}
 					else
 					{
+						console.log( object[ rule.name ] );
+						console.log( 'Condition rule' );
 						console.log( 'Object properties must be the buffers!' );
 						return false;
 					}
@@ -87,6 +90,8 @@ class Parser {
 				}
 				else
 				{
+					console.log( object[ rule.name ] );
+					console.log( 'Restricted rule' );
 					console.log( 'Object properties must be the buffers!' );
 					return false;
 				}
@@ -107,6 +112,12 @@ class Parser {
 						}
 						else
 						{
+							console.log( object );
+							console.log( object[ rule.arrayName ] );
+							console.log( object[ rule.arrayName ][ i ] );
+							console.log( rule.properties[ j ].name );
+							console.log( object[ rule.arrayName ][ i ][ rule.properties[ j ].name ] );
+							console.log( 'Array rule' );
 							console.log( 'Object properties must be the buffers!' );
 							return false;
 						}
@@ -229,8 +240,8 @@ class Parser {
 		ruleString = ruleString.split( ';' );
 		let normalRuleRegexp = /^\w+:\w+$/;
 		let conditionRuleRegexp = /^\w+:\w+&\w+=[0-9]*$/;
-		let arrayRuleRegexp = /^\w+\([A-Za-z0-9,:]+\)\*\w+$/;
-		let restrictedRuleRegexp = /^\w+:\w+\[[A-Za-z0-9,]+]$/;
+		let arrayRuleRegexp = /^\w+\((?:\w|,|:)+\)\*\w+$/;
+		let restrictedRuleRegexp = /^\w+:\w+\[(?:\w|,)+]$/;
 		for( let i = 0 ; i < ruleString.length ; i++ )
 		{
 			if( ruleString[ i ].match( normalRuleRegexp ) )
@@ -255,7 +266,7 @@ class Parser {
 			}
 			else if( ruleString[ i ].match( restrictedRuleRegexp ) )
 			{
-				let tmp = ruleString[ i ].match( /^(\w+):(\w+)\[([A-Za-z0-9,]+)]$/ );
+				let tmp = ruleString[ i ].match( /^(\w+):(\w+)\[((\w|,)+)]$/ );
 				rule.push( {
 					type : 'restricted',
 					name : tmp[ 1 ],
@@ -265,7 +276,7 @@ class Parser {
 			}
 			else if( ruleString[ i ].match( arrayRuleRegexp ) )
 			{
-				let tmp = ruleString[ i ].match( /^(\w+)\(([A-Za-z0-9,:]+)\)\*(\w+)$/ );
+				let tmp = ruleString[ i ].match( /^(\w+)\(((?:\w|,|:)+)\)\*(\w+)$/ );
 				let data = tmp[ 2 ].split( ',' );
 				let properties = [];
 				for( let i = 0 ; i < data.length ; i++ )

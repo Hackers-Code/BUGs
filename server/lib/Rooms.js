@@ -165,7 +165,7 @@ class Rooms {
 			let wormsList = [];
 			let wormsCount = Buffer.alloc( 4 );
 			wormsCount.writeInt32BE( worms.length, 0 );
-			for( let i = 0 ; i < players.length ; i++ )
+			for( let i = 0 ; i < worms.length ; i++ )
 			{
 				wormsList.push( {
 					owner_id : worms[ i ].ownerID,

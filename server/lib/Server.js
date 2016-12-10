@@ -232,7 +232,7 @@ class Server {
 			opcode : Buffer.from( [ 0x18 ] )
 		};
 		let worms = this.rooms.getWorms( data.id );
-		if( players !== false )
+		if( worms !== false )
 		{
 			object.worms_count = worms.wormsCount;
 			object.worms = worms.worms;

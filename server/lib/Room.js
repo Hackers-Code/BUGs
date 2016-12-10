@@ -30,13 +30,14 @@ class Room {
 		{
 			for( let j = 0 ; j < 5 ; j++ )
 			{
-				this.worms.push( this.players[ i ], i * 5 + j, this.mapParser.getUniqueSpawn() );
+				this.worms.push( new Worm( i, i * 5 + j, this.mapParser.getUniqueSpawn() ) );
 			}
 		}
 	}
 
 	getWorms()
 	{
+		console.log( this.worms );
 		return this.worms;
 	}
 
