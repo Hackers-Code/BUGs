@@ -19,6 +19,13 @@
 0x16 + 4 bytes ( players_count ) + (1 byte(id) + 20 bytes(name))*players_count - list players in game ( server )
 0x17 + 4 bytes ( id ) - get worms positions and health ( client )
 0x18 + 4 bytes ( worms_count ) + (1 byte( owner_id )+4bytes( x )+4bytes( y )+1byte(hp)+1byte(worm_id) )*worms_count - list living worms ( server )
+0x19 + 4 bytes ( id ) - map ready ( client )
+0x20 - ok ( server )
+
+
+0xe0 - unknown opcode ( server )
+0xe1 - bad parameters ( server )
+0xe2 - server error ( server )
 
 0xfe + 4 bytes ( id ) - update socket ( client )
 0xff + bool ( status ) - updating player socket status ( server )
