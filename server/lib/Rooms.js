@@ -156,6 +156,21 @@ class Rooms {
 		};
 	}
 
+	readyToStartGame( playerID )
+	{
+		let index = this.findRoomByID( this.players.getPlayerGame( playerID ) );
+		if( index !== -1 )
+		{
+			this.rooms[ index ].readyToStartGame();
+			return true;
+		}
+		else
+		{
+			console.log( 'Not found room' );
+			return false;
+		}
+	}
+
 	getWorms( playerID )
 	{
 		let index = this.findRoomByID( this.players.getPlayerGame( playerID ) );

@@ -27,6 +27,7 @@ class Room {
 		this.maxSpeedY = 875;
 		this.maxframes = 60;
 		this.frames = 0;
+		this.readyPlayers = 0;
 	}
 
 	startGame()
@@ -38,9 +39,17 @@ class Room {
 				this.worms.push( new Worm( i, i * 5 + j, this.mapParser.getUniqueSpawn() ) );
 			}
 		}
-		this.lastRenderTime = new Date().getTime();
-		this.frames = 0;
-		setImmediate( this.applyGravity.bind( this ) );
+	}
+
+	readyToStartGame()
+	{
+		this.readyPlayers++;
+		if( this.readyPlayers === this.maxPlayers )
+		{
+			this.lastRenderTime = new Date().getTime();
+			this.frames = 0;
+			setTimeout( 3000, this.applyGravity.bind( this ) );
+		}
 	}
 
 	applyGravity()

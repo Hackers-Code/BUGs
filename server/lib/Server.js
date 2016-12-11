@@ -72,6 +72,10 @@ class Server {
 					rule = 'id:4';
 					callback = this.listWorms.bind( this );
 					break;
+				case 0x19:
+					rule = 'id:4';
+					callback = this.startGame.bind( this );
+					break;
 				case 0xfe:
 					rule = 'id:4';
 					callback = this.updateSocket.bind( this );
@@ -242,6 +246,15 @@ class Server {
 		{
 			console.log( 'Are you in room?' );
 		}
+	}
+
+	startGame( socket, data )
+	{
+		let object = {
+			opcode : Buffer.from( [ 0x20 ] )
+		};
+		this.rooms.readyToStartGame( data.id );
+		this.send( socket, '', object );
 	}
 
 	updateSocket( socket, data )
