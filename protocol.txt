@@ -20,7 +20,11 @@
 0x17 + 4 bytes ( id ) - get worms positions and health ( client )
 0x18 + 4 bytes ( worms_count ) + (1 byte( owner_id )+4bytes( x )+4bytes( y )+1byte(hp)+1byte(worm_id) )*worms_count - list living worms ( server )
 0x19 + 4 bytes ( id ) - map ready ( client )
-0x20 - ok ( server )
+0x1a - ok ( server )
+0x1b - you have 60 seconds to move ( server )
+0x1c + 4 bytes ( id ) - how much time left ( client )
+0x1d + 4 bytes ( seconds ) - time left ( server )
+0x1e - time is out or did damage, end ( server )
 
 
 0xe0 - unknown opcode ( server )
