@@ -3,7 +3,7 @@ const fs = require( 'fs' );
 class Map {
 	constructor()
 	{
-		this.metadata = [
+		this.metadataRules = [
 			{
 				name : 'width',
 				length : 4
@@ -13,7 +13,7 @@ class Map {
 				length : 4
 			}
 		];
-		this.objects = [
+		this.objectsRules = [
 			{
 				name : 'spawn',
 				length : 9,
@@ -30,11 +30,26 @@ class Map {
 		this.parser = new Parser( 'opcode:1' );
 		this.map = null;
 		this.uniqueSpawns = [];
+		this.blocks = [];
+		this.metadata = [];
+	}
+
+	collideY( y )
+	{
+		for( let i = 0 ; i < this.blocks.length ; i++ )
+		{
+			if( y >= this.blocks[ i ].y.readInt32BE( 0 ) && y <= this.blocks[ i ].y.readInt32BE(
+					0 ) + this.blocks[ i ].height.readInt32BE( 0 ) )
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	loadMap( fileName )
 	{
-		this.map = fs.readFileSync( fileName );
+		this.map = fs.readFileSync( __dirname + fileName );
 		this.parse();
 	}
 
@@ -45,21 +60,22 @@ class Map {
 			return false;
 		}
 		let offset = 0;
-		for( let i = 0 ; i < this.metadata.length ; i++ )
+		for( let i = 0 ; i < this.metadataRules.length ; i++ )
 		{
-			console.log( this.metadata[ i ].name );
-			console.log( this.map.slice( offset, offset += this.metadata[ i ].length ) );
+			this.metadata.push( this.map.slice( offset, offset += this.metadataRules[ i ].length ) );
 		}
 		while( offset < this.map.length )
 		{
-			let object = this.objects[ this.findObject( this.map.readInt8( offset ) ) ];
+			let object = this.objectsRules[ this.findObject( this.map.readInt8( offset ) ) ];
 			let entity = this.parser.decode( object.rule, this.map.slice( offset, offset += object.length ) );
 			if( object.name === 'spawn' )
 			{
 				this.uniqueSpawns.push( entity );
 			}
-			console.log( object );
-			console.log( entity );
+			if( object.name === 'block' )
+			{
+				this.blocks.push( entity );
+			}
 		}
 	}
 
@@ -73,9 +89,9 @@ class Map {
 
 	findObject( opcode )
 	{
-		for( let i = 0 ; i < this.objects.length ; i++ )
+		for( let i = 0 ; i < this.objectsRules.length ; i++ )
 		{
-			if( this.objects[ i ].opcode === opcode )
+			if( this.objectsRules[ i ].opcode === opcode )
 			{
 				return i;
 			}

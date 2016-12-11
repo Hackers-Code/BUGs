@@ -22,6 +22,11 @@ class Room {
 		this.mapID = null;
 		this.worms = [];
 		this.mapParser = new Map();
+		this.lastRenderTime = null;
+		this.gravity = 437;
+		this.maxSpeedY = 875;
+		this.maxframes = 60;
+		this.frames = 0;
 	}
 
 	startGame()
@@ -33,11 +38,45 @@ class Room {
 				this.worms.push( new Worm( i, i * 5 + j, this.mapParser.getUniqueSpawn() ) );
 			}
 		}
+		this.lastRenderTime = new Date().getTime();
+		this.frames = 0;
+		setImmediate( this.applyGravity.bind( this ) );
+	}
+
+	applyGravity()
+	{
+		let timeDiff = new Date().getTime() - this.lastRenderTime;
+		if( timeDiff >= 1000 / this.maxframes )
+		{
+			this.frames++;
+			for( let i = 0 ; i < this.worms.length ; i++ )
+			{
+				if( !this.checkCollisionY( this.worms[ i ] ) )
+				{
+					if( this.worms[ i ].speedY < this.maxSpeedY )
+					{
+						this.worms[ i ].speedY += this.gravity * (timeDiff / 1000);
+						if( this.worms[ i ].speedY > this.maxSpeedY )
+						{
+							this.worms[ i ].speedY = this.maxSpeedY;
+						}
+					}
+					this.worms[ i ].y.writeDoubleBE(
+						this.worms[ i ].y.readDoubleBE( 0 ) + this.worms[ i ].speedY * (timeDiff / 1000), 0 );
+				}
+			}
+			this.lastRenderTime = new Date().getTime();
+		}
+		setImmediate( this.applyGravity.bind( this ) );
+	}
+
+	checkCollisionY( worm )
+	{
+		return this.mapParser.collideY( worm.y.readDoubleBE( 0 ) + worm.height );
 	}
 
 	getWorms()
 	{
-		console.log( this.worms );
 		return this.worms;
 	}
 
@@ -47,7 +86,7 @@ class Room {
 		if( this.confirmedPlayers === this.maxPlayers )
 		{
 			this.status = RoomStatus.inGame;
-			this.mapParser.loadMap( 'maps/' + this.mapID.readInt32BE( 0 ) + '.map' );
+			this.mapParser.loadMap( '/../maps/' + this.mapID.readInt32BE( 0 ) + '.map' );
 			this.startGame();
 			console.log( 'Room is in game now' );
 			return this.players;

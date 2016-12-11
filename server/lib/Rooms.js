@@ -167,13 +167,16 @@ class Rooms {
 			wormsCount.writeInt32BE( worms.length, 0 );
 			for( let i = 0 ; i < worms.length ; i++ )
 			{
-				wormsList.push( {
+				let tmp = {
 					owner_id : worms[ i ].ownerID,
 					worm_id : worms[ i ].id,
-					hp : worms[ i ].hp,
-					x : worms[ i ].x,
-					y : worms[ i ].y
-				} );
+					hp : worms[ i ].hp
+				};
+				tmp.x = Buffer.alloc( 4 );
+				tmp.x.writeInt32BE( parseInt( worms[ i ].x.readDoubleBE( 0 ) ), 0 );
+				tmp.y = Buffer.alloc( 4 );
+				tmp.y.writeInt32BE( parseInt( worms[ i ].y.readDoubleBE( 0 ) ), 0 );
+				wormsList.push( tmp );
 			}
 			return {
 				wormsCount : wormsCount,
