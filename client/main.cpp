@@ -258,7 +258,7 @@ class worm{public:
         sprite.setScale(mapscale, mapscale);
     }
 
-    worm operator =(worm &input){
+    worm operator =(worm input){
         position=input.position;
         hp=input.hp;
         direction=input.direction;
@@ -391,7 +391,7 @@ void protocol3(string buffer, unsigned int idbuffer){
             for(int i=0; i<buffer.length(); i++){
                 to_send[i+5]=buffer[i];
             }
-            if(clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo\n"; else cout<<"sending error\n";
+            if(clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo 0x3\n"; else cout<<"sending error\n";
         }else cout<<"not connected, cannot get nick\n";
     }else cout<<"nick must have no more than 20 letters\n";
 }
@@ -414,7 +414,7 @@ void protocol7(string buffer, unsigned int idbuffer, string buffer2){
         for(int i=26; i<to_send[25]+26; i++){
             to_send[i]=buffer[i-26];
         }
-        if(clientsocket.send(to_send, 26+(buffer.length()))==sf::Socket::Done) cout<<"poszlo\n";
+        if(clientsocket.send(to_send, 26+(buffer.length()))==sf::Socket::Done) cout<<"poszlo 0x7\n";
         else cout<<"sending error\n";
     }else cout<<"not connected, can not create room\n";
 }
@@ -432,7 +432,7 @@ void protocol9(unsigned int idbuffer, unsigned int seed, unsigned char playersam
 			seed=seed>>8;
 		}
 		to_send[9]=playersamount;
-		if(clientsocket.send(to_send, 10)==sf::Socket::Done) cout<<"poszlo\n";
+		if(clientsocket.send(to_send, 10)==sf::Socket::Done) cout<<"poszlo 0x9\n";
 		else cout<<"sending error\n";
     }else cout<<"not connected, cannot change settings\n";
 }
@@ -457,7 +457,7 @@ void protocol10(unsigned int id, unsigned int gameid, string password){
                 to_send[i+10]=password[i];
             }
             if(clientsocket.send(to_send, 10+length)==sf::Socket::Done){
-                cout<<"poszlo\n";
+                cout<<"poszlo 0x10\n";
             }else cout<<"sending error 0x10\n";
         }else cout<<"not connected, cannot join\n";
     }else cout<<"password too long (255 chars max)\n";
@@ -472,7 +472,7 @@ void protocol12(unsigned int id){
             id=id>>8;
         }
         if(clientsocket.send(to_send, 5)==sf::Socket::Done){
-            cout<<"poszlo\n";
+            cout<<"poszlo 0x12\n";
         }else cout<<"sending error 0x12\n";
     }else cout<<"not connected, cannot get ready\n";
 }
@@ -486,7 +486,7 @@ void protocol15(unsigned int id){
             id=id>>8;
         }
         if(clientsocket.send(to_send, 5)==sf::Socket::Done){
-            cout<<"poszlo\n";
+            cout<<"poszlo 0x15\n";
         }else cout<<"sending error 0x15\n";
     }else cout<<"not connected, cannot get players list\n";
 }
@@ -1167,7 +1167,7 @@ int main(){
                     if(data[i]==0x14){
                         soundtrack.stop();
                         protocol15(myid);
-                        backgroundt.loadFromImage(loadMap("1.map", spawnpoints));
+                        backgroundt.loadFromImage(loadMap(seedinput.getString()+".map", spawnpoints));
                         backgrounds.setTexture(backgroundt, 1);
                         mode=ingame;
                         break;
@@ -1346,6 +1346,14 @@ int main(){
                             if(protbufferi[1]!=40){
                                 if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5])))
                                     wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
+                                else{
+                                    for(int j=0; j<wormpointers.size(); j++){
+                                        if((*wormpointers[j]).id==protbufferi[5]){
+                                            (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                             protbufferi[1]=data[i];
                         }else
@@ -1381,6 +1389,14 @@ int main(){
                             receiving=0;
                             if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5])))
                                 wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
+                            else{
+                                for(int j=0; j<wormpointers.size(); j++){
+                                    if((*wormpointers[j]).id==protbufferi[5]){
+                                        (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
+                                        break;
+                                    }
+                                }
+                            }
                             for(int j=1; j<7; j++)
                                 protbufferi[j]=0;
                             break;
