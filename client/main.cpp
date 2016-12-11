@@ -176,7 +176,7 @@ list<sf::Vector2u> spawnpoints;
 sf::Color playercolors[4];
 sf::Texture wormt[9];
 sf::Vector2f deltabg(0,0);
-float mapscale=1;
+float mapscale=0.2;
 
 
 
@@ -1343,7 +1343,7 @@ int main(){
                         protbufferi[1]+=data[i];
                     }else{
                         if(!(to_receive%11)){
-                            if(protbufferi[1]!=40){
+                            if(protbufferi[1]<4){
                                 if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5])))
                                     wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
                                 else{
@@ -1354,6 +1354,9 @@ int main(){
                                         }
                                     }
                                 }
+                            }else{
+                                if(protbufferi[1]!=40)
+                                    cout<<"wrong data, playerid="<<protbufferi[1]<<"\n";
                             }
                             protbufferi[1]=data[i];
                         }else
@@ -1387,22 +1390,26 @@ int main(){
                         }else
                         {//end of protocol
                             receiving=0;
-                            if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5])))
-                                wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
-                            else{
-                                for(int j=0; j<wormpointers.size(); j++){
-                                    if((*wormpointers[j]).id==protbufferi[5]){
-                                        (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
-                                        break;
+                            if(protbufferi[1]<4){
+                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5])))
+                                    wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
+                                else{
+                                    for(int j=0; j<wormpointers.size(); j++){
+                                        if((*wormpointers[j]).id==protbufferi[5]){
+                                            (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
+                                            break;
+                                        }
                                     }
                                 }
+                            }else{
+                                cout<<"wrong data, playerid="<<protbufferi[1]<<"\n";
                             }
                             for(int j=1; j<7; j++)
                                 protbufferi[j]=0;
                             break;
                         }
                     }
-                }
+                }protocol17(myid);
             }
         }
         frame++;
