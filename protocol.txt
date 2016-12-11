@@ -23,7 +23,7 @@
 0x1a - ok ( server )
 0x1b - you have 60 seconds to move ( server )
 0x1c + 4 bytes ( id ) - how much time left ( client )
-0x1d + 4 bytes ( seconds ) - time left ( server )
+0x1d + 1 byte ( seconds ) - time left ( server )
 0x1e - time is out or did damage, end ( server )
 
 
