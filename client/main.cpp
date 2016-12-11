@@ -150,7 +150,6 @@ sf::Image backgroundi, bgplanei;
 sf::Font mainfont;
 sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwordinput;
 sf::Music soundtrack;
-float mapscale=1;
 bool bounds[4];//up,right,down,left
 bool soundbarexchanged=0, soundpointerpressed=0;
 enum modes{ingame, connectroom, lobby};
@@ -171,6 +170,14 @@ sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys;
 int playersamount=2;
 bool ready=0, changingsettings=0;;
 list<sf::Vector2u> spawnpoints;
+
+
+//zmienne do rozgrywki
+sf::Color playercolors[4];
+sf::Texture wormt[9];
+sf::Vector2f deltabg(0,0);
+float mapscale=1;
+
 
 
 class gamelistelements{public:
@@ -236,7 +243,8 @@ class player;
 
 class worm{public:
     sf::Vector2f position;
-    unsigned int hp, direction, team, id;
+    unsigned int hp, direction, team, id, animcount;
+    sf::Sprite sprite;
 
     worm(sf::Vector2f positionin=sf::Vector2f(0,0), unsigned int teamin=0, unsigned int hpin=200, unsigned int idin=0){
         position=positionin;
@@ -244,6 +252,10 @@ class worm{public:
         hp=hpin;
         id=idin;
         direction=1;
+        animcount=0;
+        sprite.setTexture(wormt[0]);
+        sprite.setPosition((deltabg+position)*mapscale);
+        sprite.setScale(mapscale, mapscale);
     }
 
     worm operator =(worm &input){
@@ -252,27 +264,64 @@ class worm{public:
         direction=input.direction;
         team=input.team;
         id=input.id;
+        sprite=input.sprite;
+    }
+
+    void draw(sf::RenderWindow &window){
+        window.draw(sprite);
+    }
+
+    void update(){cout<<(deltabg*mapscale).x<<"\n";
+        sprite.setPosition((deltabg+position)*mapscale);
+        sprite.setScale(mapscale, mapscale);
     }
 };
+vector<worm*> wormpointers;
 
 class player{public:
     worm worms[5];
     unsigned char id, hp, emptyworm;
     string name;
+    sf::Text namet;
+    sf::Color color;
+    sf::Texture hpbart;
+    sf::Sprite hpbars;
 
     player(unsigned int idin=0, string namein="guest"){
         id=idin;
         name=namein;
+        color=playercolors[id];
         hp=0;
         emptyworm=0;
+        namet.setString(namein);
+        namet.setCharacterSize(12);
+        namet.setColor(color);
+        namet.setPosition(0,id*40);
+
+        sf::Image image;
+        image.create(1,1,color);
+        hpbart.loadFromImage(image);
+        hpbars.setTexture(hpbart,1);
+        hpbars.setScale(hp, 10);
+        hpbars.setPosition(0, 30+40*id);
     }
 
     bool addworm(worm newworm){
         if(emptyworm>4)return 0;
-
+        worms[emptyworm]=newworm;
+        hp+=newworm.hp;
         emptyworm++;
         return 1;
     }
+
+    void draw(sf::RenderWindow &window){
+        window.draw(hpbars);
+        window.draw(namet);
+        for(int i=0; i<5; i++){
+            worms[i].draw(window);
+        }
+    }
+
 };
 vector<player> players;
 
@@ -470,6 +519,10 @@ int main(){
     {
         system("color 0a");
         window.setFramerateLimit(60);
+        playercolors[0]=sf::Color(0,255,0);
+        playercolors[1]=sf::Color(255,255,0);
+        playercolors[2]=sf::Color(0,255,255);
+        playercolors[3]=sf::Color(255,0,0);
         soundtrack.openFromFile("snd/music.ogg");
         soundtrack.setVolume(0);
         soundtrack.setLoop(1);
@@ -523,6 +576,9 @@ int main(){
         ready2.loadFromFile("img/ready2.bmp");
         readys.setTexture(ready2);
         readys.setPosition(200,30);
+        for(int i=0; i<9; i++){
+            wormt[i].loadFromFile("img/rob2.0/anim"+to_string(i+1)+".png");
+        }
 
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
@@ -593,7 +649,8 @@ int main(){
     while(window.isOpen()){
         while(window.pollEvent(event)){
             if(event.type==sf::Event::Closed){
-                clientsocket.disconnect();
+                if(connected)
+                    clientsocket.disconnect();
                 window.close();
             }else
             if(event.type==sf::Event::Resized){
@@ -605,11 +662,20 @@ int main(){
                         if(mapscale<1){
                             mapscale+=0.1;
                             backgrounds.setScale(mapscale, mapscale);
+                            backgrounds.setPosition(deltabg*mapscale);
+                            for(int i=0; i<wormpointers.size(); i++){
+                                (*wormpointers[i]).update();
+                            }
                         }
-                    }else
-                    if(mapscale>0.2){
-                        mapscale-=0.1;
-                        backgrounds.setScale(mapscale, mapscale);
+                    }else{
+                        if(mapscale>0.2){
+                            mapscale-=0.1;
+                            backgrounds.setScale(mapscale, mapscale);
+                            backgrounds.setPosition(deltabg*mapscale);
+                            for(int i=0; i<wormpointers.size(); i++){
+                                (*wormpointers[i]).update();
+                            }
+                        }
                     }
                 }else
                 if(event.type==sf::Event::MouseMoved){
@@ -937,17 +1003,67 @@ int main(){
             }
         }
         if(bounds[3]){
-            if(backgrounds.getPosition().x<-9) backgrounds.move(10, 0); else{
-                if(backgrounds.getPosition().x<0) backgrounds.setPosition(0, backgrounds.getPosition().y);
+            if(backgrounds.getPosition().x<-9){
+                backgrounds.move(10, 0);
+                deltabg.x+=10/mapscale;
+                for(int i=0; i<wormpointers.size(); i++){
+                    (*wormpointers[i]).update();
+                }
+            }else
+            if(backgrounds.getPosition().x<0){
+                backgrounds.setPosition(0, backgrounds.getPosition().y);
+                deltabg.x=0;
+                for(int i=0; i<wormpointers.size(); i++){
+                    (*wormpointers[i]).update();
+                }
             }
         }else
         if(bounds[1]){
-            if(backgrounds.getPosition().x+(backgrounds.getLocalBounds().width*backgrounds.getScale().x)>window.getSize().x+9) backgrounds.move(-10, 0); else
-                if(backgrounds.getPosition().x+(backgrounds.getLocalBounds().width*backgrounds.getScale().x)>window.getSize().x) backgrounds.setPosition(window.getSize().x-(backgrounds.getLocalBounds().width*backgrounds.getScale().x), backgrounds.getPosition().y);
+            if(backgrounds.getPosition().x+(backgrounds.getLocalBounds().width*backgrounds.getScale().x)>window.getSize().x+9){
+                backgrounds.move(-10, 0);
+                deltabg.x-=10/mapscale;
+                for(int i=0; i<wormpointers.size(); i++){
+                    (*wormpointers[i]).update();
+                }
+            }else
+            if(backgrounds.getPosition().x+(backgrounds.getLocalBounds().width*backgrounds.getScale().x)>window.getSize().x){
+                backgrounds.setPosition(window.getSize().x-(backgrounds.getLocalBounds().width*backgrounds.getScale().x), backgrounds.getPosition().y);
+                deltabg.x-=window.getSize().x-(backgrounds.getLocalBounds().width*backgrounds.getScale().x)/mapscale;
+                for(int i=0; i<wormpointers.size(); i++){
+                    (*wormpointers[i]).update();
+                }
+            }
         }
         if(bounds[0]){
-            if(backgrounds.getPosition().y<-9) backgrounds.move(0, 10); else{
-                if(backgrounds.getPosition().y<0) backgrounds.setPosition(backgrounds.getPosition().x, 0);
+            if(backgrounds.getPosition().y<-9){
+                backgrounds.move(0, 10);
+                deltabg.y+=10/mapscale;
+                for(int i=0; i<wormpointers.size(); i++){
+                    (*wormpointers[i]).update();
+                }
+            }else
+            if(backgrounds.getPosition().y<0){
+                backgrounds.setPosition(0, backgrounds.getPosition().y);
+                deltabg.y=0;
+                for(int i=0; i<wormpointers.size(); i++){
+                    (*wormpointers[i]).update();
+                }
+            }
+        }else
+        if(bounds[2]){
+            if(backgrounds.getPosition().y+(backgrounds.getLocalBounds().height*backgrounds.getScale().y)>window.getSize().y+9){
+                backgrounds.move(0, -10);
+                deltabg.y-=10/mapscale;
+                for(int i=0; i<wormpointers.size(); i++){
+                    (*wormpointers[i]).update();
+                }
+            }else
+            if(backgrounds.getPosition().y+(backgrounds.getLocalBounds().height*backgrounds.getScale().y)>window.getSize().y){
+                backgrounds.setPosition(window.getSize().y-(backgrounds.getLocalBounds().height*backgrounds.getScale().y), backgrounds.getPosition().y);
+                deltabg.y-=window.getSize().y-(backgrounds.getLocalBounds().height*backgrounds.getScale().y)/mapscale;
+                for(int i=0; i<wormpointers.size(); i++){
+                    (*wormpointers[i]).update();
+                }
             }
         }
 
@@ -1073,6 +1189,18 @@ int main(){
                             protbufferi[j]=0;
                         cout<<"receiving worms\n";
                         break;
+                    }
+                    if(data[i]==0xe0){
+                        cout<<"unknown opcode\n";
+                        continue;
+                    }
+                    if(data[i]==0xe1){
+                        cout<<"bad parameters\n";
+                        continue;
+                    }
+                    if(data[i]==0xe2){
+                        cout<<"server error\n";
+                        continue;
                     }
                     cout<<"recieved unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
@@ -1215,8 +1343,9 @@ int main(){
                         protbufferi[1]+=data[i];
                     }else{
                         if(!(to_receive%11)){
-                            if(protbufferi[1]!=40){cout<<"x="<<protbufferi[2]<<", y="<<protbufferi[3]<<", team="<<protbufferi[1]<<", hp="<<protbufferi[4]<<", id="<<protbufferi[5]<<"\n";
-                                players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]));
+                            if(protbufferi[1]!=40){
+                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5])))
+                                    wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
                             }
                             protbufferi[1]=data[i];
                         }else
@@ -1249,8 +1378,9 @@ int main(){
                             protbufferi[1]=40;
                         }else
                         {//end of protocol
-                            receiving=0;cout<<"x="<<protbufferi[2]<<", y="<<protbufferi[3]<<", team="<<protbufferi[1]<<", hp="<<protbufferi[4]<<", id="<<protbufferi[5]<<"\n";
-                            players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]));
+                            receiving=0;
+                            if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5])))
+                                wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
                             for(int j=1; j<7; j++)
                                 protbufferi[j]=0;
                             break;
@@ -1271,6 +1401,9 @@ int main(){
         window.clear(bgcolor);{
         if(mode==ingame){
             window.draw(backgrounds);
+            for(int i=0; i<wormpointers.size(); i++){
+                (*wormpointers[i]).draw(window);
+            }
         }else
         if(mode==connectroom){
             if(connected)
