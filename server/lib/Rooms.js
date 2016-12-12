@@ -15,7 +15,7 @@ class Rooms {
 	{
 		if( this.players.isFree( ownerID ) )
 		{
-			if( this.nameStorage.checkName( name ) )
+			if( this.nameStorage.addName( name ) )
 			{
 				let gameID = this.keyGenerator.generateKey();
 				let room = new Room( gameID, name, password, ownerID );

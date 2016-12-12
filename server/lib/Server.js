@@ -251,7 +251,7 @@ class Server {
 	startGame( socket, data )
 	{
 		let object = {
-			opcode : Buffer.from( [ 0x20 ] )
+			opcode : Buffer.from( [ 0x1a ] )
 		};
 		this.rooms.readyToStartGame( data.id );
 		this.send( socket, '', object );

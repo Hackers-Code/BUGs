@@ -9,7 +9,6 @@ class UniqueKeyGenerator {
 	{
 		let key = Buffer.alloc( this.keyLength );
 		do {
-			key = Buffer.alloc( this.keyLength );
 			for( let i = 0 ; i < this.keyLength ; i++ )
 			{
 				key[ i ] = Math.floor( Math.random() * 256 );

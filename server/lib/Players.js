@@ -138,7 +138,7 @@ class Players {
 		let index = this.findPlayerById( id );
 		if( index !== -1 )
 		{
-			if( this.nameStorage.checkName( name ) )
+			if( this.nameStorage.addName( name ) )
 			{
 				this.players[ index ].setName( name );
 				return true;

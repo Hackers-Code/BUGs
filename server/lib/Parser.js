@@ -31,6 +31,8 @@ class Parser {
 				}
 				else
 				{
+					console.log( object );
+					console.log( rule.name );
 					console.log( object[ rule.name ] );
 					console.log( 'Normal rule' );
 					console.log( 'Object properties must be the buffers!' );
