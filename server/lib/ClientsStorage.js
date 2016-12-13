@@ -1,3 +1,4 @@
+'use strict';
 const UniqueKeyGenerator = require( './UniqueKeyGenerator' );
 const UniqueNameStorage = require( './UniqueNameStorage' );
 const Client = require( './Client' );

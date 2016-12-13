@@ -1,3 +1,4 @@
+'use strict';
 const Instruction = require( './Instruction' );
 const Parser = require( './Parser' );
 const Response = require( './Response' );

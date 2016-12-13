@@ -1,16 +1,20 @@
+'use strict';
 class Worm {
-	constructor( ownerID, id, coords )
+	constructor( position, owner )
 	{
-		this.hp = Buffer.from( [ 200 ] );
-		this.ownerID = Buffer.from( [ ownerID ] );
-		this.id = Buffer.from( [ id ] );
-		this.x = Buffer.alloc( 8 );
-		this.x.writeDoubleBE( coords.x.readInt32BE( 0 ), 0 );
-		this.y = Buffer.alloc( 8 );
-		this.y.writeDoubleBE( coords.y.readInt32BE( 0 ), 0 );
-		this.width = 100;
-		this.height = 120;
-		this.speedY = 0;
+		this.x = position.x;
+		this.y = position.y;
+		this.hp = 200;
+		this.xSpeed = 0;
+		this.ySpeed = 0;
+		this.xAcceleration = 0;
+		this.yAcceleration = 0;
+		this.xMaxSpeed = 0;
+		this.yMaxSpeed = 0;
+		this.owner = 0;
+		this.id = 0;
+		this.width = 120;
+		this.height = 120
 	}
 }
 

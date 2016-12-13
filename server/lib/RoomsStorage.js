@@ -1,6 +1,7 @@
+'use strict';
 const UniqueKeyGenerator = require( './UniqueKeyGenerator' );
 const UniqueNameStorage = require( './UniqueNameStorage' );
-const Room = require( './Room2' );
+const Room = require( './Room' );
 class RoomsStorage {
 	constructor()
 	{

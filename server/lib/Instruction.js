@@ -1,5 +1,4 @@
-const Client = require( './Client' );
-
+'use strict';
 const InstructionTypes = {
 	both : 0,
 	server : 1,
