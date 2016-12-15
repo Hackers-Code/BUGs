@@ -25,6 +25,9 @@
 0x1a - how much time left ( client )
 0x1b + 1 byte (seconds) - time left ( server )
 0x1c - time is out, did damage or used weapon, end move ( server )
+0x1d - jump ( client )
+0x1e - switch move left ( client )
+0x1f - switch move right ( client )
 
 //error opcodes
 0xe0 - unknown opcode ( server )
