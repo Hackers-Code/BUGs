@@ -21,7 +21,7 @@
 0x16 + 4 bytes (players count) + {1 byte(id) + 20 bytes(name)}*[players_count] - list players in game ( server )
 0x17 - get worms positions and health ( client )
 0x18 + 4 bytes (worms_count) + {1 byte(owner_id)+4bytes(x)+4bytes(y)+1byte(hp)+1byte(worm_id)}*worms_count - list living worms ( server )
-0x19 - you have 60 seconds to move ( server )
+0x19 + 1byte (worm_id) - you have 60 seconds to move ( server )
 0x1a - how much time left ( client )
 0x1b + 1 byte (seconds) - time left ( server )
 0x1c - time is out, did damage or used weapon, end move ( server )
