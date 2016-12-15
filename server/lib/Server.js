@@ -21,14 +21,22 @@ class Server {
 
 	connectionHandler( socket )
 	{
-		socket.id = this.socketID++;
-		this.clientsStorage.addClient( socket );
-		console.log( 'New connection from ' + socket.remoteAddress + ', socket id: ' + socket.id );
+		if( socket instanceof net.Socket )
+		{
+			socket.id = this.socketID++;
+			this.clientsStorage.addClient( socket );
+			console.log( `New connection from ${socket.remoteAddress}:${socket.remotePort}, socket id: ${socket.id}` );
+		}
+		else
+		{
+			console.log( 'Socket must be an instance of net socket!' );
+		}
 	}
 
 	displayWelcomeMessage()
 	{
-		console.log( 'Listening on ' + this.server.address().address + ':' + this.server.address().port );
+		let address = this.server.address();
+		console.log( `Listening on ${address.address}:${address.port}` );
 	}
 }
 module.exports = Server;

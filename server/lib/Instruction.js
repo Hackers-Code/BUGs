@@ -21,7 +21,7 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x3 : {
-		rule : 'id:4;nick:20',
+		rule : 'nick:20',
 		callback : 'setName',
 		type : InstructionTypes.client
 	},
@@ -39,7 +39,7 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x7 : {
-		rule : 'id:4;roomName:20;passwordLength:1;password:passwordLength',
+		rule : 'roomName:20;passwordLength:1;password:passwordLength',
 		callback : 'createRoom',
 		type : InstructionTypes.client
 	},
@@ -48,7 +48,7 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x9 : {
-		rule : 'playerID:4;mapID:4;maxPlayers:1',
+		rule : 'mapID:4;maxPlayers:1',
 		callback : 'setRoomSettings',
 		type : InstructionTypes.client
 	},
@@ -57,7 +57,7 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x10 : {
-		rule : 'playerID:4;roomID:4;passwordLength:1;password:passwordLength',
+		rule : 'roomID:4;passwordLength:1;password:passwordLength',
 		callback : 'joinGame',
 		type : InstructionTypes.client
 	},
@@ -66,12 +66,12 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x12 : {
-		rule : 'id:4',
+		rule : '',
 		callback : 'confirmGame',
 		type : InstructionTypes.client
 	},
 	0x13 : {
-		rule : 'status:1',
+		rule : '',
 		type : InstructionTypes.server
 	},
 	0x14 : {
@@ -79,7 +79,7 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x15 : {
-		rule : 'id:4',
+		rule : '',
 		callback : 'getPlayers',
 		type : InstructionTypes.client
 	},
@@ -88,7 +88,7 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x17 : {
-		rule : 'id:4',
+		rule : '',
 		callback : 'getWorms',
 		type : InstructionTypes.client
 	},
@@ -97,48 +97,36 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x19 : {
-		rule : 'id:4',
-		callback : null,
-		type : InstructionTypes.client
-	},
-	0x1a : {
-		rule : 'worms_count:1;worms(owner_id:1,x:4,y:4,hp:1,worm_id:1)*worms_count',
-		callback : null,
+		rule : 'worm_id:1',
 		type : InstructionTypes.server
 	},
-	0x1b : {
+	0x1a : {
 		rule : '',
-		callback : null,
+		callback : 'getTimeLeft',
+		type : InstructionTypes.client
+	},
+	0x1b : {
+		rule : 'seconds:1',
 		type : InstructionTypes.server
 	},
 	0x1c : {
-		rule : 'id:4',
-		callback : null,
-		type : InstructionTypes.client
-	},
-	0x1d : {
-		rule : 'seconds:1',
-		callback : null,
-		type : InstructionTypes.server
-	},
-	0x1e : {
 		rule : '',
-		callback : null,
 		type : InstructionTypes.server
 	},
 	0xe0 : {
 		rule : '',
-		callback : null,
 		type : InstructionTypes.server
 	},
 	0xe1 : {
 		rule : '',
-		callback : null,
 		type : InstructionTypes.server
 	},
 	0xe2 : {
 		rule : '',
-		callback : null,
+		type : InstructionTypes.server
+	},
+	0xe3 : {
+		rule : '',
 		type : InstructionTypes.server
 	},
 	0xfe : {

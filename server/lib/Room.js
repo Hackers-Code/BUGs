@@ -28,23 +28,28 @@ class Room {
 
 	setConfig( id, config )
 	{
-		if( id.compare( this.adminID ) === 0 )
+		if( this.status === Status.uninitialized )
 		{
-			this.mapID = config.mapID.readInt32BE( 0 );
-			if( !fs.existsSync( __dirname + '/../maps/' + this.mapID + '.map' ) )
+			if( id.compare( this.adminID ) === 0 )
 			{
-				console.log( 'Map ' + this.mapID + ' does not exist' );
+				this.mapID = config.mapID.readInt32BE( 0 );
+				if( !fs.existsSync( __dirname + '/../maps/' + this.mapID + '.map' ) )
+				{
+					console.log( 'Map ' + this.mapID + ' does not exist' );
+					return false;
+				}
+				this.maxPlayers = config.maxPlayers.readInt8( 0 );
+				this.status = Status.waitingForPlayers;
+				return true;
+			}
+			else
+			{
+				console.log( 'Only admin can set config' );
 				return false;
 			}
-			this.maxPlayers = config.maxPlayers.readInt8( 0 );
-			this.status = Status.waitingForPlayers;
-			return true;
 		}
-		else
-		{
-			console.log( 'Only admin can set config' );
-			return false;
-		}
+		console.log( 'Game is already configured' );
+		return false;
 	}
 
 	joinGame( password, client )
@@ -101,6 +106,20 @@ class Room {
 		{
 			this.clients[ i ].response.send( { opcode : 0x14 } );
 		}
+		this.checkIfAllLoadedMap();
+	}
+
+	checkIfAllLoadedMap()
+	{
+		for( let i = 0 ; i < this.clients.length ; i++ )
+		{
+			if( this.clients[ i ].mapLoaded === false )
+			{
+				setTimeout( this.checkIfAllLoadedMap.bind( this ), 100 );
+				return;
+			}
+		}
+		setTimeout( this.game.start.bind( this.game ), 3000 );
 	}
 
 	preparePlayersList()
@@ -131,6 +150,11 @@ class Room {
 	getWorms()
 	{
 		return this.game.getWorms();
+	}
+
+	getTimeLeft()
+	{
+		return this.game.getTimeLeft();
 	}
 }
 

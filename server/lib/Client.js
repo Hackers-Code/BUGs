@@ -13,6 +13,7 @@ class Client {
 		this.hasCustomName = false;
 		this.room = null;
 		this.confirmedGame = false;
+		this.mapLoaded = false;
 		this.socket.on( 'data', this.request.handleRequest.bind( this.request ) );
 		this.socket.on( 'error', function()
 		{
@@ -151,20 +152,17 @@ class Client {
 
 	confirmGame()
 	{
-		let status = 0;
 		if( this.room !== null )
 		{
-			this.confirmedGame = true;
-			status = 1;
+			this.confirmedGame = !this.confirmedGame;
+			this.response.send( {
+				opcode : 0x13
+			} );
 		}
 		else
 		{
 			console.log( 'You need to join game first!' );
 		}
-		this.response.send( {
-			opcode : 0x13,
-			status : Buffer.from( [ status ] )
-		} );
 	}
 
 	getPlayers()
@@ -185,9 +183,30 @@ class Client {
 	{
 		if( this.room !== null )
 		{
+			if( this.mapLoaded === false )
+			{
+				this.mapLoaded = true;
+			}
 			let retval = this.room.getWorms();
 			retval.opcode = 0x18;
 			this.response.send( retval );
+		}
+		else
+		{
+			console.log( 'You need to join game first!' );
+		}
+	}
+
+	getTimeLeft()
+	{
+		if( this.room !== null )
+		{
+			let seconds = Buffer.alloc( 1 );
+			seconds.writeUInt8( this.room.getTimeLeft(), 0 );
+			this.response.send( {
+				opcode : 0x1b,
+				seconds : seconds
+			} );
 		}
 		else
 		{

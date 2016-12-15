@@ -1,7 +1,6 @@
 'use strict';
 const Instruction = require( './Instruction' );
 const Parser = require( './Parser' );
-const Response = require( './Response' );
 class Request {
 	constructor( client )
 	{
@@ -20,32 +19,36 @@ class Request {
 				{
 					if( typeof this.client[ instruction.callback ] === 'function' )
 					{
-						console.log( 'Received data: ' + data.toString( 'hex' ) );
+						console.log( `Received data: ${data.toString( 'hex' )}` );
 						let parsedRequest = this.parser.decode( instruction.rule, data );
 						this.client[ instruction.callback ]( parsedRequest );
 						return true;
 					}
 					else
 					{
-						console.log( 'Callback not specified, lost data: ' + data.toString( 'hex' ) );
+						this.client.response.send( { opcode : 0xe2 } );
+						console.log( `Callback not specified, lost data: ${data.toString( 'hex' )}` );
 						return false;
 					}
 				}
 				else
 				{
-					console.log( 'This instruction may be only sent by server: ' + data.toString( 'hex' ) );
+					this.client.response.send( { opcode : 0xe3 } );
+					console.log( `This instruction may be only sent by server: ${data.toString( 'hex' )}` );
 					return false;
 				}
 			}
 			else
 			{
-				console.log( 'Not recognized instruction: ' + data.toString( 'hex' ) );
+				this.client.response.send( { opcode : 0xe0 } );
+				console.log( `Not recognized instruction: ${data.toString( 'hex' )}` );
 				return false;
 			}
 		}
 		else
 		{
-			console.log( 'Empty request' );
+			this.client.response.send( { opcode : 0xe1 } );
+			console.log( `Empty request` );
 			return false;
 		}
 	}
