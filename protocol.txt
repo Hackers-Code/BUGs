@@ -9,9 +9,7 @@
 0x8 + 1 byte (status) - creating game status ( server )
 0x9 + 4 bytes (map id) + 1 byte (players_count must be equal 2,3 or 4) - set game config ( client )
 0xa + 1 byte (status) - game config status( server )
-
 //Reserved opcodes for additional game settings
-
 0x10 + 4 bytes (game id) + 1 byte (password length) + [password length] bytes (password) - join game ( client )
 0x11 + 1 byte (status) + 4 bytes (mapID if status equal 1) - accept join game ( server )
 0x12 - switch confirm joining game ( client )
@@ -28,13 +26,11 @@
 0x1d - jump ( client )
 0x1e - switch move left ( client )
 0x1f - switch move right ( client )
-
 //error opcodes
 0xe0 - unknown opcode ( server )
 0xe1 - bad parameters ( server )
 0xe2 - server error ( server )
 0xe3 - unexpected opcode ( server )
-
 //session opcodes
 0xfe + 4 bytes ( id ) - update socket ( client )
 0xff + bool ( status ) - updating player socket status ( server )
