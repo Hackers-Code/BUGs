@@ -379,128 +379,99 @@ void createmap(unsigned int seed){
     }
 }
 
-void protocol3(string buffer, unsigned int idbuffer){
+void protocol3(string buffer){
     if(buffer.length()<=20){
         if(connected){
-            unsigned char to_send[25]={0};
+            unsigned char to_send[21]={0};
             to_send[0]=3;
-            for(int i=4; i>0; i--){
-                to_send[i]=idbuffer%256;
-                idbuffer=idbuffer>>8;
-            }
             for(int i=0; i<buffer.length(); i++){
-                to_send[i+5]=buffer[i];
+                to_send[i+1]=buffer[i];
             }
-            if(clientsocket.send(to_send, 25)==sf::Socket::Done) cout<<"poszlo 0x3\n"; else cout<<"sending error\n";
+            if(clientsocket.send(to_send, 21)==sf::Socket::Done) cout<<"poszlo 0x3\n"; else cout<<"sending error\n";
         }else cout<<"not connected, cannot get nick\n";
     }else cout<<"nick must have no more than 20 letters\n";
 }
 
-void protocol7(string buffer, unsigned int idbuffer, string buffer2){
+void protocol7(string buffer, string buffer2){
     if(connected){
-        unsigned char to_send[26+(buffer.length())];
+        unsigned char to_send[22+(buffer.length())];
         to_send[0]=7;
-        for(int i=4; i>0; i--){
-            to_send[i]=idbuffer%256;
-            idbuffer=idbuffer>>8;
-        }
-        for(int i=5; i<25; i++){
-            if(i-5<buffer2.length()){
-                to_send[i]=buffer2[i-5];
+        for(int i=1; i<21; i++){
+            if(i-1<buffer2.length()){
+                to_send[i]=buffer2[i-1];
             }else
                 to_send[i]=0;
         }
-        to_send[25]=buffer.length();
-        for(int i=26; i<to_send[25]+26; i++){
-            to_send[i]=buffer[i-26];
+        to_send[21]=buffer.length();
+        for(int i=22; i<to_send[21]+22; i++){
+            to_send[i]=buffer[i-22];
         }
-        if(clientsocket.send(to_send, 26+(buffer.length()))==sf::Socket::Done) cout<<"poszlo 0x7\n";
+        if(clientsocket.send(to_send, 22+(buffer.length()))==sf::Socket::Done) cout<<"poszlo 0x7\n";
         else cout<<"sending error\n";
     }else cout<<"not connected, can not create room\n";
 }
 
-void protocol9(unsigned int idbuffer, unsigned int seed, unsigned char playersamount){
+void protocol9(unsigned int seed, unsigned char playersamount){
     if(connected){
-		unsigned char to_send[10];
+		unsigned char to_send[6];
 		to_send[0]=9;
 		for(int i=4; i>0; i--){
-			to_send[i]=idbuffer%256;
-			idbuffer=idbuffer>>8;
-		}
-		for(int i=8; i>4; i--){
 			to_send[i]=seed%256;
 			seed=seed>>8;
 		}
-		to_send[9]=playersamount;
-		if(clientsocket.send(to_send, 10)==sf::Socket::Done) cout<<"poszlo 0x9\n";
+		to_send[5]=playersamount;
+		if(clientsocket.send(to_send, 6)==sf::Socket::Done) cout<<"poszlo 0x9\n";
 		else cout<<"sending error\n";
     }else cout<<"not connected, cannot change settings\n";
 }
 
-void protocol10(unsigned int id, unsigned int gameid, string password){
+void protocol10(unsigned int gameid, string password){
     if(password.length()<256){
         if(connected){
             unsigned char length=password.length(), to_send[10+length];
             to_send[0]=0x10;
-            for(int i=4; i>0; i--){
-                to_send[i]=id%256;
-                id=id>>8;
-            }
             protbufferi[0]=gameid;
-            for(int i=8; i>4; i--){
+            for(int i=4; i>0; i--){
                 to_send[i]=gameid%256;
                 gameid=gameid>>8;
             }
             protbuffers[0]=password;
-            to_send[9]=length;
+            to_send[5]=length;
             for(int i=0; i<length; i++){
-                to_send[i+10]=password[i];
+                to_send[i+6]=password[i];
             }
-            if(clientsocket.send(to_send, 10+length)==sf::Socket::Done){
+            if(clientsocket.send(to_send, 6+length)==sf::Socket::Done){
                 cout<<"poszlo 0x10\n";
             }else cout<<"sending error 0x10\n";
         }else cout<<"not connected, cannot join\n";
     }else cout<<"password too long (255 chars max)\n";
 }
 
-void protocol12(unsigned int id){
+void protocol12(){
     if(connected){
-        unsigned char to_send[5];
+        unsigned char to_send[1];
         to_send[0]=0x12;
-        for(int i=4; i>0; i--){
-            to_send[i]=id%256;
-            id=id>>8;
-        }
-        if(clientsocket.send(to_send, 5)==sf::Socket::Done){
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
             cout<<"poszlo 0x12\n";
         }else cout<<"sending error 0x12\n";
     }else cout<<"not connected, cannot get ready\n";
 }
 
-void protocol15(unsigned int id){
+void protocol15(){
     if(connected){
-        unsigned char to_send[5];
+        unsigned char to_send[1];
         to_send[0]=0x15;
-        for(int i=4; i>0; i--){
-            to_send[i]=id%256;
-            id=id>>8;
-        }
-        if(clientsocket.send(to_send, 5)==sf::Socket::Done){
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
             cout<<"poszlo 0x15\n";
         }else cout<<"sending error 0x15\n";
     }else cout<<"not connected, cannot get players list\n";
 }
 
-void protocol17(unsigned int id){
+void protocol17(){
     if(connected){
-        unsigned char to_send[5];
+        unsigned char to_send[1];
         to_send[0]=0x17;
-        for(int i=4; i>0; i--){
-            to_send[i]=id%256;
-            id=id>>8;
-        }
-        if(clientsocket.send(to_send, 5)==sf::Socket::Done){
-            cout<<"poszlo\n";
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
         }else cout<<"sending error 0x17\n";
     }else cout<<"not connected, cannot get worms list\n";
 }
@@ -736,10 +707,10 @@ int main(){
                             }
                         }else
                         if((event.mouseButton.x>=oknicks.getPosition().x)&&(event.mouseButton.x<=oknicks.getPosition().x+oknicks.getLocalBounds().width)&&(event.mouseButton.y>=oknicks.getPosition().y)&&(event.mouseButton.y<=oknicks.getPosition().y+oknicks.getLocalBounds().height)){
-                            protocol3(nickinput.getString(), myid);
+                            protocol3(nickinput.getString());
                         }else
                         if((event.mouseButton.x>=okcreaterooms.getPosition().x)&&(event.mouseButton.x<=okcreaterooms.getPosition().x+okcreaterooms.getLocalBounds().width)&&(event.mouseButton.y>=okcreaterooms.getPosition().y)&&(event.mouseButton.y<=okcreaterooms.getPosition().y+okcreaterooms.getLocalBounds().height)){
-                            protocol7(passwordinput.getString(), myid, roomnameinput.getString());
+                            protocol7(passwordinput.getString(), roomnameinput.getString());
                         }else
                         if((event.mouseButton.x>=soundpointers.getPosition().x)&&(event.mouseButton.x<=soundpointers.getPosition().x+soundpointers.getLocalBounds().width)&&(event.mouseButton.y>=soundpointers.getPosition().y)&&(event.mouseButton.y<=soundpointers.getPosition().y+soundpointers.getLocalBounds().height)){
                             soundpointerpressed=1;
@@ -764,7 +735,7 @@ int main(){
                             if(event.mouseButton.x<=inputbars.getLocalBounds().width+binputbars.getLocalBounds().width){
                                 for(list<gamelistelements>::iterator i=gamelist.begin(); i!=gamelist.end(); ++i){
                                     if((*i).pos==listelementbuffer){
-                                        protocol10(myid, (*i).id, (*i).password);
+                                        protocol10((*i).id, (*i).password);
                                         break;
                                     }
                                 }
@@ -802,7 +773,7 @@ int main(){
                     }else
                     if(textbox==nickbox){inputpointer=&nickinput;
                         if(event.text.unicode==13){
-                            protocol3(nickinput.getString(), myid);
+                            protocol3(nickinput.getString());
                             nickinput.setColor(normalclr);
                             inputpointer=0;
                         }
@@ -816,7 +787,7 @@ int main(){
                     }else
                     if(textbox==passwordbox){inputpointer=&passwordinput;
                         if(event.text.unicode==13){
-                            protocol7(passwordinput.getString(), myid, roomnameinput.getString());
+                            protocol7(passwordinput.getString(), roomnameinput.getString());
                             inputpointer=0;
                         }
                     }else
@@ -935,12 +906,11 @@ int main(){
                         playersamount=4;
                     }else
                     if((changingsettings)&&(event.mouseButton.x>=oksettings.getPosition().x)&&(event.mouseButton.x<=oksettings.getPosition().x+oksettings.getLocalBounds().width)&&(event.mouseButton.y>=oksettings.getPosition().y)&&(event.mouseButton.y<=oksettings.getPosition().y+oksettings.getLocalBounds().height)){
-                        if(seedinput.getString().getSize()<10) protocol9(myid, atoi(seedinput.getString().toAnsiString().c_str()), playersamount);
+                        if(seedinput.getString().getSize()<10) protocol9(atoi(seedinput.getString().toAnsiString().c_str()), playersamount);
                         else cout<<"seed is too big\n";
                     }else
                     if((event.mouseButton.x>=readys.getPosition().x)&&(event.mouseButton.x<=readys.getPosition().x+readys.getLocalBounds().width)&&(event.mouseButton.y>=readys.getPosition().y)&&(event.mouseButton.y<=readys.getPosition().y+readys.getLocalBounds().height)){
-                        if(!ready)
-                            protocol12(myid);
+                        protocol12();
                     }else
                     if((event.mouseButton.x>=soundpointers.getPosition().x)&&(event.mouseButton.x<=soundpointers.getPosition().x+soundpointers.getLocalBounds().width)&&(event.mouseButton.y>=soundpointers.getPosition().y)&&(event.mouseButton.y<=soundpointers.getPosition().y+soundpointers.getLocalBounds().height)){
                         soundpointerpressed=1;
@@ -1091,7 +1061,7 @@ int main(){
                                 nickname=nickinput.getString();
                                 cout<<"nick accepted\n"<<char(7);
                             }else{
-                                cout<<"nick denited\n";
+                                cout<<"nick denied\n";
                             }
                         }else cout<<"lost response 0x4\n";
                         continue;
@@ -1111,7 +1081,7 @@ int main(){
                                 changingsettings=1;
                                 cout<<"room accepted\n"<<char(7);
                             }else{
-                                cout<<"room denited\n";
+                                cout<<"room denied\n";
                             }
                         }else cout<<"lost response 0x8\n";
                         continue;
@@ -1126,7 +1096,7 @@ int main(){
                                 changingsettings=0;
                                 cout<<"settings accepted\n"<<char(7);
                             }else{
-                                cout<<"settings denited\n";
+                                cout<<"settings denied\n";
                             }
                         }else cout<<"lost response 0xa\n";
                         continue;
@@ -1147,28 +1117,23 @@ int main(){
                         break;
                     }
                     if(data[i]==0x13){
-                        i++;
-                        if(i<received){
-                            if(data[i]){
-                                readys.setTexture(ready1);
-                                ready=1;
-                                cout<<"ready\n"<<char(7);
-                            }else{
-                                readys.setTexture(ready2);
-                                ready=0;
-                                connected=0;
-                                clientsocket.disconnect();
-                                connectionS.setTexture(offt);
-                                cout<<"not ready?\nso disconnect\n";
-                            }
-                        }else cout<<"lost response 0x13\n";
+                        if(ready){
+                            ready=0;
+                            readys.setTexture(ready2);
+                            cout<<"unready\n"<<char(7);
+                        }else{
+                            ready=1;
+                            readys.setTexture(ready1);
+                            cout<<"ready\n"<<char(7);
+                        }
                         continue;
                     }
                     if(data[i]==0x14){
                         soundtrack.stop();
-                        protocol15(myid);
+                        protocol15();
                         backgroundt.loadFromImage(loadMap(seedinput.getString()+".map", spawnpoints));
                         backgrounds.setTexture(backgroundt, 1);
+                        backgrounds.setScale(0.2,0.2);
                         mode=ingame;
                         break;
                     }
@@ -1187,8 +1152,12 @@ int main(){
                         protbufferi[0]=1;
                         for(int j=1; j<7; j++)
                             protbufferi[j]=0;
-                        cout<<"receiving worms\n";
                         break;
+                    }
+                    if(data[i]==0x19){
+
+                        cout<<"your turn\n";
+                        continue;
                     }
                     if(data[i]==0xe0){
                         cout<<"unknown opcode\n";
@@ -1330,7 +1299,7 @@ int main(){
                             for(int i=0; i<playersamount; i++){
                                 cout<<"player["<<i<<"]="<<int(players[i].id)<<", "<<players[i].name<<"\n";
                             }
-                            protocol17(myid);
+                            protocol17();
                             break;
                         }
                     }
@@ -1409,7 +1378,7 @@ int main(){
                             break;
                         }
                     }
-                }protocol17(myid);
+                }protocol17();
             }
         }
         frame++;
