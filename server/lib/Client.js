@@ -14,6 +14,7 @@ class Client {
 		this.room = null;
 		this.confirmedGame = false;
 		this.mapLoaded = false;
+		this.isYourMove = false;
 		this.socket.on( 'data', this.request.handleRequest.bind( this.request ) );
 		this.socket.on( 'error', function()
 		{
@@ -211,6 +212,42 @@ class Client {
 		else
 		{
 			console.log( 'You need to join game first!' );
+		}
+	}
+
+	jump()
+	{
+		if( this.room !== null && this.isYourMove === true )
+		{
+			this.room.jump();
+		}
+		else
+		{
+			console.log( 'You need to join game first and wait for your move!' );
+		}
+	}
+
+	switchMoveLeft()
+	{
+		if( this.room !== null && this.isYourMove === true )
+		{
+			this.room.switchMoveLeft();
+		}
+		else
+		{
+			console.log( 'You need to join game first and wait for your move!' );
+		}
+	}
+
+	switchMoveRight()
+	{
+		if( this.room !== null && this.isYourMove === true )
+		{
+			this.room.switchMoveRight();
+		}
+		else
+		{
+			console.log( 'You need to join game first and wait for your move!' );
 		}
 	}
 }

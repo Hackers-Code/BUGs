@@ -156,6 +156,11 @@ class Room {
 	{
 		return this.game.getTimeLeft();
 	}
+
+	jump()
+	{
+		return this.game.jump();
+	}
 }
 
 module.exports = Room;

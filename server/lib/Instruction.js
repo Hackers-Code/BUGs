@@ -113,6 +113,21 @@ const InstructionMap = {
 		rule : '',
 		type : InstructionTypes.server
 	},
+	0x1d : {
+		rule : '',
+		callback : 'jump',
+		type : InstructionTypes.client
+	},
+	0x1e : {
+		rule : '',
+		callback : 'switchMoveLeft',
+		type : InstructionTypes.client
+	},
+	0x1f : {
+		rule : '',
+		callback : 'switchMoveRight',
+		type : InstructionTypes.client
+	},
 	0xe0 : {
 		rule : '',
 		type : InstructionTypes.server

@@ -25,13 +25,29 @@ class Game {
 			opcode : 0x19,
 			worm_id : worm_id
 		} );
+		this.players[ this.move ].isYourMove = true;
 		this.lastClockTime = new Date().getTime();
 		this.updateMove();
 	}
 
 	updateMove()
 	{
-		this.timeleft -= (new Date().getTime() - this.lastClockTime);
+		this.timeleft -= ((new Date().getTime() - this.lastClockTime) / 1000);
+		this.lastClockTime = new Date().getTime();
+		if( this.timeleft <= 0 )
+		{
+			this.players[ this.move ].response.send( {
+				opcode : 0x1c
+			} );
+			this.players[ this.move ].isYourMove = false;
+			this.move = ++this.move % this.players.length;
+			if( this.move === 0 )
+			{
+				this.worm = ++this.worm % this.wormsPerPlayer;
+			}
+			this.whoseMove();
+			return;
+		}
 		setTimeout( this.updateMove.bind( this ), 500 );
 	}
 
@@ -56,7 +72,6 @@ class Game {
 				this.worms.push( worm );
 			}
 		}
-		this.whoseMove();
 		this.updateWormsList();
 	}
 
@@ -100,6 +115,7 @@ class Game {
 	{
 		this.lastFrameTime = new Date().getTime();
 		this.update();
+		this.whoseMove();
 	}
 
 	update()
@@ -111,12 +127,23 @@ class Game {
 			{
 				if( !this.checkCollisionBottom( this.worms[ i ] ) )
 				{
-					this.worms[ i ].speedY += this.worms[ i ].accelerationY * (diffTime / 1000);
-					if( this.worms[ i ].speedY > this.worms[ i ].maxSpeedY )
+					if( this.checkCollisionTop( this.worms[ i ] ) )
 					{
-						this.worms[ i ].speedY = this.worms[ i ].maxSpeedY;
+						this.worms[ i ].speedY = 0;
+					}
+					else
+					{
+						this.worms[ i ].speedY += this.worms[ i ].accelerationY * (diffTime / 1000);
+						if( this.worms[ i ].speedY > this.worms[ i ].maxSpeedY )
+						{
+							this.worms[ i ].speedY = this.worms[ i ].maxSpeedY;
+						}
 					}
 					this.worms[ i ].y += this.worms[ i ].speedY * (diffTime / 1000);
+					if( this.checkCollisionBottom( this.worms[ i ] ) )
+					{
+						this.worms[ i ].speedY = 0;
+					}
 				}
 			}
 			this.updateWormsList();
@@ -125,19 +152,43 @@ class Game {
 		setImmediate( this.update.bind( this ) );
 	}
 
-	checkCollisionLeft()
+	checkCollisionLeft( worm )
 	{
-
+		for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
+		{
+			let block = this.mapParser.blocks[ i ];
+			if( (worm.y > block.y) && (worm.y < block.y + block.height) && ( worm.x < block.x ) && ( worm.x > block.x + block.width) )
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
-	checkCollisionRight()
+	checkCollisionRight( worm )
 	{
-
+		for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
+		{
+			let block = this.mapParser.blocks[ i ];
+			if( (worm.y > block.y) && (worm.y < block.y + block.height) && ( worm.x > block.x ) && ( worm.x < block.x + block.width) )
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
-	checkCollisionTop()
+	checkCollisionTop( worm )
 	{
-
+		for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
+		{
+			let block = this.mapParser.blocks[ i ];
+			if( (worm.y > block.y) && (worm.y < block.y + block.height) && ( worm.x > block.x ) && ( worm.x < block.x + block.width) )
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	checkCollisionBottom( worm )
@@ -151,6 +202,14 @@ class Game {
 			}
 		}
 		return false;
+	}
+
+	jump()
+	{
+		if( this.worms[ this.worm ].speedY === 0 )
+		{
+			this.worms[ this.worm ].speedY = -300;
+		}
 	}
 }
 
