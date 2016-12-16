@@ -174,9 +174,12 @@ list<sf::Vector2u> spawnpoints;
 
 //zmienne do rozgrywki
 sf::Color playercolors[4];
-sf::Texture wormt[9];
+sf::Texture wormt[9], clockt[8];
+sf::Sprite clocks;
 sf::Vector2f deltabg(0,0);
+sf::Text turntimet;
 float mapscale=0.2;
+unsigned int turntime=0, clockframe=0, no18delta=0;
 
 
 
@@ -245,6 +248,7 @@ class worm{public:
     sf::Vector2f position;
     unsigned int hp, direction, team, id, animcount;
     sf::Sprite sprite;
+    sf::Text text;
 
     worm(sf::Vector2f positionin=sf::Vector2f(0,0), unsigned int teamin=0, unsigned int hpin=200, unsigned int idin=0){
         position=positionin;
@@ -256,6 +260,10 @@ class worm{public:
         sprite.setTexture(wormt[0]);
         sprite.setPosition((deltabg+position)*mapscale);
         sprite.setScale(mapscale, mapscale);
+        text.setColor(normalclr);
+        text.setString("HP="+to_string(hp));
+        text.setPosition((deltabg+position-sf::Vector2f(0,-14))*mapscale);
+        text.setScale(mapscale, mapscale);
     }
 
     worm operator =(worm input){
@@ -265,18 +273,25 @@ class worm{public:
         team=input.team;
         id=input.id;
         sprite=input.sprite;
+        text=input.text;
+        return input;
     }
 
     void draw(sf::RenderWindow &window){
         window.draw(sprite);
+        window.draw(text);
     }
 
-    void update(){cout<<(deltabg*mapscale).x<<"\n";
+    void update(){
         sprite.setPosition((deltabg+position)*mapscale);
         sprite.setScale(mapscale, mapscale);
+        text.setPosition((deltabg+position-sf::Vector2f(0,-14))*mapscale);
+        text.setScale(mapscale, mapscale);
+        text.setString("HP="+to_string(hp));
     }
 };
 vector<worm*> wormpointers;
+worm *currentworm=0;
 
 class player{public:
     worm worms[5];
@@ -475,6 +490,24 @@ void protocol17(){
         }else cout<<"sending error 0x17\n";
     }else cout<<"not connected, cannot get worms list\n";
 }
+
+void protocol1a(){
+    if(connected){
+        unsigned char to_send[1];
+        to_send[0]=0x1a;
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+        }else cout<<"sending error 0x1a\n";
+    }else cout<<"not connected, cannot get turn time\n";
+}
+
+void protocol1d(){
+    if(connected){
+        unsigned char to_send[1];
+        to_send[0]=0x1d;
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+        }else cout<<"sending error 0x1d\n";
+    }else cout<<"not connected, cannot jump\n";
+}
 //}
 
 void save(string track, string input){
@@ -547,8 +580,12 @@ int main(){
         ready2.loadFromFile("img/ready2.bmp");
         readys.setTexture(ready2);
         readys.setPosition(200,30);
+        clocks.setPosition(0,0);
         for(int i=0; i<9; i++){
             wormt[i].loadFromFile("img/rob2.0/anim"+to_string(i+1)+".png");
+        }
+        for(int i=0; i<8; i++){
+            clockt[i].loadFromFile("img/clock/clock"+to_string(i+1)+".png");
         }
 
         mainfont.loadFromFile("font.ttf");
@@ -587,6 +624,11 @@ int main(){
         seedinput.setCharacterSize(12);
         seedinput.setColor(normalclr);
         seedinput.setPosition(8,38);
+        turntimet.setFont(mainfont);
+        turntimet.setString("0s");
+        turntimet.setCharacterSize(25);
+        turntimet.setColor(normalclr);
+        turntimet.setPosition(40,0);
         for(int i=0; i<INFO_AMOUNT; i++){
             info[i].setFont(mainfont);
             info[i].setCharacterSize(12);
@@ -655,6 +697,11 @@ int main(){
                     if(event.mouseMove.x>window.getSize().x-10) bounds[1]=1;
                     if(event.mouseMove.y<10) bounds[0]=1; else
                     if(event.mouseMove.y>window.getSize().y-10) bounds[2]=1;
+                }else
+                if(event.type==sf::Event::TextEntered){
+                    if(event.text.unicode==32){
+                        protocol1d();
+                    }
                 }
             }else
             if(mode==connectroom){
@@ -1155,8 +1202,30 @@ int main(){
                         break;
                     }
                     if(data[i]==0x19){
-
                         cout<<"your turn\n";
+                        i++;
+                        if(i<received){
+                            if(data[i]<wormpointers.size()){
+                                currentworm=wormpointers[data[i]];
+                            }else cout<<"wrong worm id: "+to_string(int(data[i]))+"\n";
+                        }else cout<<"lost response 0x19\n";
+                        continue;
+                    }
+                    if(data[i]==0x1b){
+                        i++;
+                        if(i<received){
+                            turntime=data[i];
+                            if(!turntime){
+                                clocks.setTexture(clockt[0]);
+                                clockframe=0;
+                            }
+                            turntimet.setString(to_string(turntime)+"s");
+                        }else cout<<"lost response 0x1b\n";
+                        continue;
+                    }
+                    if(data[i]==0x1c){
+                        currentworm=0;
+                        cout<<"end of your turn\n";
                         continue;
                     }
                     if(data[i]==0xe0){
@@ -1360,8 +1429,10 @@ int main(){
                         {//end of protocol
                             receiving=0;
                             if(protbufferi[1]<4){
-                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5])))
+                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]))){
                                     wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
+                                    protocol1a();
+                                }
                                 else{
                                     for(int j=0; j<wormpointers.size(); j++){
                                         if((*wormpointers[j]).id==protbufferi[5]){
@@ -1378,14 +1449,36 @@ int main(){
                             break;
                         }
                     }
-                }protocol17();
+                }
+                protocol17();
+                no18delta=0;
             }
         }
         frame++;
-        if(frame%120){
+        if(!(frame%120)){
             if(clientsocket.getRemoteAddress()==sf::IpAddress::None){
                 connected=0;
                 connectionS.setTexture(offt);
+            }else{
+                connected=1;
+                connectionS.setTexture(ont);
+            }
+        }
+        if(!(frame%20)){
+            if((turntime)&&(connected)){
+                clockframe++;
+                if(clockframe>7)
+                    clockframe=0;
+                clocks.setTexture(clockt[clockframe]);
+            }
+        }
+
+        if((mode==ingame)&&(connected)){
+            no18delta++;
+            if(no18delta>20){
+                no18delta=0;
+                protocol17();
+                cout<<"resending 0x17 (response time out)\n";
             }
         }
 
@@ -1396,6 +1489,8 @@ int main(){
             for(int i=0; i<wormpointers.size(); i++){
                 (*wormpointers[i]).draw(window);
             }
+            window.draw(clocks);
+            window.draw(turntimet);
         }else
         if(mode==connectroom){
             if(connected)
