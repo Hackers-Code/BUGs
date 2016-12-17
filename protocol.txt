@@ -8,8 +8,12 @@
 0x7 + 20 bytes (game name) + 1 byte (password length) + [password length] bytes (password) - create game ( client )
 0x8 + 1 byte (status) - creating game status ( server )
 0x9 + 4 bytes (map id) + 1 byte (players_count must be equal 2,3 or 4) - set game config ( client )
-0xa + 1 byte (status) - game config status( server )
-//Reserved opcodes for additional game settings
+0xa + 1 byte (status) - game config status ( server )
+0xb + 1 byte (color) + 1 byte (mask) - set character properties ( client )
+0xc + 1 byte (status) - are properties unique ( server )
+0xd - reserved
+0xe - reserved
+0xf - reserved
 0x10 + 4 bytes (game id) + 1 byte (password length) + [password length] bytes (password) - join game ( client )
 0x11 + 1 byte (status) + 4 bytes (mapID if status equal 1) - accept join game ( server )
 0x12 - switch confirm joining game ( client )
