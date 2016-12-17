@@ -260,9 +260,10 @@ class worm{public:
         sprite.setTexture(wormt[0]);
         sprite.setPosition((deltabg+position)*mapscale);
         sprite.setScale(mapscale, mapscale);
+        text.setFont(mainfont);
         text.setColor(normalclr);
         text.setString("HP="+to_string(hp));
-        text.setPosition((deltabg+position-sf::Vector2f(0,-14))*mapscale);
+        text.setPosition((deltabg+position+sf::Vector2f(0,-14))*mapscale);
         text.setScale(mapscale, mapscale);
     }
 
@@ -285,7 +286,7 @@ class worm{public:
     void update(){
         sprite.setPosition((deltabg+position)*mapscale);
         sprite.setScale(mapscale, mapscale);
-        text.setPosition((deltabg+position-sf::Vector2f(0,-14))*mapscale);
+        text.setPosition((deltabg+position+sf::Vector2f(0,-14))*mapscale);
         text.setScale(mapscale, mapscale);
         text.setString("HP="+to_string(hp));
     }
@@ -1470,12 +1471,13 @@ int main(){
                 if(clockframe>7)
                     clockframe=0;
                 clocks.setTexture(clockt[clockframe]);
+                protocol1a();
             }
         }
 
         if((mode==ingame)&&(connected)){
             no18delta++;
-            if(no18delta>20){
+            if(no18delta>40){
                 no18delta=0;
                 protocol17();
                 cout<<"resending 0x17 (response time out)\n";
