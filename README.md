@@ -1,4 +1,4 @@
-# Worms
+# Creepy-crawlies
 
 ## Game made only for educational purposes
 
