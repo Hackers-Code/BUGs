@@ -15,6 +15,7 @@ class Game {
 		this.worm = 0;
 		this.timeleft = 60;
 		this.lastClockTime = 0;
+		this.frames = 0;
 	}
 
 	whoseMove()
@@ -26,6 +27,7 @@ class Game {
 			worm_id : worm_id
 		} );
 		this.players[ this.move ].isYourMove = true;
+		this.timeleft = 60;
 		this.lastClockTime = new Date().getTime();
 		this.updateMove();
 	}
@@ -125,27 +127,35 @@ class Game {
 		{
 			for( let i = 0 ; i < this.worms.length ; i++ )
 			{
-				if( !this.checkCollisionBottom( this.worms[ i ] ) )
+				let worm = this.worms[ i ];
+				if( worm.speedY < 0 )
 				{
-					if( this.checkCollisionTop( this.worms[ i ] ) )
+					console.log( 'jumping' );
+					console.log( this.checkCollisionTop( worm.y, worm.x ) );
+					console.log( !this.checkCollisionBottom( worm.y, worm.height, worm.x ) );
+					console.log( worm.y );
+					console.log( worm.y + worm.speedY * (diffTime / 1000) );
+				}
+				if( this.checkCollisionTop( worm.y, worm.x ) )
+				{
+					worm.speedY = 0;
+				}
+				if( !this.checkCollisionBottom( worm.y, worm.height, worm.x ) )
+				{
+					worm.speedY += worm.accelerationY * (diffTime / 1000);
+					if( worm.speedY > worm.maxSpeedY )
 					{
-						this.worms[ i ].speedY = 0;
+						worm.speedY = worm.maxSpeedY;
 					}
-					else
+					if( this.checkCollisionBottom( worm.y + worm.speedY * (diffTime / 1000), worm.height, worm.x ) )
 					{
-						this.worms[ i ].speedY += this.worms[ i ].accelerationY * (diffTime / 1000);
-						if( this.worms[ i ].speedY > this.worms[ i ].maxSpeedY )
-						{
-							this.worms[ i ].speedY = this.worms[ i ].maxSpeedY;
-						}
-					}
-					this.worms[ i ].y += this.worms[ i ].speedY * (diffTime / 1000);
-					if( this.checkCollisionBottom( this.worms[ i ] ) )
-					{
-						this.worms[ i ].speedY = 0;
+						worm.speedY = 0;
+						continue;
 					}
 				}
+				worm.y += worm.speedY * (diffTime / 1000);
 			}
+			this.frames++;
 			this.updateWormsList();
 			this.lastFrameTime = new Date().getTime();
 		}
@@ -157,7 +167,7 @@ class Game {
 		for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
 		{
 			let block = this.mapParser.blocks[ i ];
-			if( (worm.y > block.y) && (worm.y < block.y + block.height) && ( worm.x < block.x ) && ( worm.x > block.x + block.width) )
+			if( (worm.y >= block.y) && (worm.y <= block.y + block.height) && ( worm.x <= block.x ) && ( worm.x >= block.x + block.width) )
 			{
 				return true;
 			}
@@ -170,7 +180,7 @@ class Game {
 		for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
 		{
 			let block = this.mapParser.blocks[ i ];
-			if( (worm.y > block.y) && (worm.y < block.y + block.height) && ( worm.x > block.x ) && ( worm.x < block.x + block.width) )
+			if( (worm.y >= block.y) && (worm.y <= block.y + block.height) && ( worm.x >= block.x ) && ( worm.x <= block.x + block.width) )
 			{
 				return true;
 			}
@@ -178,12 +188,12 @@ class Game {
 		return false;
 	}
 
-	checkCollisionTop( worm )
+	checkCollisionTop( y, x )
 	{
 		for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
 		{
 			let block = this.mapParser.blocks[ i ];
-			if( (worm.y > block.y) && (worm.y < block.y + block.height) && ( worm.x > block.x ) && ( worm.x < block.x + block.width) )
+			if( (y >= block.y) && (y <= block.y + block.height) && ( x >= block.x ) && ( x <= block.x + block.width) )
 			{
 				return true;
 			}
@@ -191,12 +201,12 @@ class Game {
 		return false;
 	}
 
-	checkCollisionBottom( worm )
+	checkCollisionBottom( y, height, x )
 	{
 		for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
 		{
 			let block = this.mapParser.blocks[ i ];
-			if( (worm.y + worm.height < block.y + block.height) && (worm.y + worm.height > block.y) && ( worm.x > block.x ) && ( worm.x < block.x + block.width) )
+			if( (y + height <= block.y + block.height) && (y + height >= block.y) && ( x >= block.x ) && ( x <= block.x + block.width) )
 			{
 				return true;
 			}

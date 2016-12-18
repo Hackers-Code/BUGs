@@ -15,13 +15,13 @@ class Response {
 		let buffer = this.parser.encode( Instruction.Map[ opcode ].rule, data );
 		if( buffer !== false )
 		{
-			console.log( `[${this.socket.remoteAddress}:${this.socket.remotePort}] Sending data to:${buffer.toString(
-				'hex' )}` );
+			//console.log( `[${this.socket.remoteAddress}:${this.socket.remotePort}] Sending data
+			// to:${buffer.toString('hex' )}` );
 			this.socket.write( buffer );
 		}
 		else
 		{
-			console.log( `[${this.socket.remoteAddress}:${this.socket.remotePort}] Sending data : 0xe2` );
+			//console.log( `[${this.socket.remoteAddress}:${this.socket.remotePort}] Sending data : 0xe2` );
 			this.socket.write( Buffer.from( [ 0xe2 ] ) );
 		}
 	}
