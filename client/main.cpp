@@ -252,9 +252,11 @@ class player;
 
 class worm{public:
     sf::Vector2f position, V;
-    unsigned int hp, direction, team, id, animcount;
+    unsigned int hp, team, id, animcount;
+    int direction;
     sf::Sprite sprite;
     sf::Text text;
+    bool walking;
 
     worm(sf::Vector2f positionin=sf::Vector2f(0,0), unsigned int teamin=0, unsigned int hpin=200, unsigned int idin=0){
         position=positionin;
@@ -273,6 +275,7 @@ class worm{public:
         text.setScale(mapscale, mapscale);
         text.setCharacterSize(20);
         V=sf::Vector2f(0,0);
+        walking=0;
     }
 
     worm operator =(worm input){
@@ -292,9 +295,19 @@ class worm{public:
         window.draw(text);
     }
 
+    void next_anim(){
+        animcount++;
+        if(animcount>8){
+            animcount=0;
+        }
+        sprite.setTexture(wormt[animcount]);
+    }
+
     void update(){
         sprite.setPosition((deltabg+position)*mapscale);
-        sprite.setScale(mapscale, mapscale);
+        sprite.setScale(mapscale*direction, mapscale);
+        if(direction==-1)
+            sprite.move(sprite.getLocalBounds().width*mapscale, 0);
         text.setPosition((deltabg+position+sf::Vector2f(0,-20))*mapscale);
         text.setScale(mapscale, mapscale);
         text.setString("HP="+to_string(hp));
@@ -524,6 +537,26 @@ bool protocol1d(){
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){return 1;
         }else cout<<"sending error 0x1d\n";
     }else cout<<"not connected, cannot jump\n";
+    return 0;
+}
+
+bool protocol1e(){
+    if(connected){
+        unsigned char to_send[1];
+        to_send[0]=0x1e;
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){return 1;
+        }else cout<<"sending error 0x1e\n";
+    }else cout<<"not connected, can not move\n";
+    return 0;
+}
+
+bool protocol1f(){
+    if(connected){
+        unsigned char to_send[1];
+        to_send[0]=0x1f;
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){return 1;
+        }else cout<<"sending error 0x1f\n";
+    }else cout<<"not connected, can not move\n";
     return 0;
 }
 //}
@@ -760,10 +793,44 @@ int main(){
                     if(event.mouseMove.y>window.getSize().y-10) bounds[2]=1;
                 }else
                 if(event.type==sf::Event::TextEntered){
-                    if(event.text.unicode==32){
+                    if(event.text.unicode==32){//space
                         if(currentworm){
                             //if(protocol1d()){
                                 (*currentworm).V.y+=vjump;
+                            //}
+                        }
+                    }
+                }else
+                if((event.type==sf::Event::KeyPressed)||(event.type==sf::Event::KeyReleased)){
+                    if(event.key.code==sf::Keyboard::A){
+                        if((currentworm)&&((*currentworm).V.x<=0)&&(((event.type==sf::Event::KeyPressed)&&(!(*currentworm).walking))||((event.type==sf::Event::KeyReleased)&&((*currentworm).walking)))){
+                            //if(protocol1e()){
+                                if(!(*currentworm).walking){
+                                    (*currentworm).V.x=-vxmax;
+                                    (*currentworm).walking=1;
+                                    (*currentworm).direction=-1;
+                                }else{
+                                    (*currentworm).walking=0;
+                                    (*currentworm).V.x=0;
+                                    (*currentworm).animcount=0;
+                                    (*currentworm).sprite.setTexture(wormt[0]);
+                                }
+                            //}
+                        }
+                    }else
+                    if(event.key.code==sf::Keyboard::D){
+                        if((currentworm)&&((*currentworm).V.x>=0)&&(((event.type==sf::Event::KeyPressed)&&(!(*currentworm).walking))||((event.type==sf::Event::KeyReleased)&&((*currentworm).walking)))){
+                            //if(protocol1f()){
+                                if(!(*currentworm).walking){
+                                    (*currentworm).V.x=vxmax;
+                                    (*currentworm).walking=1;
+                                    (*currentworm).direction=1;
+                                }else{
+                                    (*currentworm).walking=0;
+                                    (*currentworm).V.x=0;
+                                    (*currentworm).animcount=0;
+                                    (*currentworm).sprite.setTexture(wormt[0]);
+                                }
                             //}
                         }
                     }
@@ -1568,6 +1635,57 @@ int main(){
                             (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
                             if((*wormpointers[i]).V.y>vymax)
                                 (*wormpointers[i]).V.y=vymax;
+                        }else
+                        if((*wormpointers[i]).V.x>0){cout<<(*wormpointers[i]).position.x<<"\n";
+                            int fkas=(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width;
+                            bool fcolided=0;
+                            sf::Vector2f colisionpos;
+                            for(int j=(*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height; j<=(*wormpointers[i]).position.y; j--){
+                                for(int k=0; k<=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x; k++){
+                                    if(colide(sf::Vector2f(k+fkas, j), backgroundi)){
+                                        fcolided=1;
+                                        colisionpos=sf::Vector2f(k+(*wormpointers[i]).position.x, j);
+                                        break;
+                                    }
+                                }
+                                if(fcolided)
+                                    break;
+                            }
+                            if(fcolided){
+                                (*wormpointers[i]).position=colisionpos;
+                                (*wormpointers[i]).update();
+                            }else{
+                                (*wormpointers[i]).position.x+=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x;
+                                (*wormpointers[i]).update();
+                            }
+                            if(!(frame%5)){
+                                (*wormpointers[i]).next_anim();
+                            }
+                        }else
+                        if((*wormpointers[i]).V.x<0){cout<<(*wormpointers[i]).position.x<<"\n";
+                            bool fcolided=0;
+                            sf::Vector2f colisionpos;
+                            for(int j=(*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height; j<=(*wormpointers[i]).position.y; j--){
+                                for(int k=0; k>=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x; k--){
+                                    if(colide(sf::Vector2f(k+(*wormpointers[i]).position.x, j), backgroundi)){
+                                        fcolided=1;
+                                        colisionpos=sf::Vector2f(k+(*wormpointers[i]).position.x+1, j);
+                                        break;
+                                    }
+                                }
+                                if(fcolided)
+                                    break;
+                            }
+                            if(fcolided){
+                                (*wormpointers[i]).position=colisionpos;
+                                (*wormpointers[i]).update();
+                            }else{
+                                (*wormpointers[i]).position.x+=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x;
+                                (*wormpointers[i]).update();
+                            }
+                            if(!(frame%5)){
+                                (*wormpointers[i]).next_anim();
+                            }
                         }
                     }
                     if((*wormpointers[i]).V.y>0){
@@ -1575,7 +1693,7 @@ int main(){
                             bool fcolided=0;
                             sf::Vector2f colisionpos;
                             for(int k=0; k<=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y; k++){
-                                for(int j=(*wormpointers[i]).position.x; j<(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
+                                for(int j=(*wormpointers[i]).position.x; j<=(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
                                     if(colide(sf::Vector2f(j, ((*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height+k)), backgroundi)){
                                         fcolided=1;
                                         colisionpos=sf::Vector2f(j, ((*wormpointers[i]).position.y+k));
@@ -1602,7 +1720,7 @@ int main(){
                             bool fcolided=0;
                             sf::Vector2f colisionpos;
                             for(int k=0; k>=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y; k--){
-                                for(int j=(*wormpointers[i]).position.x; j<(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
+                                for(int j=(*wormpointers[i]).position.x; j<=(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
                                     if(colide(sf::Vector2f(j, ((*wormpointers[i]).position.y+k)), backgroundi)){
                                         fcolided=1;
                                         colisionpos=sf::Vector2f(j, ((*wormpointers[i]).position.y+k-1));
