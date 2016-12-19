@@ -13,6 +13,108 @@
 
 using namespace std;
 
+bool copyToClipboard(string input){
+    HGLOBAL hglbCopy;
+    LPTSTR  lptstrCopy;
+
+    if(!OpenClipboard(0))
+        return 0;
+    EmptyClipboard();
+    if(!input.length()){
+        CloseClipboard();
+        return 0;
+    }
+
+    hglbCopy=GlobalAlloc(GMEM_MOVEABLE, input.length()+1);
+    if(!hglbCopy){
+        CloseClipboard();
+        return 0;
+    }
+
+    memcpy(GlobalLock(hglbCopy), &input[0], input.length()+1);
+    GlobalUnlock(hglbCopy);
+    SetClipboardData(CF_TEXT, hglbCopy);
+    CloseClipboard();
+    return 1;
+}
+
+sf::TcpSocket clientsocket;
+sf::Socket::Status status;
+unsigned char data[128]={1}, receiving=0, deltareceive=0;
+sf::Texture ont, offt;
+sf::Sprite connectionS;
+bool connected=0;
+
+bool connect(string ip, string port){
+    sf::IpAddress ipaddress0(ip);
+    if(ipaddress0==sf::IpAddress::None){
+        cout<<"invalid ip\n";
+        return 0;
+    }
+    status=clientsocket.connect(ipaddress0, atoi(port.c_str()));
+    if(status!=sf::Socket::Done)
+    {
+        cout<<"not connected\n";
+        return 0;
+    }
+    clientsocket.setBlocking(0);
+    if (clientsocket.send(data, 1) != sf::Socket::Done){
+        cout<<"failed to send\n";
+        return 0;
+    }
+    connectionS.setTexture(ont);
+    connected=1;
+    return 1;
+}
+
+//{
+sf::RenderWindow window(sf::VideoMode(1200, 720), "worms");
+sf::Event event;
+sf::Color bgcolor(40,40,40), checkedclr(0,255,255), normalclr(0,255,0);
+sf::Texture inputbart, binputbart, okt, bgplanet, reloadgamelistt, soundicont, soundbart, soundpointert;
+sf::Sprite  inputbars, binputbars, okconnects, oknicks, okcreaterooms, bgplanes, reloadgamelists, soundicons, soundbars, soundpointers;
+sf::Image bgplanei;
+sf::Font mainfont;
+sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwordinput;
+sf::Music soundtrack;
+bool bounds[4];//up,right,down,left
+bool soundbarexchanged=0, soundpointerpressed=0;
+enum modes{ingame, connectroom, lobby};
+enum textboxes{none=0, ipbox, portbox, nickbox, roomnamebox, passwordbox, seedbox, listbox};
+modes mode=connectroom;
+textboxes textbox=none;
+string buffer, nickname, restofprotocol, protbuffers[3];
+size_t received=0;
+unsigned int myid=0, to_receive=0, to_ignore=0, lastgamelistelement=0, frame=0, protbufferi[6];
+float deltagamelist=120;
+
+
+//zmienne do lobby
+string lobbyname;
+sf::Text lobbynamet, seedinput;
+sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2;
+sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys;
+int playersamount=2;
+bool ready=0, changingsettings=0;;
+list<sf::Vector2u> spawnpoints;
+
+
+//zmienne do rozgrywki
+sf::Color playercolors[4];
+sf::Texture backgroundt, wormt[9], clockt[8];
+sf::Sprite  backgrounds, clocks;
+sf::Image backgroundi;
+sf::Vector2f deltabg(0,0);
+sf::Text turntimet;
+float mapscale=0.2;
+unsigned int turntime=0, clockframe=0, no18delta=0;
+
+//fizyka
+float vxmax=2, vymax=875, ax=4, ay=437, vjump=-300;
+sf::Clock clocker;
+sf::Time lastittime, currentittime, starttime;
+bool started=0;
+
 sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
     spawnpoints.clear();
     fstream plik;
@@ -83,105 +185,9 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
     }else{
         cout<<"plik "<<track<<" is not good\n";
     }
+
     return output;
 }
-
-bool copyToClipboard(string input){
-    HGLOBAL hglbCopy;
-    LPTSTR  lptstrCopy;
-
-    if(!OpenClipboard(0))
-        return 0;
-    EmptyClipboard();
-    if(!input.length()){
-        CloseClipboard();
-        return 0;
-    }
-
-    hglbCopy=GlobalAlloc(GMEM_MOVEABLE, input.length()+1);
-    if(!hglbCopy){
-        CloseClipboard();
-        return 0;
-    }
-
-    memcpy(GlobalLock(hglbCopy), &input[0], input.length()+1);
-    GlobalUnlock(hglbCopy);
-    SetClipboardData(CF_TEXT, hglbCopy);
-    CloseClipboard();
-    return 1;
-}
-
-sf::TcpSocket clientsocket;
-sf::Socket::Status status;
-unsigned char data[128]={1}, receiving=0, deltareceive=0;
-sf::Texture ont, offt;
-sf::Sprite connectionS;
-bool connected=0;
-
-bool connect(string ip, string port){
-    sf::IpAddress ipaddress0(ip);
-    if(ipaddress0==sf::IpAddress::None){
-        cout<<"invalid ip\n";
-        return 0;
-    }
-    status=clientsocket.connect(ipaddress0, atoi(port.c_str()));
-    if(status!=sf::Socket::Done)
-    {
-        cout<<"not connected\n";
-        return 0;
-    }
-    clientsocket.setBlocking(0);
-    if (clientsocket.send(data, 1) != sf::Socket::Done){
-        cout<<"failed to send\n";
-        return 0;
-    }
-    connectionS.setTexture(ont);
-    connected=1;
-    return 1;
-}
-
-//{
-sf::RenderWindow window(sf::VideoMode(1200, 720), "worms");
-sf::Event event;
-sf::Color bgcolor(40,40,40), checkedclr(0,255,255), normalclr(0,255,0);
-sf::Texture backgroundt, inputbart, binputbart, okt, bgplanet, reloadgamelistt, soundicont, soundbart, soundpointert;
-sf::Sprite  backgrounds, inputbars, binputbars, okconnects, oknicks, okcreaterooms, bgplanes, reloadgamelists, soundicons, soundbars, soundpointers;
-sf::Image backgroundi, bgplanei;
-sf::Font mainfont;
-sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwordinput;
-sf::Music soundtrack;
-bool bounds[4];//up,right,down,left
-bool soundbarexchanged=0, soundpointerpressed=0;
-enum modes{ingame, connectroom, lobby};
-enum textboxes{none=0, ipbox, portbox, nickbox, roomnamebox, passwordbox, seedbox, listbox};
-modes mode=connectroom;
-textboxes textbox=none;
-string buffer, nickname, restofprotocol, protbuffers[3];
-size_t received=0;
-unsigned int myid=0, to_receive=0, to_ignore=0, lastgamelistelement=0, frame=0, protbufferi[6];
-float deltagamelist=120;
-
-
-//zmienne do lobby
-string lobbyname;
-sf::Text lobbynamet, seedinput;
-sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2;
-sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys;
-int playersamount=2;
-bool ready=0, changingsettings=0;;
-list<sf::Vector2u> spawnpoints;
-
-
-//zmienne do rozgrywki
-sf::Color playercolors[4];
-sf::Texture wormt[9], clockt[8];
-sf::Sprite clocks;
-sf::Vector2f deltabg(0,0);
-sf::Text turntimet;
-float mapscale=0.2;
-unsigned int turntime=0, clockframe=0, no18delta=0;
-
-
 
 class gamelistelements{public:
     unsigned int id, pos;
@@ -245,7 +251,7 @@ gamelistelements *gamelistpointer;
 class player;
 
 class worm{public:
-    sf::Vector2f position;
+    sf::Vector2f position, V;
     unsigned int hp, direction, team, id, animcount;
     sf::Sprite sprite;
     sf::Text text;
@@ -263,8 +269,10 @@ class worm{public:
         text.setFont(mainfont);
         text.setColor(normalclr);
         text.setString("HP="+to_string(hp));
-        text.setPosition((deltabg+position+sf::Vector2f(0,-14))*mapscale);
+        text.setPosition((deltabg+position+sf::Vector2f(0,-20))*mapscale);
         text.setScale(mapscale, mapscale);
+        text.setCharacterSize(20);
+        V=sf::Vector2f(0,0);
     }
 
     worm operator =(worm input){
@@ -279,6 +287,7 @@ class worm{public:
     }
 
     void draw(sf::RenderWindow &window){
+        if(hp<=0)return;
         window.draw(sprite);
         window.draw(text);
     }
@@ -286,7 +295,7 @@ class worm{public:
     void update(){
         sprite.setPosition((deltabg+position)*mapscale);
         sprite.setScale(mapscale, mapscale);
-        text.setPosition((deltabg+position+sf::Vector2f(0,-14))*mapscale);
+        text.setPosition((deltabg+position+sf::Vector2f(0,-20))*mapscale);
         text.setScale(mapscale, mapscale);
         text.setString("HP="+to_string(hp));
     }
@@ -341,7 +350,7 @@ class player{public:
 };
 vector<player> players;
 
-void placek(sf::Image &image, int x, int y,unsigned int r){cout<<x<<", "<<y<<", "<<r;
+void placek(sf::Image &image, int x, int y,unsigned int r){
     sf::Vector2f margins;
     margins.x=image.getSize().x;
     margins.y=image.getSize().y;
@@ -393,6 +402,13 @@ void createmap(unsigned int seed){
         backgroundt.loadFromImage(backgroundi);
         backgrounds.setTexture(backgroundt);
     }
+}
+
+bool colide(sf::Vector2f pixelin, sf::Image &imagein){
+    if((pixelin.x<=imagein.getSize().x-1)&&(pixelin.x>=0)&&(pixelin.y>=0)&&(pixelin.y<=imagein.getSize().y-1)&&(imagein.getPixel(pixelin.x, pixelin.y)==sf::Color(0,0,0,0)))
+        return 0;
+    else
+        return 1;
 }
 
 void protocol3(string buffer){
@@ -501,13 +517,14 @@ void protocol1a(){
     }else cout<<"not connected, cannot get turn time\n";
 }
 
-void protocol1d(){
+bool protocol1d(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x1d;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){return 1;
         }else cout<<"sending error 0x1d\n";
     }else cout<<"not connected, cannot jump\n";
+    return 0;
 }
 //}
 
@@ -621,7 +638,7 @@ int main(){
         lobbynamet.setColor(normalclr);
         lobbynamet.setPosition(38,8);
         seedinput.setFont(mainfont);
-        seedinput.setString("1234567");
+        seedinput.setString("1");
         seedinput.setCharacterSize(12);
         seedinput.setColor(normalclr);
         seedinput.setPosition(8,38);
@@ -659,6 +676,49 @@ int main(){
         info[10].setPosition(20,128);
         info[11].setString("4");
         info[11].setPosition(20,158);
+        fstream plik;
+        plik.open("physic.cfg", ios::in | ios::binary);
+        if(plik.good()){
+            string line="";
+            int linenumber=0;
+            while(getline(plik, line)){
+                linenumber++;
+                switch(linenumber){
+                    case 1:{
+                        ay=atof(line.c_str());
+                    }break;
+                    case 2:{
+                        vymax=atof(line.c_str());
+                    }break;
+                    case 3:{
+                        vjump=atof(line.c_str());
+                    }break;
+                    case 4:{
+                        ax=atof(line.c_str());
+                    }break;
+                    case 5:{
+                        vxmax=atof(line.c_str());
+                    }break;
+                    default:{
+                        cout<<"unspecified physic.cfg line"<<linenumber<<"\n";
+                    }break;
+                }
+            }
+        }else{
+            cout<<"physic.cfg does not exist or is damaged\n";
+        }
+
+        backgroundt.loadFromImage(backgroundi=loadMap("1.map", spawnpoints));
+        backgrounds.setTexture(backgroundt, 1);
+        backgrounds.setScale(0.2,0.2);
+        mode=ingame;
+        playersamount=1;
+        players.push_back(player());
+        players[0].addworm(worm());
+        players[0].addworm(worm(sf::Vector2f(200,0), 0, 200, 1));
+        wormpointers.push_back(&players[0].worms[0]);
+        started=1;
+        currentworm=wormpointers[0];
     }
     while(window.isOpen()){
         while(window.pollEvent(event)){
@@ -682,7 +742,7 @@ int main(){
                             }
                         }
                     }else{
-                        if(mapscale>0.2){
+                        if(mapscale>0.3){
                             mapscale-=0.1;
                             backgrounds.setScale(mapscale, mapscale);
                             backgrounds.setPosition(deltabg*mapscale);
@@ -701,7 +761,11 @@ int main(){
                 }else
                 if(event.type==sf::Event::TextEntered){
                     if(event.text.unicode==32){
-                        protocol1d();
+                        if(currentworm){
+                            //if(protocol1d()){
+                                (*currentworm).V.y+=vjump;
+                            //}
+                        }
                     }
                 }
             }else
@@ -1179,7 +1243,7 @@ int main(){
                     if(data[i]==0x14){
                         soundtrack.stop();
                         protocol15();
-                        backgroundt.loadFromImage(loadMap(seedinput.getString()+".map", spawnpoints));
+                        backgroundt.loadFromImage(backgroundi=loadMap(seedinput.getString()+".map", spawnpoints));
                         backgrounds.setTexture(backgroundt, 1);
                         backgrounds.setScale(0.2,0.2);
                         mode=ingame;
@@ -1458,11 +1522,17 @@ int main(){
         frame++;
         if(!(frame%120)){
             if(clientsocket.getRemoteAddress()==sf::IpAddress::None){
-                connected=0;
-                connectionS.setTexture(offt);
+                if(connected){
+                    connected=0;
+                    connectionS.setTexture(offt);
+                    cout<<"connection lost\n";
+                }
             }else{
-                connected=1;
-                connectionS.setTexture(ont);
+                if(!connected){
+                    connected=1;
+                    connectionS.setTexture(ont);
+                    cout<<"reconnected\n";
+                }
             }
         }
         if(!(frame%20)){
@@ -1475,6 +1545,88 @@ int main(){
             }
         }
 
+        lastittime=currentittime;
+        currentittime=clocker.getElapsedTime();
+        if(started){
+            if((!backgroundi.getSize().x)||(!backgroundi.getSize().y)){
+                cout<<"fatal error, map invalid, closing game\n";
+                system("pause");
+                return 1;
+            }
+            for(int i=0; i<wormpointers.size(); i++){
+                if((*wormpointers[i]).hp>0){
+                    if((*wormpointers[i]).V.y==0){
+                        int wuk=(*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height;
+                        bool fhasfloor=0;
+                        for(int j=(*wormpointers[i]).position.x; j<(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
+                            if(colide(sf::Vector2f(j, wuk), backgroundi)){
+                                fhasfloor=1;
+                                break;
+                            }
+                        }
+                        if(!fhasfloor){
+                            (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
+                            if((*wormpointers[i]).V.y>vymax)
+                                (*wormpointers[i]).V.y=vymax;
+                        }
+                    }
+                    if((*wormpointers[i]).V.y>0){
+                        if(!(*wormpointers[i]).V.x){
+                            bool fcolided=0;
+                            sf::Vector2f colisionpos;
+                            for(int k=0; k<=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y; k++){
+                                for(int j=(*wormpointers[i]).position.x; j<(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
+                                    if(colide(sf::Vector2f(j, ((*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height+k)), backgroundi)){
+                                        fcolided=1;
+                                        colisionpos=sf::Vector2f(j, ((*wormpointers[i]).position.y+k));
+                                        break;
+                                    }
+                                }
+                                if(fcolided)
+                                    break;
+                            }
+                            if(fcolided){
+                                (*wormpointers[i]).position=colisionpos;
+                                (*wormpointers[i]).V.y=0;
+                            }else{
+                                (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
+                                (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
+                                if((*wormpointers[i]).V.y>vymax)
+                                    (*wormpointers[i]).V.y=vymax;
+                            }
+                            (*wormpointers[i]).update();
+                        }
+                    }else
+                    if((*wormpointers[i]).V.y<0){
+                        if(!(*wormpointers[i]).V.x){
+                            bool fcolided=0;
+                            sf::Vector2f colisionpos;
+                            for(int k=0; k>=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y; k--){
+                                for(int j=(*wormpointers[i]).position.x; j<(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
+                                    if(colide(sf::Vector2f(j, ((*wormpointers[i]).position.y+k)), backgroundi)){
+                                        fcolided=1;
+                                        colisionpos=sf::Vector2f(j, ((*wormpointers[i]).position.y+k-1));
+                                        break;
+                                    }
+                                }
+                                if(fcolided)
+                                    break;
+                            }
+                            if(fcolided){
+                                (*wormpointers[i]).position=colisionpos;
+                                (*wormpointers[i]).V.y=0;
+                            }
+                            (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
+                            (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
+                            if((*wormpointers[i]).V.y>vymax)
+                                (*wormpointers[i]).V.y=vymax;
+                            (*wormpointers[i]).update();
+                        }
+                    }
+                }
+            }
+        }
+
         if((mode==ingame)&&(connected)){
             no18delta++;
             if(no18delta>40){
@@ -1483,7 +1635,6 @@ int main(){
                 cout<<"resending 0x17 (response time out)\n";
             }
         }
-
 
         window.clear(bgcolor);{
         if(mode==ingame){
