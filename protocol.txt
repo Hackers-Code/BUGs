@@ -1,6 +1,6 @@
 0x0 - kick from session ( server, TCP )
 0x1 - connect ( client, TCP )
-0x2 + 4 bytes (session id) - accept connection ( server, TCP )
+0x2 + 1 byte (status) - accept connection ( server, TCP )
 0x3 + 20 bytes (nickname) - reserve nickname ( client, TCP )
 0x4 + 1 byte (status) - nickname status ( server, TCP )
 0x5 - list games ( client, TCP )
