@@ -1,4 +1,4 @@
-0x0 - exit, destroy session ( both, TCP )
+0x0 - kick from session ( server, TCP )
 0x1 - connect ( client, TCP )
 0x2 + 4 bytes (session id) - accept connection ( server, TCP )
 0x3 + 20 bytes (nickname) - reserve nickname ( client, TCP )
@@ -35,6 +35,3 @@
 0xe1 - bad parameters ( server, TCP )
 0xe2 - server error ( server, TCP )
 0xe3 - unexpected opcode ( server, TCP )
-//session opcodes
-0xfe + 4 bytes ( id ) - update socket ( client, TCP )
-0xff + bool ( status ) - updating player socket status ( server, TCP )
