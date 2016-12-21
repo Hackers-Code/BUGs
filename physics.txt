@@ -1,6 +1,0 @@
-constants
-accelerationY = 437
-maxSpeedY = 875
-jump speedY = -300
-accelerationX = 4
-maxSpeedX = 2
