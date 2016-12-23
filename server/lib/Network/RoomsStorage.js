@@ -72,6 +72,27 @@ class RoomsStorage {
 			return false;
 		}
 	}
+
+	joinGame( params, client )
+	{
+		if( typeof params.roomID !== 'undefined' && typeof params.password !== 'undefined' )
+		{
+			let room = SearchEngine.findByUniqueID( this.rooms, params.roomID );
+			if( room !== false && room !== -1 )
+			{
+				if( this.rooms[ room ].joinGame( params.password, client ) )
+				{
+					return this.rooms[ room ];
+				}
+				return false;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		return false;
+	}
 }
 
 module.exports = RoomsStorage;
