@@ -51,22 +51,6 @@ class ClientsStorage {
 	{
 		return this.uniqueNameStorage.removeName( name );
 	}
-
-	listAvailableGames()
-	{
-		return this.roomsStorage.listAvailableGames();
-	}
-
-	addRoom( settings, client )
-	{
-		return this.roomsStorage.addRoom( settings, client );
-	}
-
-	joinGame( params, client )
-	{
-		return this.roomsStorage.joinGame( params, client );
-	}
-
 }
 
 module.exports = ClientsStorage;
