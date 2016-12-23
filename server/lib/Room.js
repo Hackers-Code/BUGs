@@ -1,27 +1,11 @@
-'use strict';
-
-const Status = {
-	uninitialized : 0,
-	waitingForPlayers : 1,
-	waitingForConfirming : 2,
-	inGame : 3
-};
-
 const fs = require( 'fs' );
 const Game = require( './Game' );
-
 class Room {
-	constructor( settings, client, id )
+	constructor( settings )
 	{
-		this.id = id;
-		this.name = settings.name;
 		this.password = settings.password;
-		this.adminID = client.getID();
-		this.clients = [];
-		this.clients.push( client );
 		this.mapID = 1;
 		this.maxPlayers = 2;
-		this.status = Status.uninitialized;
 		this.playersList = null;
 		this.game = new Game();
 	}
@@ -35,7 +19,6 @@ class Room {
 				this.mapID = config.mapID.readInt32BE( 0 );
 				if( !fs.existsSync( __dirname + '/../maps/' + this.mapID + '.map' ) )
 				{
-					console.log( 'Map ' + this.mapID + ' does not exist' );
 					return false;
 				}
 				this.maxPlayers = config.maxPlayers.readInt8( 0 );
@@ -44,11 +27,9 @@ class Room {
 			}
 			else
 			{
-				console.log( 'Only admin can set config' );
 				return false;
 			}
 		}
-		console.log( 'Game is already configured' );
 		return false;
 	}
 
@@ -66,26 +47,9 @@ class Room {
 				}
 				return true;
 			}
-			console.log( 'Wrong password' );
 			return false;
 		}
-		console.log( 'Room is not accessible anymore' );
 		return false;
-	}
-
-	isAvailable()
-	{
-		if( this.status === Status.waitingForPlayers )
-		{
-			return {
-				name : this.name,
-				id : this.id
-			};
-		}
-		else
-		{
-			return false;
-		}
 	}
 
 	checkIfAllConfirmed()

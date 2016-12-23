@@ -3,10 +3,12 @@ const UniqueKeyGenerator = require( './../Utils/UniqueKeyGenerator' );
 const UniqueNameStorage = require( './../Utils/UniqueNameStorage' );
 const Client = require( './Client' ).Client;
 const ClientStatus = require( './Client' ).ClientStatus;
+const SearchEngine = require( './../Utils/SearchEngine' );
 class ClientsStorage {
-	constructor()
+	constructor( roomsStorage )
 	{
 		this.clients = [];
+		this.roomsStorage = roomsStorage;
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20 );
 	}
@@ -20,9 +22,13 @@ class ClientsStorage {
 
 	removeClient( id )
 	{
-		let client = this.findClientById( id );
+		let client = SearchEngine.findByUniqueID( this.clients, id );
 		if( client !== false && client !== -1 )
 		{
+			if( this.clients.status >= ClientStatus.inLobby )
+			{
+				this.clients[ client ].leaveLobby();
+			}
 			if( this.clients.status >= ClientStatus.named )
 			{
 				this.uniqueNameStorage.removeName( this.clients[ client ].name )
@@ -46,22 +52,14 @@ class ClientsStorage {
 		return this.uniqueNameStorage.removeName( name );
 	}
 
-	findClientById( id )
+	listAvailableGames()
 	{
-		if( !id instanceof Buffer )
-		{
-			console.log( 'ID must be a buffer!' );
-			return false;
-		}
-		console.log( 'Looking for client with id: ' + id.toString( 'hex' ) );
-		for( let i = 0 ; i < this.clients.length ; i++ )
-		{
-			if( this.clients[ i ].id.compare( id ) === 0 )
-			{
-				return i;
-			}
-		}
-		return -1;
+		return this.roomsStorage.listAvailableGames();
+	}
+
+	addRoom( settings, client )
+	{
+		return this.roomsStorage.addRoom( settings, client );
 	}
 
 }

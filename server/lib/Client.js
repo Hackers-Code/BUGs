@@ -1,6 +1,4 @@
-'use strict';
-const Request = require( './Request' );
-const Response = require( './Response' );
+
 class Client {
 	constructor( socket, clientsStorage )
 	{
@@ -18,86 +16,8 @@ class Client {
 		this.socket.on( 'data', this.request.handleRequest.bind( this.request ) );
 		this.socket.on( 'error', function()
 		{
-			console.log( 'error' );
 		} );
 		this.socket.on( 'close', this.handleSocketClose.bind( this ) );
-	}
-
-	handleSocketClose()
-	{
-		console.log( 'Disconnected ' + this.socket.remoteAddress + ', socket id: ' + this.socket.id );
-	}
-
-	disconnect()
-	{
-		this.clientsStorage.removeName( this.name );
-		this.clientsStorage.removeClient( this.socket.id );
-		this.socket.end();
-	}
-
-	setID()
-	{
-		this.id = this.clientsStorage.generateId();
-		this.response.send( {
-			opcode : 0x2,
-			id : this.id
-		} );
-	}
-
-	getID()
-	{
-		return this.id;
-	}
-
-	setName( data )
-	{
-		let status = 0;
-		if( this.clientsStorage.addName( data.nick ) )
-		{
-			if( this.hasCustomName === true )
-			{
-				!this.clientsStorage.removeName( this.name );
-			}
-			this.name = data.nick;
-			this.hasCustomName = true;
-			status = 1;
-		}
-		this.response.send( {
-			opcode : 0x4,
-			status : Buffer.from( [ status ] )
-		} );
-	}
-
-	listGames()
-	{
-		let retval = this.clientsStorage.listAvailableGames();
-		retval.opcode = 0x6;
-		this.response.send( retval );
-	}
-
-	createRoom( data )
-	{
-		let status = 0;
-		if( this.room === null )
-		{
-			let room = this.clientsStorage.addRoom( {
-				name : data.roomName,
-				password : data.password
-			}, this );
-			if( room !== false )
-			{
-				this.room = room;
-				status = 1;
-			}
-		}
-		else
-		{
-			console.log( 'You are already in room!' );
-		}
-		this.response.send( {
-			opcode : 0x8,
-			status : Buffer.from( [ status ] )
-		} );
 	}
 
 	setRoomSettings( data )
@@ -115,7 +35,7 @@ class Client {
 		}
 		else
 		{
-			console.log( 'You need to create a room first!' );
+
 		}
 		this.response.send( {
 			opcode : 0xA,
@@ -145,7 +65,7 @@ class Client {
 		}
 		else
 		{
-			console.log( 'You are in a room already!' );
+
 		}
 		retval.status = Buffer.from( [ retval.status ] );
 		this.response.send( retval );
@@ -162,7 +82,7 @@ class Client {
 		}
 		else
 		{
-			console.log( 'You need to join game first!' );
+
 		}
 	}
 
@@ -176,7 +96,7 @@ class Client {
 		}
 		else
 		{
-			console.log( 'You need to join game first!' );
+
 		}
 	}
 
@@ -194,7 +114,7 @@ class Client {
 		}
 		else
 		{
-			console.log( 'You need to join game first!' );
+
 		}
 	}
 
@@ -211,7 +131,7 @@ class Client {
 		}
 		else
 		{
-			console.log( 'You need to join game first!' );
+
 		}
 	}
 
@@ -223,7 +143,7 @@ class Client {
 		}
 		else
 		{
-			console.log( 'You need to join game first and wait for your move!' );
+
 		}
 	}
 
@@ -235,7 +155,7 @@ class Client {
 		}
 		else
 		{
-			console.log( 'You need to join game first and wait for your move!' );
+
 		}
 	}
 
@@ -247,7 +167,6 @@ class Client {
 		}
 		else
 		{
-			console.log( 'You need to join game first and wait for your move!' );
 		}
 	}
 }

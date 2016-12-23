@@ -1,6 +1,5 @@
 'use strict';
-const MapParser = require( './MapParser' );
-const Worm = require( './Worm' );
+const Worm = require( './Game/Worm' );
 
 class Game {
 	constructor()
@@ -130,11 +129,6 @@ class Game {
 				let worm = this.worms[ i ];
 				if( worm.speedY < 0 )
 				{
-					console.log( 'jumping' );
-					console.log( this.checkCollisionTop( worm.y, worm.x ) );
-					console.log( !this.checkCollisionBottom( worm.y, worm.height, worm.x ) );
-					console.log( worm.y );
-					console.log( worm.y + worm.speedY * (diffTime / 1000) );
 				}
 				if( this.checkCollisionTop( worm.y, worm.x ) )
 				{

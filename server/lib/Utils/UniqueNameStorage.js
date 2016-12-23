@@ -4,6 +4,8 @@ class UniqueNameStorage {
 	{
 		this.nameLength = length;
 		this.storedNames = [];
+		this.defaultName = Buffer.alloc( this.nameLength );
+		this.defaultName.write( 'Anonymous', 0 );
 	}
 
 	addName( name )
@@ -38,6 +40,10 @@ class UniqueNameStorage {
 
 	isUnique( name )
 	{
+		if( name.compare( this.defaultName ) === 0 )
+		{
+			return false;
+		}
 		for( let i = 0 ; i < this.storedNames.length ; i++ )
 		{
 			if( name.compare( this.storedNames[ i ] ) === 0 )

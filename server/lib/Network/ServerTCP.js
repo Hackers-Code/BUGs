@@ -4,7 +4,8 @@ const RoomsStorage = require( './RoomsStorage' );
 class ServerTCP {
 	constructor( options )
 	{
-		this.clientsStorage = new ClientsStorage();
+		this.roomsStorage = new RoomsStorage();
+		this.clientsStorage = new ClientsStorage( this.roomsStorage );
 		this.server = net.createServer( ( socket ) =>
 		{
 			this.clientsStorage.addClient( socket );
