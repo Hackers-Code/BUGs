@@ -1,16 +1,15 @@
 'use strict';
 (function()
 {
-	console.log( 'Running server v. 1.0' );
-	console.log( 'Author: BOAKGP' );
 	try
 	{
-		const Server = require( './lib/Server' );
-		new Server();
+		const Server = require( './lib/Network/ServerTCP' );
+		new Server( {
+			host : '0.0.0.0',
+			port : 31337
+		} );
 	}
 	catch( e )
 	{
-		console.log( 'Caught exception, more info:' );
-		console.log( e );
 	}
 })();
