@@ -13,7 +13,7 @@ class Client {
 		this.socket = socket;
 		this.id = id;
 		this.storage = storage;
-		this.rooms = storage.roomsStorage;
+		this.roomsStorage = storage.roomsStorage;
 		this.status = ClientStatus.connected;
 		this.name = Buffer.alloc( 20 );
 		this.response = new Response( socket );
@@ -72,6 +72,14 @@ class Client {
 		return false;
 	}
 
+	leaveRoom()
+	{
+		if( this.status === ClientStatus.inLobby )
+		{
+			this.leaveLobby();
+		}
+	}
+
 	leaveLobby()
 	{
 		if( this.room !== null )
@@ -82,96 +90,53 @@ class Client {
 		return false;
 	}
 
-	joinGame( params, client )
+	setRoomConfig( data )
 	{
-		return this.roomsStorage.joinGame( params, client );
+		if( this.room !== null )
+		{
+			if( this.room.setConfig( this.id, {
+					mapID : data.mapID,
+					maxPlayers : data.maxPlayers
+				} ) )
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
-	/*TODO:Variables that might be useful
-	 this.confirmedGame = false;
-	 this.mapLoaded = false;
-	 this.isYourMove = false;
-	 */
+	joinGame( data )
+	{
+		if( this.room === null )
+		{
+			let room = this.roomsStorage.joinGame( data, this );
+			if( room !== false )
+			{
+				this.room = room;
+				return true;
+			}
+		}
+		return false
+	}
+
+	switchReady()
+	{
+		if( this.room !== null )
+		{
+			this.room.confirm( this.id );
+		}
+
+	}
+
+	listPlayers()
+	{
+		if( this.room !== null )
+		{
+			this.room.getPlayers();
+		}
+	}
+
 	/*TODO: Methods to implement
-	 setRoomSettings( data )
-	 {
-	 let status = 0;
-	 if( this.room !== null )
-	 {
-	 if( this.room.setConfig( this.id, {
-	 mapID : data.mapID,
-	 maxPlayers : data.maxPlayers
-	 } ) )
-	 {
-	 status = 1;
-	 }
-	 }
-	 else
-	 {
-
-	 }
-	 this.response.send( {
-	 opcode : 0xA,
-	 status : Buffer.from( [ status ] )
-	 } );
-	 }
-
-	 joinGame( data )
-	 {
-	 let retval = {
-	 opcode : 0x11,
-	 status : 0
-	 };
-	 if( this.room === null )
-	 {
-	 let room = this.clientsStorage.joinGame( {
-	 roomID : data.roomID,
-	 password : data.password
-	 }, this );
-	 if( room !== false )
-	 {
-	 this.room = room;
-	 retval.status = 1;
-	 retval.mapID = Buffer.alloc( 4 );
-	 retval.mapID.writeInt32BE( room.mapID, 0 );
-	 }
-	 }
-	 else
-	 {
-
-	 }
-	 retval.status = Buffer.from( [ retval.status ] );
-	 this.response.send( retval );
-	 }
-
-	 confirmGame()
-	 {
-	 if( this.room !== null )
-	 {
-	 this.confirmedGame = !this.confirmedGame;
-	 this.response.send( {
-	 opcode : 0x13
-	 } );
-	 }
-	 else
-	 {
-
-	 }
-	 }
-
-	 getPlayers()
-	 {
-	 if( this.room !== null )
-	 {
-	 let retval = this.room.getPlayers();
-	 retval.opcode = 0x16;
-	 this.response.send( retval );
-	 }
-	 else
-	 {
-
-	 }
-	 }
 
 	 getWorms()
 	 {
@@ -182,14 +147,8 @@ class Client {
 	 this.mapLoaded = true;
 	 }
 	 let retval = this.room.getWorms();
-	 retval.opcode = 0x18;
-	 this.response.send( retval );
 	 }
-	 else
-	 {
 
-	 }
-	 }
 
 	 getTimeLeft()
 	 {
@@ -202,10 +161,6 @@ class Client {
 	 seconds : seconds
 	 } );
 	 }
-	 else
-	 {
-
-	 }
 	 }
 
 	 jump()
@@ -213,10 +168,6 @@ class Client {
 	 if( this.room !== null && this.isYourMove === true )
 	 {
 	 this.room.jump();
-	 }
-	 else
-	 {
-
 	 }
 	 }
 
@@ -226,10 +177,6 @@ class Client {
 	 {
 	 this.room.switchMoveLeft();
 	 }
-	 else
-	 {
-
-	 }
 	 }
 
 	 switchMoveRight()
@@ -237,9 +184,6 @@ class Client {
 	 if( this.room !== null && this.isYourMove === true )
 	 {
 	 this.room.switchMoveRight();
-	 }
-	 else
-	 {
 	 }
 	 }
 	 */

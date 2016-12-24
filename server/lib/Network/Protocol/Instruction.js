@@ -25,7 +25,7 @@ const InstructionMap = {
 		type : InstructionTypes.client
 	},
 	0x04 : {
-		rule : 'reason:30',
+		rule : 'length:1;reason:length',
 		type : InstructionTypes.server
 	},
 	0x10 : {
@@ -45,6 +45,18 @@ const InstructionMap = {
 		response : 0x21
 	},
 	0x21 : {
+		rule : 'status:1',
+		type : InstructionTypes.server
+	},
+	0x22 : {},
+	0x23 : {},
+	0x24 : {
+		rule : 'map:4;players:1',
+		type : InstructionTypes.client,
+		callback : 'setRoomConfig',
+		response : 0x25
+	},
+	0x25 : {
 		rule : 'status:1',
 		type : InstructionTypes.server
 	},

@@ -1,69 +1,86 @@
+const MapInterface = require( './../MapInterface/MapInterface' );
+const World = require( './../MapInterface/MapInterface' );
 class Game {
-	constructor()
+	constructor( players )
 	{
-		this.players = [];
+		this.players = players;
+		this.world = null;
+		this.timeleft = 60;
+		this.lastClockTime = 0;
+		this.frames = 0;
+		this.lastFrameTime = 0;
+	}
+
+	loadMap( id )
+	{
+		MapInterface.getParsedMap( id, this.initWorld );
+	}
+
+	initWorld( err, data )
+	{
+		if( err )
+		{
+			throw err;
+		}
+		this.world = new World( data );
+	}
+
+	start()
+	{
+		this.lastFrameTime = new Date().getTime();
+		this.update();
+		this.whoseMove();
+	}
+
+	updateMove()
+	{
+		this.timeleft -= ((new Date().getTime() - this.lastClockTime) / 1000);
+		this.lastClockTime = new Date().getTime();
+		if( this.timeleft <= 0 )
+		{
+			this.players[ this.move ].response.send( {
+				opcode : 0x1c
+			} );
+			this.players[ this.move ].isYourMove = false;
+			this.move = ++this.move % this.players.length;
+			if( this.move === 0 )
+			{
+				this.worm = ++this.worm % this.wormsPerPlayer;
+			}
+			this.whoseMove();
+			return;
+		}
+		setTimeout( this.updateMove.bind( this ), 500 );
+	}
+
+	whoseMove()
+	{
+		let worm_id = Buffer.alloc( 1 );
+		worm_id.writeInt8( this.move * this.players.length + this.worm, 0 );
+		this.players[ this.move ].response.send( {
+			opcode : 0x19,
+			worm_id : worm_id
+		} );
+		this.players[ this.move ].isYourMove = true;
+		this.timeleft = 60;
+		this.lastClockTime = new Date().getTime();
+		this.updateMove();
+	}
+
+	getTimeLeft()
+	{
+		return parseInt( this.timeleft );
 	}
 }
 module.exports = Game;
 /*TODO:Variables that might be useful
- this.mapParser = new MapParser();
- this.players = [];
  this.worms = [];
  this.wormsPerPlayer = 5;
  this.maxFramesPerSecond = 300;
- this.lastFrameTime = 0;
  this.move = 0;
  this.worm = 0;
- this.timeleft = 60;
- this.lastClockTime = 0;
- this.frames = 0;
  */
 /*TODO:Methods to implement
- whoseMove()
- {
- let worm_id = Buffer.alloc( 1 );
- worm_id.writeInt8( this.move * this.players.length + this.worm, 0 );
- this.players[ this.move ].response.send( {
- opcode : 0x19,
- worm_id : worm_id
- } );
- this.players[ this.move ].isYourMove = true;
- this.timeleft = 60;
- this.lastClockTime = new Date().getTime();
- this.updateMove();
- }
-
- updateMove()
- {
- this.timeleft -= ((new Date().getTime() - this.lastClockTime) / 1000);
- this.lastClockTime = new Date().getTime();
- if( this.timeleft <= 0 )
- {
- this.players[ this.move ].response.send( {
- opcode : 0x1c
- } );
- this.players[ this.move ].isYourMove = false;
- this.move = ++this.move % this.players.length;
- if( this.move === 0 )
- {
- this.worm = ++this.worm % this.wormsPerPlayer;
- }
- this.whoseMove();
- return;
- }
- setTimeout( this.updateMove.bind( this ), 500 );
- }
-
- getTimeLeft()
- {
- return parseInt( this.timeleft );
- }
-
- loadMap( id )
- {
- this.mapParser.loadMap( id );
- }
-
  init( players )
  {
  this.players = players;
@@ -112,13 +129,6 @@ module.exports = Game;
  getWorms()
  {
  return this.wormsList;
- }
-
- start()
- {
- this.lastFrameTime = new Date().getTime();
- this.update();
- this.whoseMove();
  }
 
  update()
