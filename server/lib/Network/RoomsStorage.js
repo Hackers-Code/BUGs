@@ -73,14 +73,14 @@ class RoomsStorage {
 		}
 	}
 
-	joinGame( params, client )
+	joinRoom( params, client )
 	{
 		if( typeof params.roomID !== 'undefined' && typeof params.password !== 'undefined' )
 		{
 			let room = SearchEngine.findByUniqueID( this.rooms, params.roomID );
 			if( room !== false && room !== -1 )
 			{
-				if( this.rooms[ room ].joinGame( params.password, client ) )
+				if( this.rooms[ room ].joinRoom( params.password, client ) )
 				{
 					return this.rooms[ room ];
 				}

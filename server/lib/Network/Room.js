@@ -107,7 +107,20 @@ class Room {
 		return false;
 	}
 
-	joinGame( password, client )
+	setPhysics( id, physics )
+	{
+		if( this.status === Status.uninitialized )
+		{
+			if( id.compare( this.admin ) === 0 )
+			{
+				this.game.setPhysics( physics );
+				return true;
+			}
+		}
+		return false;
+	}
+
+	joinRoom( password, client )
 	{
 		if( this.status === Status.waitingForPlayers )
 		{

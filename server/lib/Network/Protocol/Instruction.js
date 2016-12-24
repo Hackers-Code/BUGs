@@ -48,8 +48,16 @@ const InstructionMap = {
 		rule : 'status:1',
 		type : InstructionTypes.server
 	},
-	0x22 : {},
-	0x23 : {},
+	0x22 : {
+		rule : 'gravity:2;jumpHeight:2;maxSpeedX:2;maxSpeedY:2',
+		type : InstructionTypes.client,
+		callback : 'setGamePhysics',
+		response : 0x22
+	},
+	0x23 : {
+		rule : 'status:1',
+		type : InstructionTypes.server
+	},
 	0x24 : {
 		rule : 'map:4;players:1',
 		type : InstructionTypes.client,
@@ -68,6 +76,22 @@ const InstructionMap = {
 	},
 	0x27 : {
 		rule : 'status:1',
+		type : InstructionTypes.server
+	},
+	0xe0 : {
+		rule : 'length:1;error:length',
+		type : InstructionTypes.server
+	},
+	0xe1 : {
+		rule : 'length:1;error:length',
+		type : InstructionTypes.server
+	},
+	0xe2 : {
+		rule : 'length:1;error:length',
+		type : InstructionTypes.server
+	},
+	0xe3 : {
+		rule : 'length:1;error:length',
 		type : InstructionTypes.server
 	}
 };

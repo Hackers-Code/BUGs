@@ -56,6 +56,24 @@ describe( 'TCP Server', function()
 			client.close();
 		} );
 	} );
+	it( 'server should respond for 0x22 in correct format', function( done )
+	{
+		let client = require( 'net' ).createConnection( 31337, '185.84.136.151' );
+		client.write( '2200ff00ff00ff00ff', 'hex' );
+		client.on( 'data', ( data ) =>
+		{
+			let regexp = new RegExp( `^\x23(\x00|\x01)$` );
+			if( regexp.test( data.toString() ) )
+			{
+				done();
+			}
+			else
+			{
+				done( new Error() );
+			}
+			client.close();
+		} );
+	} );
 	it( 'server should respond for 0x24 in correct format', function( done )
 	{
 		let client = require( 'net' ).createConnection( 31337, '185.84.136.151' );

@@ -9,6 +9,18 @@ class Game {
 		this.lastClockTime = 0;
 		this.frames = 0;
 		this.lastFrameTime = 0;
+		this.gravity = 475;
+		this.maxSpeedX = 100;
+		this.maxSpeedY = 875;
+		this.jumpHeight = -300;
+	}
+
+	setPhysics( physics )
+	{
+		this.gravity = physics.gravity;
+		this.maxSpeedX = physics.maxSpeedX;
+		this.maxSpeedY = physics.maxSpeedY;
+		this.jumpHeight = physics.jumpHeight;
 	}
 
 	loadMap( id )

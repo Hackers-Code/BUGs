@@ -105,11 +105,11 @@ class Client {
 		return false;
 	}
 
-	joinGame( data )
+	joinRoom( data )
 	{
 		if( this.room === null )
 		{
-			let room = this.roomsStorage.joinGame( data, this );
+			let room = this.roomsStorage.joinRoom( data, this );
 			if( room !== false )
 			{
 				this.room = room;
@@ -117,6 +117,18 @@ class Client {
 			}
 		}
 		return false
+	}
+
+	setGamePhysics( data )
+	{
+		if( this.room !== null )
+		{
+			if( this.room.setPhysics( this.id, data ) )
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	switchReady()

@@ -19,7 +19,14 @@ class Response {
 		}
 		else
 		{
-			this.socket.write( Buffer.from( [ 0xe2, 0 ] ) );
+			let error = 'Could not parse response, please try again later.';
+			this.socket.write( Buffer.concat( [
+				Buffer.from( [
+					0xe2,
+					error.length
+				] ),
+				Buffer.from( error )
+			] ) );
 		}
 	}
 }
