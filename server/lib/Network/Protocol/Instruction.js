@@ -60,6 +60,16 @@ const InstructionMap = {
 		rule : 'status:1',
 		type : InstructionTypes.server
 	},
+	0x26 : {
+		rule : 'map:4;length:1;password:length',
+		type : InstructionTypes.client,
+		callback : 'joinRoom',
+		response : 0x27
+	},
+	0x27 : {
+		rule : 'status:1',
+		type : InstructionTypes.server
+	}
 };
 module.exports.Map = InstructionMap;
 module.exports.Types = InstructionTypes;

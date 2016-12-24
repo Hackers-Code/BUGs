@@ -1,6 +1,5 @@
 'use strict';
 const chai = require( 'chai' );
-const expect = chai.expect;
 
 describe( 'TCP Server', function()
 {
@@ -36,6 +35,61 @@ describe( 'TCP Server', function()
 			{
 				done( new Error() );
 			}
+			client.close();
+		} );
+	} );
+	it( 'server should respond for 0x20 in correct format', function( done )
+	{
+		let client = require( 'net' ).createConnection( 31337, '185.84.136.151' );
+		client.write( '2041414141414141414141414141414141414141410141', 'hex' );
+		client.on( 'data', ( data ) =>
+		{
+			let regexp = new RegExp( `^\x21(\x00|\x01)$` );
+			if( regexp.test( data.toString() ) )
+			{
+				done();
+			}
+			else
+			{
+				done( new Error() );
+			}
+			client.close();
+		} );
+	} );
+	it( 'server should respond for 0x24 in correct format', function( done )
+	{
+		let client = require( 'net' ).createConnection( 31337, '185.84.136.151' );
+		client.write( '240000000102', 'hex' );
+		client.on( 'data', ( data ) =>
+		{
+			let regexp = new RegExp( `^\x25(\x00|\x01)$` );
+			if( regexp.test( data.toString() ) )
+			{
+				done();
+			}
+			else
+			{
+				done( new Error() );
+			}
+			client.close();
+		} );
+	} );
+	it( 'server should respond for 0x26 in correct format', function( done )
+	{
+		let client = require( 'net' ).createConnection( 31337, '185.84.136.151' );
+		client.write( '26b2b2b2b20141', 'hex' );
+		client.on( 'data', ( data ) =>
+		{
+			let regexp = new RegExp( `^\x27(\x00|\x01)$` );
+			if( regexp.test( data.toString() ) )
+			{
+				done();
+			}
+			else
+			{
+				done( new Error() );
+			}
+			client.close();
 		} );
 	} );
 } );
@@ -47,9 +101,8 @@ describe( 'UDP Server', function()
 		let client = require( 'dgram' ).createSocket( 'udp4' );
 		client.bind( 31337 );
 		client.send( Buffer.from( '01', 'hex' ), 31337, '185.84.136.151' );
-		client.on( 'message', ( data ) =>
+		client.on( 'message', () =>
 		{
-			console.log( data );
 			done();
 		} );
 	} );

@@ -6,7 +6,6 @@ class ServerUDP {
 		this.server.bind( port );
 		this.server.on( 'message', ( data, rinfo ) =>
 		{
-			console.log( rinfo );
 			this.server.send( Buffer.from( '00010101', 'hex' ), rinfo.port, rinfo.address );
 		} );
 	}
