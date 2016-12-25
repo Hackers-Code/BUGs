@@ -52,7 +52,7 @@ const InstructionMap = {
 		rule : 'gravity:2;jumpHeight:2;maxSpeedX:2;maxSpeedY:2',
 		type : InstructionTypes.client,
 		callback : 'setGamePhysics',
-		response : 0x22
+		response : 0x23
 	},
 	0x23 : {
 		rule : 'status:1',

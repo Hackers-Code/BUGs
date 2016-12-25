@@ -1,13 +1,17 @@
 const dgram = require( 'dgram' );
 class ServerUDP {
-	constructor( port )
+	constructor( reject, options )
 	{
 		this.server = dgram.createSocket( 'udp4' );
-		this.server.bind( port );
 		this.server.on( 'message', ( data, rinfo ) =>
 		{
-			this.server.send( Buffer.from( '00010101', 'hex' ), rinfo.port, rinfo.address );
+
 		} );
+		this.server.on( 'error', ( err ) =>
+		{
+			reject( err.message );
+		} );
+		this.server.bind( options.port );
 	}
 }
 module.exports = ServerUDP;
