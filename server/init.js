@@ -15,18 +15,20 @@ const ConfigManager = require( './lib/App/ConfigManager' );
 			if( answer === 'N' )
 			{
 				console.log( 'Config creating aborted by user.' );
+				rl.close();
 			}
 			else if( answer === 'Y' )
 			{
 				config.create( handleConfigCreate );
+				rl.close();
 			}
 		} );
 	}
 	else
 	{
 		config.create( handleConfigCreate );
+		rl.close();
 	}
-	rl.close();
 })();
 
 function handleConfigCreate( err )
