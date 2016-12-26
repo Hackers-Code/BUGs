@@ -23,7 +23,7 @@ class Logger {
 			{
 				return;
 			}
-			data = Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + ']' + data );
+			data = Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + ']' + data + '\n' );
 			fs.write( fd, data, 0, data.length, 0, () =>
 			{
 			} );
@@ -38,7 +38,7 @@ class Logger {
 			{
 				return;
 			}
-			data = Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + ']' + data );
+			data = Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + ']' + data + '\n' );
 			fs.write( fd, data, 0, data.length, 0, () =>
 			{
 			} );
