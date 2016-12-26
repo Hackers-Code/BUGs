@@ -1,9 +1,12 @@
 const fs = require( 'fs' );
+const path = require( 'path' );
 class Logger {
 	constructor( logFile, errorFile )
 	{
 		this.logFile = logFile;
 		this.errorFile = errorFile;
+		fs.mkdirSync( path.dirname( this.logFile ) );
+		fs.mkdirSync( path.dirname( this.errorFile ) );
 	}
 
 	log( data )
