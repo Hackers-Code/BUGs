@@ -5,8 +5,14 @@ class Logger {
 	{
 		this.logFile = logFile;
 		this.errorFile = errorFile;
-		fs.mkdirSync( path.dirname( this.logFile ) );
-		fs.mkdirSync( path.dirname( this.errorFile ) );
+		if( !fs.existsSync( path.dirname( this.logFile ) ) )
+		{
+			fs.mkdirSync( path.dirname( this.logFile ) );
+		}
+		if( !fs.existsSync( path.dirname( this.errorFile ) ) )
+		{
+			fs.mkdirSync();
+		}
 	}
 
 	log( data )
