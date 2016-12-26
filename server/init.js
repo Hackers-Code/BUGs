@@ -26,6 +26,7 @@ const ConfigManager = require( './lib/App/ConfigManager' );
 	{
 		config.create( handleConfigCreate );
 	}
+	rl.close();
 })();
 
 function handleConfigCreate( err )
