@@ -18,12 +18,23 @@ const ConfigManager = require( './lib/App/ConfigManager' );
 			}
 			else if( answer === 'Y' )
 			{
-				config.create();
+				config.create( handleConfigCreate );
 			}
 		} );
 	}
 	else
 	{
-		config.create();
+		config.create( handleConfigCreate );
 	}
 })();
+
+function handleConfigCreate( err )
+{
+	if( err )
+	{
+		console.log( 'Config file could not be created' );
+		console.log( err.message );
+		return;
+	}
+	console.log( 'File successfully created' );
+}
