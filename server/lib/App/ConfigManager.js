@@ -10,14 +10,14 @@ class ConfigManager {
 		return fs.existsSync( this.path );
 	}
 
-	create( callback )
+	create()
 	{
 		let defaultConfig = {
 			log_file : process.cwd() + '/logs/log.txt',
 			error_file : process.cwd() + '/logs/error.txt',
 			max_clients : 3
 		};
-		fs.writeFile( this.path, JSON.stringify( defaultConfig ), callback );
+		fs.writeFileSync( this.path, JSON.stringify( defaultConfig ) );
 	}
 }
 module.exports = ConfigManager;
