@@ -10,7 +10,7 @@ const ConfigManager = require( './lib/App/ConfigManager' );
 	let config = new ConfigManager();
 	if( config.exist() )
 	{
-		rl.question( 'Config file already exist. Create anyway? Old data will be deleted. Y/N', ( answer ) =>
+		rl.question( 'Config file already exist. Create anyway? Old data will be deleted. (Y/N) : ', ( answer ) =>
 		{
 			if( answer === 'N' )
 			{
