@@ -4,9 +4,9 @@ const rl = readline.createInterface( {
 	input : process.stdin,
 	output : process.stdout
 } );
+const ConfigManager = require( './lib/App/ConfigManager' );
 (function()
 {
-	const ConfigManager = require( './lib/App/ConfigManager' );
 	let config = new ConfigManager();
 	if( config.exist() )
 	{
