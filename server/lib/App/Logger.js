@@ -15,34 +15,19 @@ class Logger {
 		}
 	}
 
-	log( data )
+	log( data, path )
 	{
-		fs.open( this.logFile, 'a+', ( err, fd ) =>
+		if( typeof path === 'undefined' )
 		{
-			if( err )
-			{
-				return;
-			}
-			data = Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + ']' + data + '\n' );
-			fs.write( fd, data, 0, data.length, 0, () =>
-			{
-			} );
-		} );
+			path = this.logFile;
+		}
+		data = Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + ']' + data + '\n' );
+		fs.appendFileSync( path, data );
 	}
 
 	error( data )
 	{
-		fs.open( this.errorFile, 'a+', ( err, fd ) =>
-		{
-			if( err )
-			{
-				return;
-			}
-			data = Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + ']' + data + '\n' );
-			fs.write( fd, data, 0, data.length, 0, () =>
-			{
-			} );
-		} );
+		this.log( data, this.errorFile );
 	}
 }
 module.exports = Logger;
