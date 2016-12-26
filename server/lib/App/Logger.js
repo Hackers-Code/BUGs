@@ -21,7 +21,7 @@ class Logger {
 		{
 			path = this.logFile;
 		}
-		data = Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + ']' + data + '\n' );
+		data = Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + '] ' + data + '\n' );
 		fs.appendFileSync( path, data );
 	}
 
