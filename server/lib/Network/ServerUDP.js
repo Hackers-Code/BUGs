@@ -1,7 +1,10 @@
 const dgram = require( 'dgram' );
 class ServerUDP {
-	constructor( reject, options, logger )
+	constructor( reject, app )
 	{
+		this.logger = app.logger;
+		this.options = app.config.tcp;
+		this.clients = app.clientsStorage;
 		this.server = dgram.createSocket( 'udp4' );
 		this.server.on( 'message', ( data, rinfo ) =>
 		{
@@ -14,10 +17,10 @@ class ServerUDP {
 		this.server.on( 'listening', () =>
 		{
 			let address = this.server.address();
-			logger.log( `UDP server listening on ${address.address}:${address.port}` );
+			this.logger.log( `UDP server listening on ${address.address}:${address.port}` );
 		} );
 
-		this.server.bind( options.port );
+		this.server.bind( this.options );
 	}
 }
 module.exports = ServerUDP;
