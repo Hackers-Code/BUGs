@@ -17,6 +17,7 @@ describe( 'TCP Server', function()
 			{
 				done( new Error() );
 			}
+			client.close();
 		} );
 	} );
 	it( 'server should respond for 0x10 in correct format', function( done )
