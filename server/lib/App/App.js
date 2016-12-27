@@ -47,7 +47,7 @@ class App {
 				return;
 			}
 			this.servers[ index ].lastError = err;
-			this.runServer( type, config, index );
+			this.runServer( type, options, index );
 		} );
 	}
 }
