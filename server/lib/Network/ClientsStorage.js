@@ -5,18 +5,23 @@ const Client = require( './Client' ).Client;
 const ClientStatus = require( './Client' ).ClientStatus;
 const SearchEngine = require( './../Utils/SearchEngine' );
 class ClientsStorage {
-	constructor( roomsStorage )
+	constructor( app )
 	{
+		this.app = app;
+		this.maxClients = this.app.config.max_clients;
 		this.clients = [];
-		this.roomsStorage = roomsStorage;
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
-		this.uniqueNameStorage = new UniqueNameStorage( 20 );
+		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
 	}
 
 	addClient( socket )
 	{
+		if( this.clients.length >= this.maxClients )
+		{
+			return false;
+		}
 		let id = this.uniqueKeyGenerator.generateKey();
-		let client = new Client( socket, id, this );
+		let client = new Client( socket, id, this.app );
 		this.clients.push( client );
 	}
 
@@ -25,6 +30,7 @@ class ClientsStorage {
 		let client = SearchEngine.findByUniqueID( this.clients, id );
 		if( client !== false && client !== -1 )
 		{
+			if( this.clients.status >= ClientStatus.inGame )
 			if( this.clients.status >= ClientStatus.inLobby )
 			{
 				this.clients[ client ].leaveLobby();

@@ -15,8 +15,8 @@ class App {
 		{
 			console.log( 'Could not read or parse config file' );
 		}
-		this.roomsStorage = new RoomsStorage();
-		this.clientsStorage = new ClientsStorage();
+		this.roomsStorage = new RoomsStorage( this );
+		this.clientsStorage = new ClientsStorage( this );
 		this.logger = new Logger( this.config.log_file, this.config.error_file );
 		this.tcp = {
 			socket : null,
@@ -38,7 +38,7 @@ class App {
 	{
 		let tcp = new Promise( ( resolve, reject ) =>
 		{
-			this.tcp.socket = new TCP( reject, this.config.tcp, this.logger );
+			this.tcp.socket = new TCP( reject, this );
 		} );
 		tcp.catch( ( err ) =>
 		{
@@ -57,7 +57,7 @@ class App {
 	{
 		let udp = new Promise( ( resolve, reject ) =>
 		{
-			this.udp.socket = new UDP( reject, this.config.udp, this.logger );
+			this.udp.socket = new UDP( reject, this );
 		} );
 		udp.catch( ( err ) =>
 		{

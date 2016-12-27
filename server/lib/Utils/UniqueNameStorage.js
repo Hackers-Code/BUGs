@@ -1,11 +1,11 @@
 'use strict';
 class UniqueNameStorage {
-	constructor( length )
+	constructor( length, defaultName )
 	{
 		this.nameLength = length;
 		this.storedNames = [];
 		this.defaultName = Buffer.alloc( this.nameLength );
-		this.defaultName.write( 'Anonymous', 0 );
+		this.defaultName.write( defaultName, 0 );
 	}
 
 	addName( name )

@@ -8,12 +8,12 @@ const ClientStatus = {
 const Request = require( './Request' );
 const Response = require( './Response' );
 class Client {
-	constructor( socket, id, storage )
+	constructor( socket, id, app )
 	{
 		this.socket = socket;
 		this.id = id;
-		this.storage = storage;
-		this.roomsStorage = storage.roomsStorage;
+		this.clientsStorage = app.clientsStorage;
+		this.roomsStorage = app.roomsStorage;
 		this.status = ClientStatus.connected;
 		this.name = Buffer.alloc( 20 );
 		this.response = new Response( socket );
@@ -28,17 +28,17 @@ class Client {
 		} );
 		this.socket.on( 'close', () =>
 		{
-			this.storage.removeClient( this.id );
+			this.clientsStorage.removeClient( this.id );
 		} );
 	}
 
 	setName( data )
 	{
-		if( this.storage.addName( data.nick ) )
+		if( this.clientsStorage.addName( data.nick ) )
 		{
 			if( this.status === ClientStatus.named )
 			{
-				if( !this.storage.removeName( this.name ) )
+				if( !this.clientsStorage.removeName( this.name ) )
 				{
 					return false;
 				}

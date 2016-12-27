@@ -9,7 +9,7 @@ class RoomsStorage {
 		this.availableGamesResponse = null;
 		this.rooms = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
-		this.uniqueNameStorage = new UniqueNameStorage( 20 );
+		this.uniqueNameStorage = new UniqueNameStorage( 20, '' );
 		this.getAvailableGames();
 	}
 

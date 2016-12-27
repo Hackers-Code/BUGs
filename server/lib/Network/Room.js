@@ -11,13 +11,13 @@ const SearchEngine = require( './../Utils/SearchEngine' );
 const Game = require( './../Game/Game' );
 const Player = require( './../Game/Player' );
 class Room {
-	constructor( settings, client, id, storage )
+	constructor( settings, client, id, roomsStorage )
 	{
 		this.id = id;
 		this.name = settings.name;
 		this.password = settings.password;
 		this.admin = client.id;
-		this.storage = storage;
+		this.roomsStorage = roomsStorage;
 		this.players = [];
 		this.players.push( new Player( client ) );
 		this.status = Status.uninitialized;
@@ -68,6 +68,10 @@ class Room {
 			if( index !== false && index !== -1 )
 			{
 				this.players.splice( index, 1 );
+				if( this.players.length === 0 )
+				{
+					this.roomsStorage.removeRoom( this.id );
+				}
 			}
 		}
 
