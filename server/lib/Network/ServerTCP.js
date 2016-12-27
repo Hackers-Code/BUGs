@@ -18,6 +18,7 @@ class ServerTCP {
 					length : Buffer.from( [ error.length ] ),
 					error : Buffer.from( error )
 				} );
+				socket.end();
 			}
 		} ).on( 'error', ( err ) =>
 		{

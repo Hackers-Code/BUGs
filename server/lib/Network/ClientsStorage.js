@@ -8,7 +8,7 @@ class ClientsStorage {
 	constructor( app )
 	{
 		this.app = app;
-		this.maxClients = this.app.config.max_clients;
+		this.maxClients = app.config.max_clients;
 		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
@@ -16,6 +16,7 @@ class ClientsStorage {
 
 	addClient( socket )
 	{
+		console.log( 'CONN:' + this.clients.length );
 		if( this.clients.length >= this.maxClients )
 		{
 			return false;
@@ -23,6 +24,7 @@ class ClientsStorage {
 		let id = this.uniqueKeyGenerator.generateKey();
 		let client = new Client( socket, id, this.app );
 		this.clients.push( client );
+		return true;
 	}
 
 	removeClient( id )
@@ -31,9 +33,11 @@ class ClientsStorage {
 		if( client !== false && client !== -1 )
 		{
 			if( this.clients.status >= ClientStatus.inGame )
-			if( this.clients.status >= ClientStatus.inLobby )
 			{
-				this.clients[ client ].leaveLobby();
+				if( this.clients.status >= ClientStatus.inLobby )
+				{
+					this.clients[ client ].leaveLobby();
+				}
 			}
 			if( this.clients.status >= ClientStatus.named )
 			{
@@ -41,11 +45,10 @@ class ClientsStorage {
 			}
 			this.uniqueKeyGenerator.freeKey( this.clients[ client ].id );
 			this.clients.splice( client, 1 );
+			console.log( 'DISCONN' + this.clients.length );
+			return true;
 		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 
 	addName( name )

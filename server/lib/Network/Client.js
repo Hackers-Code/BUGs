@@ -23,7 +23,7 @@ class Client {
 		{
 			this.request.handleRequest( data );
 		} );
-		this.socket.on( 'error', () =>
+		this.socket.on( 'error', ( err ) =>
 		{
 		} );
 		this.socket.on( 'close', () =>
