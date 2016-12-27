@@ -4,10 +4,6 @@ const RoomsStorage = require( './../Network/RoomsStorage' );
 const ClientsStorage = require( './../Network/ClientsStorage' );
 const Logger = require( './Logger' );
 const fs = require( 'fs' );
-const Indexes = {
-	TCP : 0,
-	UDP : 1
-};
 class App {
 	constructor()
 	{
@@ -22,32 +18,57 @@ class App {
 		this.roomsStorage = new RoomsStorage();
 		this.clientsStorage = new ClientsStorage();
 		this.logger = new Logger( this.config.log_file, this.config.error_file );
-		this.servers = [];
+		this.tcp = {
+			socket : null,
+			lastError : null
+		};
+		this.udp = {
+			socket : null,
+			lastError : null
+		};
 	}
 
 	run()
 	{
-		this.runServer( TCP, this.config.tcp, Indexes.TCP );
-		this.runServer( UDP, this.config.udp, Indexes.UDP );
+		this.runTCP();
+		this.runUDP();
 	}
 
-	runServer( type, options, index )
+	runTCP()
 	{
-		let server = new Promise( ( resolve, reject ) =>
+		let tcp = new Promise( ( resolve, reject ) =>
 		{
-			this.servers[ index ].socket = new type( reject, options, this.logger );
-			this.servers[ index ].lastError = null;
+			this.tcp.socket = new TCP( reject, this.config.tcp, this.logger );
 		} );
-		server.catch( ( err ) =>
+		tcp.catch( ( err ) =>
 		{
 			this.logger.error( err );
-			if( err === this.servers[ index ].lastError )
+			if( err === this.tcp.lastError )
 			{
 				this.logger.error( 'Server shut down due to infinite loop' );
 				return;
 			}
-			this.servers[ index ].lastError = err;
-			this.runServer( type, options, index );
+			this.tcp.lastError = err;
+			this.runTCP();
+		} );
+	}
+
+	runUDP()
+	{
+		let udp = new Promise( ( resolve, reject ) =>
+		{
+			this.udp.socket = new UDP( reject, this.config.udp, this.logger );
+		} );
+		udp.catch( ( err ) =>
+		{
+			this.logger.error( err );
+			if( err === this.tcp.lastError )
+			{
+				this.logger.error( 'Server shut down due to infinite loop' );
+				return;
+			}
+			this.udp.lastError = err;
+			this.runUDP();
 		} );
 	}
 }
