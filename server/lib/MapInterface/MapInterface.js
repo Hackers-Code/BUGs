@@ -1,6 +1,7 @@
 'use strict';
 const MapLoader = require( './MapLoader' );
 const MapParser = require( './MapParser' );
+const fs = require( 'fs' );
 const MapInterface = {
 
 	getParsedMap : function( id, callback )
@@ -18,6 +19,11 @@ const MapInterface = {
 			}
 			callback( void 0, MapParser.parse( data ) );
 		} );
+	},
+
+	mapExists : function( id )
+	{
+		return fs.existsSync( __dirname + '/maps/' + id + '.map' );
 	}
 };
 module.exports = MapInterface;

@@ -66,7 +66,7 @@ class Request {
 			}
 			else
 			{
-				let error = `Unknown instruction (${data[ 0 ]})`;
+				let error = `Unknown instruction (${parseInt( data[ 0 ], 16 )})`;
 				this.client.response.send( {
 					opcode : 0xe0,
 					length : Buffer.from( [ error.length ] ),

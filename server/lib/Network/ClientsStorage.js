@@ -45,7 +45,6 @@ class ClientsStorage {
 			}
 			this.uniqueKeyGenerator.freeKey( this.clients[ client ].id );
 			this.clients.splice( client, 1 );
-			console.log( 'DISCONN' + this.clients.length );
 			return true;
 		}
 		return false;

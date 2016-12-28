@@ -6,10 +6,10 @@ const Status = {
 	waitingForConfirming : 2,
 	inGame : 3
 };
-const fs = require( 'fs' );
 const SearchEngine = require( './../Utils/SearchEngine' );
 const Game = require( './../Game/Game' );
 const Player = require( './../Game/Player' );
+const MapInterface = require( './../MapInterface/MapInterface' );
 class Room {
 	constructor( settings, client, id, roomsStorage )
 	{
@@ -33,7 +33,7 @@ class Room {
 		{
 			if( id == this.admin )
 			{
-				this.storage.removeRoom( this.id );
+				this.roomsStorage.removeRoom( this.id );
 				let adminIndex = SearchEngine.findByUniqueID( this.players, id );
 				if( adminIndex !== false && adminIndex !== -1 )
 				{
@@ -100,7 +100,7 @@ class Room {
 			{
 				this.maxPlayers = config.maxPlayers.readInt8( 0 );
 				this.mapID = config.mapID.readInt32BE( 0 );
-				if( !fs.existsSync( __dirname + '/../maps/' + this.mapID + '.map' ) )
+				if( !MapInterface.mapExists( this.mapID ) )
 				{
 					return false;
 				}

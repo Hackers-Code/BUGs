@@ -95,8 +95,8 @@ class Client {
 		if( this.room !== null )
 		{
 			if( this.room.setConfig( this.id, {
-					mapID : data.mapID,
-					maxPlayers : data.maxPlayers
+					mapID : data.map,
+					maxPlayers : data.players
 				} ) )
 			{
 				return true;
@@ -148,57 +148,29 @@ class Client {
 		}
 	}
 
-	/*TODO: Methods to implement
+	jump()
+	{
+		if( this.room !== null && this.isYourMove === true )
+		{
+			this.room.jump();
+		}
+	}
 
-	 getWorms()
-	 {
-	 if( this.room !== null )
-	 {
-	 if( this.mapLoaded === false )
-	 {
-	 this.mapLoaded = true;
-	 }
-	 let retval = this.room.getWorms();
-	 }
+	switchMoveLeft()
+	{
+		if( this.room !== null && this.isYourMove === true )
+		{
+			this.room.switchMoveLeft();
+		}
+	}
 
-
-	 getTimeLeft()
-	 {
-	 if( this.room !== null )
-	 {
-	 let seconds = Buffer.alloc( 1 );
-	 seconds.writeUInt8( this.room.getTimeLeft(), 0 );
-	 this.response.send( {
-	 opcode : 0x1b,
-	 seconds : seconds
-	 } );
-	 }
-	 }
-
-	 jump()
-	 {
-	 if( this.room !== null && this.isYourMove === true )
-	 {
-	 this.room.jump();
-	 }
-	 }
-
-	 switchMoveLeft()
-	 {
-	 if( this.room !== null && this.isYourMove === true )
-	 {
-	 this.room.switchMoveLeft();
-	 }
-	 }
-
-	 switchMoveRight()
-	 {
-	 if( this.room !== null && this.isYourMove === true )
-	 {
-	 this.room.switchMoveRight();
-	 }
-	 }
-	 */
+	switchMoveRight()
+	{
+		if( this.room !== null && this.isYourMove === true )
+		{
+			this.room.switchMoveRight();
+		}
+	}
 }
 
 module.exports.Client = Client;
