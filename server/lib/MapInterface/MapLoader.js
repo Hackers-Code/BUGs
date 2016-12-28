@@ -8,7 +8,7 @@ const MapLoader = {
 		{
 			throw new Error( 'Map ID must be valid UInt32' );
 		}
-		let mapDir = `${__dirname}/../../maps/${mapID}.map`;
+		let mapDir = __dirname + '/maps/' + mapID + '.map';
 		fs.readFile( mapDir, ( err, data ) =>
 		{
 			if( err )
