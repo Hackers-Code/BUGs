@@ -39,8 +39,12 @@ bool copyToClipboard(string input){
 }
 
 sf::TcpSocket clientsocket;
+sf::UdpSocket udpsocket;
+sf::IpAddress serverip;
 sf::Socket::Status status;
-unsigned char data[128]={1}, receiving=0, deltareceive=0;
+unsigned char data[1024]={1}, receiving=0;
+unsigned int deltareceive=0, udpdeltareceive=0;
+unsigned short udpport;
 sf::Texture ont, offt;
 sf::Sprite connectionS;
 bool connected=0;
@@ -51,19 +55,29 @@ bool connect(string ip, string port){
         cout<<"invalid ip\n";
         return 0;
     }
-    status=clientsocket.connect(ipaddress0, atoi(port.c_str()));
+    udpport=atoi(port.c_str());
+    status=clientsocket.connect(ipaddress0, udpport);
     if(status!=sf::Socket::Done)
     {
         cout<<"not connected\n";
         return 0;
     }
     clientsocket.setBlocking(0);
-    if (clientsocket.send(data, 1) != sf::Socket::Done){
-        cout<<"failed to send\n";
-        return 0;
+    udpsocket.setBlocking(0);
+    if(udpsocket.bind(udpport)!=sf::Socket::Done){
+        cout<<"udp socket can not be binded to "<<port<<"\n";
     }
     connectionS.setTexture(ont);
     connected=1;
+    serverip=ip;
+/*
+    unsigned char to_send[3];
+    to_send[0]=0x34;
+    to_send[1]=(udpsocket.getLocalPort()>>8)%256;
+    to_send[2]=udpsocket.getLocalPort()%256;
+    if(clientsocket.send(to_send, 3)==sf::Socket::Done){
+    }else cout<<"sending error 0x34\n";
+*/
     return 1;
 }
 
@@ -85,7 +99,7 @@ modes mode=connectroom;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol, protbuffers[3];
 size_t received=0;
-unsigned int myid=0, to_receive=0, to_ignore=0, lastgamelistelement=0, frame=0, protbufferi[6];
+unsigned int myid=0, to_receive=0, udpto_receive=0, to_ignore=0, udpto_ignore=0, lastgamelistelement=0, frame=0, protbufferi[6];
 float deltagamelist=120;
 
 
@@ -424,23 +438,23 @@ bool colide(sf::Vector2f pixelin, sf::Image &imagein){
         return 1;
 }
 
-void protocol3(string buffer){
+void protocol1(string buffer){
     if(buffer.length()<=20){
         if(connected){
             unsigned char to_send[21]={0};
-            to_send[0]=3;
+            to_send[0]=1;
             for(int i=0; i<buffer.length(); i++){
                 to_send[i+1]=buffer[i];
             }
-            if(clientsocket.send(to_send, 21)==sf::Socket::Done) cout<<"poszlo 0x3\n"; else cout<<"sending error\n";
+            if(clientsocket.send(to_send, 21)==sf::Socket::Done) cout<<"poszlo 0x1\n"; else cout<<"sending error\n";
         }else cout<<"not connected, cannot get nick\n";
     }else cout<<"nick must have no more than 20 letters\n";
 }
 
-void protocol7(string buffer, string buffer2){
+void protocol20(string buffer, string buffer2){
     if(connected){
         unsigned char to_send[22+(buffer.length())];
-        to_send[0]=7;
+        to_send[0]=0x20;
         for(int i=1; i<21; i++){
             if(i-1<buffer2.length()){
                 to_send[i]=buffer2[i-1];
@@ -451,30 +465,30 @@ void protocol7(string buffer, string buffer2){
         for(int i=22; i<to_send[21]+22; i++){
             to_send[i]=buffer[i-22];
         }
-        if(clientsocket.send(to_send, 22+(buffer.length()))==sf::Socket::Done) cout<<"poszlo 0x7\n";
+        if(clientsocket.send(to_send, 22+(buffer.length()))==sf::Socket::Done) cout<<"poszlo 0x20\n";
         else cout<<"sending error\n";
     }else cout<<"not connected, can not create room\n";
 }
 
-void protocol9(unsigned int seed, unsigned char playersamount){
+void protocol24(unsigned int seed, unsigned char playersamount){
     if(connected){
 		unsigned char to_send[6];
-		to_send[0]=9;
+		to_send[0]=0x24;
 		for(int i=4; i>0; i--){
 			to_send[i]=seed%256;
 			seed=seed>>8;
 		}
 		to_send[5]=playersamount;
-		if(clientsocket.send(to_send, 6)==sf::Socket::Done) cout<<"poszlo 0x9\n";
+		if(clientsocket.send(to_send, 6)==sf::Socket::Done) cout<<"poszlo 0x24\n";
 		else cout<<"sending error\n";
     }else cout<<"not connected, cannot change settings\n";
 }
 
-void protocol10(unsigned int gameid, string password){
+void protocol26(unsigned int gameid, string password){
     if(password.length()<256){
         if(connected){
             unsigned char length=password.length(), to_send[10+length];
-            to_send[0]=0x10;
+            to_send[0]=0x26;
             protbufferi[0]=gameid;
             for(int i=4; i>0; i--){
                 to_send[i]=gameid%256;
@@ -486,76 +500,89 @@ void protocol10(unsigned int gameid, string password){
                 to_send[i+6]=password[i];
             }
             if(clientsocket.send(to_send, 6+length)==sf::Socket::Done){
-                cout<<"poszlo 0x10\n";
-            }else cout<<"sending error 0x10\n";
+                cout<<"poszlo 0x26\n";
+            }else cout<<"sending error 0x26\n";
         }else cout<<"not connected, cannot join\n";
     }else cout<<"password too long (255 chars max)\n";
 }
 
-void protocol12(){
+void protocol28(){
     if(connected){
         unsigned char to_send[1];
-        to_send[0]=0x12;
+        to_send[0]=0x28;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-            cout<<"poszlo 0x12\n";
-        }else cout<<"sending error 0x12\n";
+            cout<<"poszlo 0x28\n";
+            gamelist.clear();
+            lastgamelistelement=0;
+            deltagamelist=120;
+        }else cout<<"sending error 0x28\n";
+    }else cout<<"not connected, cannot get room list\n";
+}
+
+void protocol2c(){
+    if(connected){
+        unsigned char to_send[1];
+        to_send[0]=0x2c;
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+            cout<<"poszlo 0x2c\n";
+        }else cout<<"sending error 0x2c\n";
     }else cout<<"not connected, cannot get ready\n";
 }
 
-void protocol15(){
+void protocol2e(){
     if(connected){
         unsigned char to_send[1];
-        to_send[0]=0x15;
+        to_send[0]=0x2e;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-            cout<<"poszlo 0x15\n";
-        }else cout<<"sending error 0x15\n";
+            cout<<"poszlo 0x2e\n";
+        }else cout<<"sending error 0x2e\n";
     }else cout<<"not connected, cannot get players list\n";
 }
 
-void protocol17(){
+void protocol31(){
     if(connected){
         unsigned char to_send[1];
-        to_send[0]=0x17;
+        to_send[0]=0x31;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-        }else cout<<"sending error 0x17\n";
+        }else cout<<"sending error 0x31\n";
     }else cout<<"not connected, cannot get worms list\n";
 }
 
-void protocol1a(){
+void protocol34(){
     if(connected){
         unsigned char to_send[1];
-        to_send[0]=0x1a;
+        to_send[0]=0x34;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-        }else cout<<"sending error 0x1a\n";
+        }else cout<<"sending error 0x34\n";
     }else cout<<"not connected, cannot get turn time\n";
 }
 
-bool protocol1d(){
+bool protocol37(){
     if(connected){
         unsigned char to_send[1];
-        to_send[0]=0x1d;
+        to_send[0]=0x37;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){return 1;
-        }else cout<<"sending error 0x1d\n";
+        }else cout<<"sending error 0x37\n";
     }else cout<<"not connected, cannot jump\n";
     return 0;
 }
 
-bool protocol1e(){
+bool protocol38(){
     if(connected){
         unsigned char to_send[1];
-        to_send[0]=0x1e;
+        to_send[0]=0x38;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){return 1;
-        }else cout<<"sending error 0x1e\n";
+        }else cout<<"sending error 0x38\n";
     }else cout<<"not connected, can not move\n";
     return 0;
 }
 
-bool protocol1f(){
+bool protocol39(){
     if(connected){
         unsigned char to_send[1];
-        to_send[0]=0x1f;
+        to_send[0]=0x39;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){return 1;
-        }else cout<<"sending error 0x1f\n";
+        }else cout<<"sending error 0x39\n";
     }else cout<<"not connected, can not move\n";
     return 0;
 }
@@ -740,7 +767,7 @@ int main(){
         }else{
             cout<<"physic.cfg does not exist or is damaged\n";
         }
-
+/*
         backgroundt.loadFromImage(backgroundi=loadMap("1.map", spawnpoints));
         backgrounds.setTexture(backgroundt, 1);
         backgrounds.setScale(0.2,0.2);
@@ -751,7 +778,7 @@ int main(){
         players[0].addworm(worm(sf::Vector2f(200,0), 0, 200, 1));
         wormpointers.push_back(&players[0].worms[0]);
         started=1;
-        currentworm=wormpointers[0];
+        currentworm=wormpointers[0];*/
     }
     while(window.isOpen()){
         while(window.pollEvent(event)){
@@ -795,16 +822,28 @@ int main(){
                 if(event.type==sf::Event::TextEntered){
                     if(event.text.unicode==32){//space
                         if(currentworm){
-                            //if(protocol1d()){
-                                (*currentworm).V.y+=vjump;
-                            //}
+                            bool fhasfloor=0;
+                            for(int i=0; i<wormt[0].getSize().x; i++){
+                                if(colide(sf::Vector2f(i+(*currentworm).position.x, (*currentworm).position.y+wormt[0].getSize().y), backgroundi)){
+                                    fhasfloor=1;
+                                }
+                            }
+                            if(fhasfloor){
+                                //if(protocol37()){
+                                    (*currentworm).V.y+=vjump;
+                                    (*currentworm).walking=0;
+                                    (*currentworm).V.x=0;
+                                    (*currentworm).animcount=0;
+                                    (*currentworm).sprite.setTexture(wormt[0]);
+                                //}
+                            }
                         }
                     }
                 }else
                 if((event.type==sf::Event::KeyPressed)||(event.type==sf::Event::KeyReleased)){
                     if(event.key.code==sf::Keyboard::A){
                         if((currentworm)&&((*currentworm).V.x<=0)&&(((event.type==sf::Event::KeyPressed)&&(!(*currentworm).walking))||((event.type==sf::Event::KeyReleased)&&((*currentworm).walking)))){
-                            //if(protocol1e()){
+                            //if(protocol38()){
                                 if(!(*currentworm).walking){
                                     (*currentworm).V.x=-vxmax;
                                     (*currentworm).walking=1;
@@ -820,7 +859,7 @@ int main(){
                     }else
                     if(event.key.code==sf::Keyboard::D){
                         if((currentworm)&&((*currentworm).V.x>=0)&&(((event.type==sf::Event::KeyPressed)&&(!(*currentworm).walking))||((event.type==sf::Event::KeyReleased)&&((*currentworm).walking)))){
-                            //if(protocol1f()){
+                            //if(protocol39()){
                                 if(!(*currentworm).walking){
                                     (*currentworm).V.x=vxmax;
                                     (*currentworm).walking=1;
@@ -886,10 +925,10 @@ int main(){
                             }
                         }else
                         if((event.mouseButton.x>=oknicks.getPosition().x)&&(event.mouseButton.x<=oknicks.getPosition().x+oknicks.getLocalBounds().width)&&(event.mouseButton.y>=oknicks.getPosition().y)&&(event.mouseButton.y<=oknicks.getPosition().y+oknicks.getLocalBounds().height)){
-                            protocol3(nickinput.getString());
+                            protocol1(nickinput.getString());
                         }else
                         if((event.mouseButton.x>=okcreaterooms.getPosition().x)&&(event.mouseButton.x<=okcreaterooms.getPosition().x+okcreaterooms.getLocalBounds().width)&&(event.mouseButton.y>=okcreaterooms.getPosition().y)&&(event.mouseButton.y<=okcreaterooms.getPosition().y+okcreaterooms.getLocalBounds().height)){
-                            protocol7(passwordinput.getString(), roomnameinput.getString());
+                            protocol20(passwordinput.getString(), roomnameinput.getString());
                         }else
                         if((event.mouseButton.x>=soundpointers.getPosition().x)&&(event.mouseButton.x<=soundpointers.getPosition().x+soundpointers.getLocalBounds().width)&&(event.mouseButton.y>=soundpointers.getPosition().y)&&(event.mouseButton.y<=soundpointers.getPosition().y+soundpointers.getLocalBounds().height)){
                             soundpointerpressed=1;
@@ -898,23 +937,16 @@ int main(){
                             soundbarexchanged=!soundbarexchanged;
                         }else
                         if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
-                            if(connected){unsigned char gfhahdsgfgdj[1]={5};
-                                if(clientsocket.send(gfhahdsgfgdj,1)!=sf::Socket::Done) cout<<"error while sending request 5\n";
-                                else {
-                                    gamelist.clear();
-                                    lastgamelistelement=0;
-                                    deltagamelist=120;
-                                }
-                            }else cout<<"not connected, cannot refresh\n";
+                            if(connected){protocol28();
                         }
                     }
-                    else{
+                    }else{
                         int listelementbuffer=int(event.mouseButton.y-deltagamelist)/int(inputbars.getLocalBounds().height);
                         if((listelementbuffer<=lastgamelistelement)&&(listelementbuffer>0)){
                             if(event.mouseButton.x<=inputbars.getLocalBounds().width+binputbars.getLocalBounds().width){
                                 for(list<gamelistelements>::iterator i=gamelist.begin(); i!=gamelist.end(); ++i){
                                     if((*i).pos==listelementbuffer){
-                                        protocol10((*i).id, (*i).password);
+                                        protocol26((*i).id, (*i).password);
                                         break;
                                     }
                                 }
@@ -952,7 +984,7 @@ int main(){
                     }else
                     if(textbox==nickbox){inputpointer=&nickinput;
                         if(event.text.unicode==13){
-                            protocol3(nickinput.getString());
+                            protocol1(nickinput.getString());
                             nickinput.setColor(normalclr);
                             inputpointer=0;
                         }
@@ -966,7 +998,7 @@ int main(){
                     }else
                     if(textbox==passwordbox){inputpointer=&passwordinput;
                         if(event.text.unicode==13){
-                            protocol7(passwordinput.getString(), roomnameinput.getString());
+                            protocol20(passwordinput.getString(), roomnameinput.getString());
                             inputpointer=0;
                         }
                     }else
@@ -1085,11 +1117,11 @@ int main(){
                         playersamount=4;
                     }else
                     if((changingsettings)&&(event.mouseButton.x>=oksettings.getPosition().x)&&(event.mouseButton.x<=oksettings.getPosition().x+oksettings.getLocalBounds().width)&&(event.mouseButton.y>=oksettings.getPosition().y)&&(event.mouseButton.y<=oksettings.getPosition().y+oksettings.getLocalBounds().height)){
-                        if(seedinput.getString().getSize()<10) protocol9(atoi(seedinput.getString().toAnsiString().c_str()), playersamount);
+                        if(seedinput.getString().getSize()<10) protocol24(atoi(seedinput.getString().toAnsiString().c_str()), playersamount);
                         else cout<<"seed is too big\n";
                     }else
                     if((event.mouseButton.x>=readys.getPosition().x)&&(event.mouseButton.x<=readys.getPosition().x+readys.getLocalBounds().width)&&(event.mouseButton.y>=readys.getPosition().y)&&(event.mouseButton.y<=readys.getPosition().y+readys.getLocalBounds().height)){
-                        protocol12();
+                        protocol2c();
                     }else
                     if((event.mouseButton.x>=soundpointers.getPosition().x)&&(event.mouseButton.x<=soundpointers.getPosition().x+soundpointers.getLocalBounds().width)&&(event.mouseButton.y>=soundpointers.getPosition().y)&&(event.mouseButton.y<=soundpointers.getPosition().y+soundpointers.getLocalBounds().height)){
                         soundpointerpressed=1;
@@ -1217,7 +1249,7 @@ int main(){
         }
 
 
-        if(clientsocket.receive(data, 128, received)==sf::Socket::Done){
+        if(clientsocket.receive(data, 1024, received)==sf::Socket::Done){
             if(!receiving)
             for(int i=0; i<received; i++){
                 if(!to_ignore){
@@ -1229,11 +1261,6 @@ int main(){
                         break;
                     }
                     if(data[i]==2){
-                        receiving=2;
-                        deltareceive=i+1;
-                        break;
-                    }
-                    if(data[i]==4){
                         i++;
                         if(i<received){
                             if(data[i]){
@@ -1242,15 +1269,15 @@ int main(){
                             }else{
                                 cout<<"nick denied\n";
                             }
-                        }else cout<<"lost response 0x4\n";
+                        }else cout<<"lost response 0x2\n";
                         continue;
                     }
-                    if(data[i]==6){
-                        receiving=6;
+                    if(data[i]==0x11){
+                        receiving=0x11;
                         deltareceive=i+1;
                         break;
                     }
-                    if(data[i]==8){
+                    if(data[i]==0x21){
                         i++;
                         if(i<received){
                             if(data[i]){
@@ -1265,7 +1292,7 @@ int main(){
                         }else cout<<"lost response 0x8\n";
                         continue;
                     }
-                    if(data[i]==10){
+                    if(data[i]==0x25){
                         i++;
                         if(i<received){
                             if(data[i]){
@@ -1280,8 +1307,8 @@ int main(){
                         }else cout<<"lost response 0xa\n";
                         continue;
                     }
-                    if(data[i]==0x11){
-                        receiving=0x11;
+                    if(data[i]==0x27){
+                        receiving=0x27;
                         deltareceive=i+1;
                         to_receive=5;
                         protbufferi[2]=0;
@@ -1295,7 +1322,7 @@ int main(){
                         }
                         break;
                     }
-                    if(data[i]==0x13){
+                    if(data[i]==0x2d){
                         if(ready){
                             ready=0;
                             readys.setTexture(ready2);
@@ -1307,33 +1334,24 @@ int main(){
                         }
                         continue;
                     }
-                    if(data[i]==0x14){
+                    if(data[i]==0x30){
                         soundtrack.stop();
-                        protocol15();
+                        protocol2e();
                         backgroundt.loadFromImage(backgroundi=loadMap(seedinput.getString()+".map", spawnpoints));
                         backgrounds.setTexture(backgroundt, 1);
                         backgrounds.setScale(0.2,0.2);
                         mode=ingame;
                         break;
                     }
-                    if(data[i]==0x16){
-                        receiving=0x16;
+                    if(data[i]==0x2f){
+                        receiving=0x2f;
                         deltareceive=i+1;
                         to_receive=4;
                         protbufferi[0]=1;
                         cout<<"receiving players\n";
                         break;
                     }
-                    if(data[i]==0x18){
-                        receiving=0x18;
-                        deltareceive=i+1;
-                        to_receive=4;
-                        protbufferi[0]=1;
-                        for(int j=1; j<7; j++)
-                            protbufferi[j]=0;
-                        break;
-                    }
-                    if(data[i]==0x19){
+                    if(data[i]==0x33){
                         cout<<"your turn\n";
                         i++;
                         if(i<received){
@@ -1343,8 +1361,8 @@ int main(){
                         }else cout<<"lost response 0x19\n";
                         continue;
                     }
-                    if(data[i]==0x1b){
-                        i++;
+                    if(data[i]==0x35){
+                        i++;//        time left
                         if(i<received){
                             turntime=data[i];
                             if(!turntime){
@@ -1352,45 +1370,61 @@ int main(){
                                 clockframe=0;
                             }
                             turntimet.setString(to_string(turntime)+"s");
-                        }else cout<<"lost response 0x1b\n";
+                        }else cout<<"lost response 0x35\n";
                         continue;
                     }
-                    if(data[i]==0x1c){
+                    if(data[i]==0x36){
                         currentworm=0;
                         cout<<"end of your turn\n";
                         continue;
                     }
                     if(data[i]==0xe0){
                         cout<<"unknown opcode\n";
-                        continue;
+                        receiving=0xe0;
+                        i++;
+                        if(i<received){
+                            to_receive=data[i];
+                        }else{
+                            cout<<"lost rest of 0xe0\n";
+                            break;
+                        }
+                        deltareceive=i+1;
+                        protbuffers[0]="";
+                        break;
                     }
                     if(data[i]==0xe1){
                         cout<<"bad parameters\n";
-                        continue;
+                        receiving=0xe1;
+                        i++;
+                        if(i<received){
+                            to_receive=data[i];
+                        }else{
+                            cout<<"lost rest of 0xe1\n";
+                            break;
+                        }
+                        deltareceive=i+1;
+                        protbuffers[0]="";
+                        break;
                     }
                     if(data[i]==0xe2){
-                        cout<<"server error\n";
-                        continue;
+                        cout<<"server error:\n";
+                        receiving=0xe2;
+                        i++;
+                        if(i<received){
+                            to_receive=data[i];
+                        }else{
+                            cout<<"lost rest of 0xe2\n";
+                            break;
+                        }
+                        deltareceive=i+1;
+                        protbuffers[0]="";
+                        break;
                     }
-                    cout<<"recieved unknown protocol: "<<int(data[i])<<"\n";
+                    cout<<"received unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
             }
 
-            if(receiving==2){
-                for(int i=deltareceive; i<deltareceive+4; i++){
-                    if(i>=received){
-                        cout<<deltareceive+4-i<<"/"<<4<<" of your id missed\n";
-                        receiving=0;
-                        break;
-                    }
-                    myid=myid<<8;
-                    myid+=data[i];
-                }
-                receiving=0;
-                save("sesja.iff", to_string(myid));
-                cout<<"myid="<<myid<<"\n";
-            }else
-            if(receiving==6){
+            if(receiving==0x11){
                 if(deltareceive){
                     for(int i=deltareceive; i<deltareceive+4; i++){
                         if(i>=received){
@@ -1436,7 +1470,7 @@ int main(){
                     }
                 deltareceive=0;
             }else
-            if(receiving==0x11){
+            if(receiving==0x27){
                 for(int i=deltareceive; ((i<received)||(to_receive>0)); i++){
                     if(to_receive==5){
                         if(data[i]){
@@ -1461,7 +1495,7 @@ int main(){
                     receiving=0;
                 }
             }else
-            if(receiving==0x16){
+            if(receiving==0x2f){
                 for(int i=deltareceive; i<received; i++){
                     if(protbufferi[0]){
                         protbufferi[1]=protbufferi[1]<<8;
@@ -1500,26 +1534,87 @@ int main(){
                             for(int i=0; i<playersamount; i++){
                                 cout<<"player["<<i<<"]="<<int(players[i].id)<<", "<<players[i].name<<"\n";
                             }
-                            protocol17();
+                            protocol31();
                             break;
                         }
                     }
                 }
             }else
-            if(receiving==0x18){
-                for(int i=deltareceive; i<received; i++){//1=team, 2=x, 3=y, 4=hp, 5=id
+            if(receiving==0xe0){
+                for(int i=deltareceive; i<received; i++){
+                    to_receive--;
+                    if(!to_receive){
+                        protbuffers[0]+=data[i];
+                        cout<<protbuffers[0]<<"\n";
+                        MessageBox(0, protbuffers[0].c_str(), "0xe0: unknown opcode", MB_OK);
+                        receiving=0;
+                        break;
+                    }
+                    protbuffers[0]+=data[i];
+                }
+            }else
+            if(receiving==0xe1){
+                for(int i=deltareceive; i<received; i++){
+                    to_receive--;
+                    if(!to_receive){
+                        protbuffers[0]+=data[i];
+                        cout<<protbuffers[0]<<"\n";
+                        MessageBox(0, protbuffers[0].c_str(), "0xe1: unknown opcode", MB_OK);
+                        receiving=0;
+                        break;
+                    }
+                    protbuffers[0]+=data[i];
+                }
+            }else
+            if(receiving==0xe2){
+                for(int i=deltareceive; i<received; i++){
+                    to_receive--;
+                    if(!to_receive){
+                        protbuffers[0]+=data[i];
+                        cout<<protbuffers[0]<<"\n";
+                        MessageBox(0, protbuffers[0].c_str(), "0xe2: server error", MB_OK);
+                        receiving=0;
+                        break;
+                    }
+                    protbuffers[0]+=data[i];
+                }
+            }
+        }
+        if(udpsocket.receive(data, 1024, received, serverip, udpport)){
+            if(!receiving)
+            for(int i=0; i<received; i++){
+                if(!udpto_ignore){
+                    if(data[i]==0x32){
+                        receiving=0x32;
+                        udpdeltareceive=i+1;
+                        udpto_receive=4;
+                        protbufferi[0]=1;
+                        for(int j=1; j<7; j++)
+                            protbufferi[j]=0;
+                        break;
+                    }
+                    cout<<"recieved unknown UDP protocol: "<<int(data[i])<<"\n";
+                }else udpto_ignore--;
+            }
+
+
+            if(receiving==0x32){
+                for(int i=udpdeltareceive; i<received; i++){//1=team, 2=x, 3=y, 4=hp, 5=id, 6=Vx, 7=Vy
                     if(protbufferi[0]){
                         protbufferi[1]=protbufferi[1]<<8;
                         protbufferi[1]+=data[i];
                     }else{
-                        if(!(to_receive%11)){
+                        if(!(udpto_receive%15)){
                             if(protbufferi[1]<4){
-                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5])))
-                                    wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
-                                else{
+                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]))){
+                                    worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
+                                    (*wpbuf).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
+                                    wormpointers.push_back(wpbuf);
+                                }else{
                                     for(int j=0; j<wormpointers.size(); j++){
                                         if((*wormpointers[j]).id==protbufferi[5]){
                                             (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
+                                            (*wormpointers[j]).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
                                             break;
                                         }
                                     }
@@ -1530,26 +1625,34 @@ int main(){
                             }
                             protbufferi[1]=data[i];
                         }else
-                        if((to_receive%11)>=7){
+                        if((to_receive%15)>=11){
                             protbufferi[2]=protbufferi[2]<<8;
                             protbufferi[2]+=data[i];
                         }else
-                        if((to_receive%11)>=3){
+                        if((to_receive%15)>=7){
                             protbufferi[3]=protbufferi[3]<<8;
                             protbufferi[3]+=data[i];
                         }else
-                        if((to_receive%11)==2){
+                        if((to_receive%15)==6){
                             protbufferi[4]=data[i];
                         }else
-                        if((to_receive%11)==1){
+                        if((to_receive%15)==5){
                             protbufferi[5]=data[i];
+                        }else
+                        if((to_receive%15)>=3){
+                            protbufferi[6]=protbufferi[6]<<8;
+                            protbufferi[6]+=data[i];
+                        }else
+                        if((to_receive%15)>=1){
+                            protbufferi[7]=protbufferi[7]<<8;
+                            protbufferi[7]+=data[i];
                         }
                     }
-                    to_receive--;
-                    if(!to_receive){
+                    udpto_receive--;
+                    if(!udpto_receive){
                         if(protbufferi[0]){//end of metadata
                             protbufferi[0]=0;
-                            to_receive=11*protbufferi[1];
+                            udpto_receive=11*protbufferi[1];
                             if(protbufferi[1]==0){
                                 cout<<"empty worms list?\ndisconnecting\n";
                                 receiving=0;
@@ -1562,13 +1665,16 @@ int main(){
                             receiving=0;
                             if(protbufferi[1]<4){
                                 if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]))){
-                                    wormpointers.push_back(&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1]);
-                                    protocol1a();
+                                    worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
+                                    (*wpbuf).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
+                                    wormpointers.push_back(wpbuf);
+                                    protocol34();
                                 }
                                 else{
                                     for(int j=0; j<wormpointers.size(); j++){
                                         if((*wormpointers[j]).id==protbufferi[5]){
                                             (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
+                                            (*wormpointers[j]).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
                                             break;
                                         }
                                     }
@@ -1582,7 +1688,7 @@ int main(){
                         }
                     }
                 }
-                protocol17();
+                protocol31();
                 no18delta=0;
             }
         }
@@ -1608,7 +1714,7 @@ int main(){
                 if(clockframe>7)
                     clockframe=0;
                 clocks.setTexture(clockt[clockframe]);
-                protocol1a();
+                protocol34();
             }
         }
 
@@ -1636,15 +1742,15 @@ int main(){
                             if((*wormpointers[i]).V.y>vymax)
                                 (*wormpointers[i]).V.y=vymax;
                         }else
-                        if((*wormpointers[i]).V.x>0){cout<<(*wormpointers[i]).position.x<<"\n";
+                        if((*wormpointers[i]).V.x>0){
                             int fkas=(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width;
                             bool fcolided=0;
                             sf::Vector2f colisionpos;
-                            for(int j=(*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height; j<=(*wormpointers[i]).position.y; j--){
-                                for(int k=0; k<=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x; k++){
+                            for(int k=0; k<=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x; k++){
+                                for(int j=(*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height-1; j>=(*wormpointers[i]).position.y; j--){
                                     if(colide(sf::Vector2f(k+fkas, j), backgroundi)){
                                         fcolided=1;
-                                        colisionpos=sf::Vector2f(k+(*wormpointers[i]).position.x, j);
+                                        colisionpos=sf::Vector2f(k+(*wormpointers[i]).position.x, (*wormpointers[i]).position.y);
                                         break;
                                     }
                                 }
@@ -1662,14 +1768,14 @@ int main(){
                                 (*wormpointers[i]).next_anim();
                             }
                         }else
-                        if((*wormpointers[i]).V.x<0){cout<<(*wormpointers[i]).position.x<<"\n";
+                        if((*wormpointers[i]).V.x<0){
                             bool fcolided=0;
                             sf::Vector2f colisionpos;
-                            for(int j=(*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height; j<=(*wormpointers[i]).position.y; j--){
-                                for(int k=0; k>=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x; k--){
+                            for(int k=0; k>=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x; k--){
+                                for(int j=(*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height-1; j>=(*wormpointers[i]).position.y; j--){
                                     if(colide(sf::Vector2f(k+(*wormpointers[i]).position.x, j), backgroundi)){
                                         fcolided=1;
-                                        colisionpos=sf::Vector2f(k+(*wormpointers[i]).position.x+1, j);
+                                        colisionpos=sf::Vector2f(k+(*wormpointers[i]).position.x, (*wormpointers[i]).position.y);
                                         break;
                                     }
                                 }
@@ -1713,6 +1819,57 @@ int main(){
                                     (*wormpointers[i]).V.y=vymax;
                             }
                             (*wormpointers[i]).update();
+                        }else
+                        if((*wormpointers[i]).V.x>0){//  `.
+                            bool fcolided=0, mdir;
+                            sf::Vector2f colisionpos;
+                            float maxVel=(*wormpointers[i]).V.x, minVel;
+                            if(maxVel>(*wormpointers[i]).V.y){
+                                minVel=(*wormpointers[i]).V.y;
+                                mdir=0;
+                            }else{
+                                minVel=maxVel;
+                                maxVel=(*wormpointers[i]).V.y;
+                                mdir=1;
+                            }
+                            if(mdir){
+                                for(int j=0; j<maxVel*(currentittime-lastittime).asSeconds(); j++){
+                                    for(int k=0; k<wormt[0].getSize().x; k++){
+                                        if(colide(sf::Vector2f(int(k+j/minVel)+(*wormpointers[i]).position.x, (*wormpointers[i]).position.y+wormt[0].getSize().y+j), backgroundi)){
+                                            fcolided=1;
+                                            colisionpos=sf::Vector2f(int(j/minVel)+(*wormpointers[i]).position.x, (*wormpointers[i]).position.y+j-1);
+                                            break;
+                                        }
+                                        if((k==wormt[0].getSize().x-1)&&(int(j/minVel)>int((j-1)/minVel))){
+                                            for(int l=0; l<wormt[0].getSize().y; l++){
+                                                if(colide(sf::Vector2f(int(j/minVel)+(*wormpointers[i]).position.x+k, (*wormpointers[i]).position.y+l), backgroundi)){
+                                                    fcolided=1;
+                                                    colisionpos=sf::Vector2f(int(j/minVel)+(*wormpointers[i]).position.x, (*wormpointers[i]).position.y+j-1);
+                                                    break;
+                                                }
+                                            }
+                                            if(fcolided)
+                                                break;
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                }
+                            }else{//--------------------------------------------------------------------------------------------------------------------------to do
+
+                            }
+                            if(fcolided){
+                                (*wormpointers[i]).position=colisionpos;
+                                (*wormpointers[i]).V.y=0;
+                                if((*wormpointers[i]).V.x!=vxmax)(*wormpointers[i]).V.x=0;
+                            }else{
+                                (*wormpointers[i]).position.x+=int((*wormpointers[i]).V.x*(currentittime-lastittime).asSeconds());
+                                (*wormpointers[i]).position.y+=int((*wormpointers[i]).V.y*(currentittime-lastittime).asSeconds());
+                                (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
+                                if((*wormpointers[i]).V.y>vymax)
+                                    (*wormpointers[i]).V.y=vymax;
+                            }
+                            (*wormpointers[i]).update();
                         }
                     }else
                     if((*wormpointers[i]).V.y<0){
@@ -1723,7 +1880,7 @@ int main(){
                                 for(int j=(*wormpointers[i]).position.x; j<=(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
                                     if(colide(sf::Vector2f(j, ((*wormpointers[i]).position.y+k)), backgroundi)){
                                         fcolided=1;
-                                        colisionpos=sf::Vector2f(j, ((*wormpointers[i]).position.y+k-1));
+                                        colisionpos=sf::Vector2f(j, ((*wormpointers[i]).position.y+k));
                                         break;
                                     }
                                 }
@@ -1733,8 +1890,9 @@ int main(){
                             if(fcolided){
                                 (*wormpointers[i]).position=colisionpos;
                                 (*wormpointers[i]).V.y=0;
+                            }else{
+                                (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
                             }
-                            (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
                             (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
                             if((*wormpointers[i]).V.y>vymax)
                                 (*wormpointers[i]).V.y=vymax;
@@ -1749,7 +1907,7 @@ int main(){
             no18delta++;
             if(no18delta>40){
                 no18delta=0;
-                protocol17();
+                protocol31();
                 cout<<"resending 0x17 (response time out)\n";
             }
         }
