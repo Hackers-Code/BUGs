@@ -44,25 +44,45 @@ class Request {
 					}
 					else
 					{
-						this.client.response.send( { opcode : 0xe2 } );
+						let error = 'Server error';
+						this.client.response.send( {
+							opcode : 0xe2,
+							length : Buffer.from( [ error.length ] ),
+							error : Buffer.from( error )
+						} );
 						return false;
 					}
 				}
 				else
 				{
-					this.client.response.send( { opcode : 0xe3 } );
+					let error = 'This instruction cannot be used by client';
+					this.client.response.send( {
+						opcode : 0xe3,
+						length : Buffer.from( [ error.length ] ),
+						error : Buffer.from( error )
+					} );
 					return false;
 				}
 			}
 			else
 			{
-				this.client.response.send( { opcode : 0xe0 } );
+				let error = `Unknown instruction (${data[ 0 ]})`;
+				this.client.response.send( {
+					opcode : 0xe0,
+					length : Buffer.from( [ error.length ] ),
+					error : Buffer.from( error )
+				} );
 				return false;
 			}
 		}
 		else
 		{
-			this.client.response.send( { opcode : 0xe1 } );
+			let error = 'Packet too short';
+			this.client.response.send( {
+				opcode : 0xe1,
+				length : Buffer.from( [ error.length ] ),
+				error : Buffer.from( error )
+			} );
 			return false;
 		}
 	}

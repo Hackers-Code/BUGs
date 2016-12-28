@@ -6,7 +6,7 @@ const InstructionTypes = {
 
 const InstructionMap = {
 	0x00 : {
-		rule : '',
+		rule : 'length:1;error:length',
 		type : InstructionTypes.server
 	},
 	0x01 : {
