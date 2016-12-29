@@ -33,11 +33,9 @@ class Request {
 							}
 							if( typeof response === 'object' )
 							{
-								this.response.send( {
-									opcode : instruction.response,
-									count : response.count,
-									array : response.array
-								} );
+								let object = response;
+								object.opcode = instruction.response;
+								this.response.send( object );
 							}
 						}
 						return true;

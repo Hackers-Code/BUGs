@@ -1,34 +1,31 @@
 'use strict';
 const readline = require( 'readline' );
-const rl = readline.createInterface( {
-	input : process.stdin,
-	output : process.stdout
-} );
 const ConfigManager = require( './lib/App/ConfigManager' );
 (function()
 {
-	let config = new ConfigManager();
-	if( config.exist() )
+	let checkIfConfigExists = new Promise( ConfigManager.exist );
+	checkIfConfigExists.then( () =>
 	{
+		const rl = readline.createInterface( {
+			input : process.stdin,
+			output : process.stdout
+		} );
 		rl.question( 'Config file already exist. Create anyway? Old data will be deleted. (Y/N) : ', ( answer ) =>
 		{
 			if( answer === 'N' )
 			{
-				console.log( 'Config creating aborted by user.' );
-				rl.close();
+				console.log( 'Action aborted by user' );
 			}
 			else if( answer === 'Y' )
 			{
-				config.create( handleConfigCreate );
-				rl.close();
+				ConfigManager.create( handleConfigCreate );
 			}
+			rl.close();
 		} );
-	}
-	else
+	} ).catch( () =>
 	{
-		config.create( handleConfigCreate );
-		rl.close();
-	}
+		ConfigManager.create( handleConfigCreate );
+	} );
 })();
 
 function handleConfigCreate( err )
@@ -36,7 +33,7 @@ function handleConfigCreate( err )
 	if( err )
 	{
 		console.log( 'Config file could not be created' );
-		console.log( err.message );
+		console.log( 'Error: ' + err.message );
 		return;
 	}
 	console.log( 'File successfully created' );

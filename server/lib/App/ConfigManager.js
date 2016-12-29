@@ -1,14 +1,28 @@
 const fs = require( 'fs' );
-class ConfigManager {
-	constructor()
+const ConfigDirectory = process.cwd() + '/config.json';
+const ConfigManager = {
+	read( done, error )
 	{
-		this.path = process.cwd() + '/config.json';
-	}
-
-	exist()
+		fs.readFile( ConfigDirectory, ( err, data ) =>
+		{
+			if( err )
+			{
+				error( err );
+			}
+			done( data );
+		} );
+	},
+	exist( done, error )
 	{
-		return fs.existsSync( this.path );
-	}
+		fs.access( ConfigDirectory, ( err ) =>
+		{
+			if( err )
+			{
+				error( err );
+			}
+			done();
+		} );
+	},
 
 	create( callback )
 	{
@@ -25,7 +39,7 @@ class ConfigManager {
 			},
 			max_clients : 3
 		};
-		fs.writeFile( this.path, JSON.stringify( defaultConfig ), callback );
+		fs.writeFile( ConfigDirectory, JSON.stringify( defaultConfig ), callback );
 	}
-}
+};
 module.exports = ConfigManager;

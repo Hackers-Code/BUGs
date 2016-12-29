@@ -3,18 +3,33 @@ const UDP = require( './../Network/ServerUDP' );
 const RoomsStorage = require( './../Network/RoomsStorage' );
 const ClientsStorage = require( './../Network/ClientsStorage' );
 const Logger = require( './Logger' );
-const fs = require( 'fs' );
+const ConfigManager = require( './ConfigManager' );
 class App {
 	constructor()
 	{
-		try
+		let readConfig = new Promise( ConfigManager.read );
+		readConfig.then( ( data ) =>
 		{
-			this.config = JSON.parse( fs.readFileSync( './config.json' ).toString() );
-		}
-		catch( e )
+			try
+			{
+				this.config = JSON.parse( data.toString() );
+				this.init();
+			}
+			catch( err )
+			{
+				console.log( 'Could not parse config file' );
+				console.log( 'Error: ' + err.message )
+			}
+		} ).catch( ( err ) =>
 		{
-			console.log( 'Could not read or parse config file' );
-		}
+			console.log(
+				'Could not read config file, if you run this server for the first time remember to execute init.js first' );
+			console.log( 'Error: ' + err.message );
+		} );
+	}
+
+	init()
+	{
 		this.roomsStorage = new RoomsStorage( this );
 		this.clientsStorage = new ClientsStorage( this );
 		this.logger = new Logger( this.config.log_file, this.config.error_file );
@@ -26,10 +41,6 @@ class App {
 			socket : null,
 			lastError : null
 		};
-	}
-
-	run()
-	{
 		this.runTCP();
 		this.runUDP();
 	}
