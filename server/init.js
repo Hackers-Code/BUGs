@@ -33,7 +33,7 @@ function handleConfigCreate( err )
 	if( err )
 	{
 		console.log( 'Config file could not be created' );
-		console.log( 'Error: ' + err.message );
+		console.log( `Error: ${err.message}` );
 		return;
 	}
 	console.log( 'File successfully created' );

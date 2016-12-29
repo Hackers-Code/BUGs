@@ -27,8 +27,9 @@ const ConfigManager = {
 	create( callback )
 	{
 		let defaultConfig = {
-			log_file : process.cwd() + '/logs/log.txt',
-			error_file : process.cwd() + '/logs/error.txt',
+			logs_dir : process.cwd() + '/logs/',
+			log_file : 'log.txt',
+			error_file : 'error.txt',
 			tcp : {
 				port : 31337,
 				host : '0.0.0.0'

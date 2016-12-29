@@ -16,7 +16,6 @@ class ClientsStorage {
 
 	addClient( socket )
 	{
-		console.log( 'CONN:' + this.clients.length );
 		if( this.clients.length >= this.maxClients )
 		{
 			return false;

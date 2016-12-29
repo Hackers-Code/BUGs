@@ -18,13 +18,13 @@ class App {
 			catch( err )
 			{
 				console.log( 'Could not parse config file' );
-				console.log( 'Error: ' + err.message )
+				console.log( `Error: ${err.message}` )
 			}
 		} ).catch( ( err ) =>
 		{
 			console.log(
 				'Could not read config file, if you run this server for the first time remember to execute init.js first' );
-			console.log( 'Error: ' + err.message );
+			console.log( `Error: ${err.message}` );
 		} );
 	}
 
@@ -32,7 +32,6 @@ class App {
 	{
 		this.roomsStorage = new RoomsStorage( this );
 		this.clientsStorage = new ClientsStorage( this );
-		this.logger = new Logger( this.config.log_file, this.config.error_file );
 		this.tcp = {
 			socket : null,
 			lastError : null
@@ -41,8 +40,11 @@ class App {
 			socket : null,
 			lastError : null
 		};
-		this.runTCP();
-		this.runUDP();
+		this.logger = new Logger( this.config, () =>
+		{
+			this.runTCP();
+			this.runUDP();
+		} );
 	}
 
 	runTCP()
