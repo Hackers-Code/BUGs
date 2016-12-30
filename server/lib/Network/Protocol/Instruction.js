@@ -82,10 +82,40 @@ const InstructionMap = {
 		rule : '',
 		type : InstructionTypes.client,
 		callback : 'getRoomConfig',
-		response : 0x27
+		response : 0x29
 	},
 	0x29 : {
 		rule : 'map:4;gravity:2;jumpHeight:2;maxSpeedX:2;maxSpeedY:2;maxPlayers:1',
+		type : InstructionTypes.server
+	},
+	0x2a : {
+		rule : 'colourR:1;colourG:1;colourB:1;mask:1',
+		type : InstructionTypes.client,
+		callback : 'setPlayerProperties',
+		response : 0x2b
+	},
+	0x2b : {
+		rule : 'status:1',
+		type : InstructionTypes.server
+	},
+	0x2c : {
+		rule : '',
+		type : InstructionTypes.client,
+		callback : 'switchReady',
+		response : 0x2d
+	},
+	0x2d : {
+		rule : 'status:1',
+		type : InstructionTypes.server
+	},
+	0x2e : {
+		rule : '',
+		type : InstructionTypes.client,
+		callback : 'listPlayers',
+		response : 0x2f
+	},
+	0x2f : {
+		rule : 'ready:1;count:4;players(index:1;name:20)*count',
 		type : InstructionTypes.server
 	},
 	0xe0 : {

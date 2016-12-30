@@ -20,6 +20,7 @@ class Room {
 		this.roomsStorage = roomsStorage;
 		this.players = [];
 		this.players.push( new Player( client ) );
+		client.player = this.players[ 0 ];
 		this.status = Status.uninitialized;
 		this.mapID = 1;
 		this.maxPlayers = 2;
@@ -127,6 +128,7 @@ class Room {
 					maxSpeedY,
 					maxPlayers
 				};
+				this.preparePlayersList();
 				return true;
 			}
 		}
@@ -153,6 +155,7 @@ class Room {
 			if( password.compare( this.password ) === 0 )
 			{
 				this.players.push( client );
+				client.player = this.players[ this.players.length - 1 ];
 				if( this.players.length === this.maxPlayers )
 				{
 					this.status = Status.waitingForConfirming;
@@ -165,34 +168,33 @@ class Room {
 		return false;
 	}
 
-	confirm( id )
-	{
-		let index = SearchEngine.findByUniqueID( this.players, id );
-		if( index !== false && index !== -1 )
-		{
-			this.players[ index ].confirmed = true;
-		}
-	}
-
 	checkIfAllConfirmed()
 	{
-		for( let i = 0 ; i < this.players.length ; i++ )
+		if( this.getReadyPlayersAmount() !== this.maxPlayers )
 		{
-			if( this.players[ i ].confirmed === false )
-			{
-				setTimeout( this.checkIfAllConfirmed.bind( this ), 1000 );
-				return;
-			}
+			setTimeout( this.checkIfAllConfirmed.bind( this ), 1000 );
+			return;
 		}
 		this.status = Status.inGame;
-		this.preparePlayersList();
 		this.game.loadMap( this.mapID );
-		this.game.init( this.players );
 		for( let i = 0 ; i < this.players.length ; i++ )
 		{
 			this.players[ i ].response.send( { opcode : 0x14 } );
 		}
 		this.checkIfAllLoadedMap();
+	}
+
+	getReadyPlayersAmount()
+	{
+		let amount = 0;
+		for( let i = 0 ; i < this.players.length ; i++ )
+		{
+			if( this.players[ i ].confirmed === true )
+			{
+				amount++;
+			}
+		}
+		return amount;
 	}
 
 	preparePlayersList()
@@ -209,9 +211,12 @@ class Room {
 				name : this.players[ i ].name
 			} );
 		}
+		let ready = Buffer.alloc( 1 );
+		ready.writeUInt8( this.getReadyPlayersAmount, 0 );
 		this.playersList = {
-			players_count : count,
-			players : players
+			ready,
+			count,
+			players
 		};
 	}
 

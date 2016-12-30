@@ -19,6 +19,7 @@ class Client {
 		this.response = new Response( socket );
 		this.request = new Request( this, this.response );
 		this.room = null;
+		this.player = null;
 		this.socket.on( 'data', ( data ) =>
 		{
 			this.request.handleRequest( data );
@@ -131,13 +132,24 @@ class Client {
 		return false;
 	}
 
+	getRoomConfig()
+	{
+		return this.room.getRoomConfig();
+	}
+
+	setPlayerProperties( data )
+	{
+		return this.player.setProperties( data );
+	}
+
 	switchReady()
 	{
-		if( this.room !== null )
+		if( this.player !== null )
 		{
-			this.room.confirm( this.id );
+			this.player.confirm();
+			return true;
 		}
-
+		return false;
 	}
 
 	listPlayers()
