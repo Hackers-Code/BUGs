@@ -23,6 +23,7 @@ class Room {
 		this.status = Status.uninitialized;
 		this.mapID = 1;
 		this.maxPlayers = 2;
+		this.roomConfigResponse = null;
 		this.playersList = null;
 		this.game = new Game( this.players );
 	}
@@ -31,7 +32,7 @@ class Room {
 	{
 		if( this.status < Status.inGame )
 		{
-			if( id == this.admin )
+			if( id === this.admin )
 			{
 				this.roomsStorage.removeRoom( this.id );
 				let adminIndex = SearchEngine.findByUniqueID( this.players, id );
@@ -105,6 +106,27 @@ class Room {
 					return false;
 				}
 				this.status = Status.waitingForPlayers;
+				let map = Buffer.alloc( 4 );
+				map.writeUInt32BE( this.mapID, 0 );
+				let physics = this.game.getPhysics();
+				let gravity = Buffer.alloc( 2 );
+				gravity.writeUInt16BE( physics.gravity, 0 );
+				let jumpHeight = Buffer.alloc( 2 );
+				jumpHeight.writeInt16BE( physics.jumpHeight, 0 );
+				let maxSpeedX = Buffer.alloc( 2 );
+				maxSpeedX.writeUInt16BE( physics.maxSpeedX, 0 );
+				let maxSpeedY = Buffer.alloc( 2 );
+				maxSpeedY.writeUInt16BE( physics.maxSpeedY, 0 );
+				let maxPlayers = Buffer.alloc( 1 );
+				maxPlayers.writeUInt8( this.maxPlayers, 0 );
+				this.roomConfigResponse = {
+					map,
+					gravity,
+					jumpHeight,
+					maxSpeedX,
+					maxSpeedY,
+					maxPlayers
+				};
 				return true;
 			}
 		}
@@ -189,7 +211,7 @@ class Room {
 		}
 		this.playersList = {
 			players_count : count,
-			players : clients
+			players : players
 		};
 	}
 
@@ -209,6 +231,11 @@ class Room {
 			}
 		}
 		setTimeout( this.game.start.bind( this.game ), 3000 );
+	}
+
+	getRoomConfig()
+	{
+		return this.roomConfigResponse;
 	}
 }
 module.exports = Room;

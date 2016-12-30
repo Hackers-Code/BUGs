@@ -23,6 +23,16 @@ class Game {
 		this.jumpHeight = physics.jumpHeight;
 	}
 
+	getPhysics()
+	{
+		return {
+			gravity : this.gravity,
+			maxSpeedX : this.maxSpeedX,
+			maxSpeedY : this.maxSpeedY,
+			jumpHeight : this.jumpHeight
+		};
+	}
+
 	loadMap( id )
 	{
 		MapInterface.getParsedMap( id, this.initWorld );

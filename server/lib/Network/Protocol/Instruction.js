@@ -79,11 +79,13 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x28 : {
-		rule : 'status:1',
-		type : InstructionTypes.server
+		rule : '',
+		type : InstructionTypes.client,
+		callback : 'getRoomConfig',
+		response : 0x27
 	},
 	0x29 : {
-		rule : 'status:1',
+		rule : 'map:4;gravity:2;jumpHeight:2;maxSpeedX:2;maxSpeedY:2;maxPlayers:1',
 		type : InstructionTypes.server
 	},
 	0xe0 : {
