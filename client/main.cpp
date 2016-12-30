@@ -94,7 +94,7 @@ sf::Music soundtrack;
 bool bounds[4];//up,right,down,left
 bool soundbarexchanged=0, soundpointerpressed=0;
 enum modes{ingame, connectroom, lobby};
-enum textboxes{none=0, ipbox, portbox, nickbox, roomnamebox, passwordbox, seedbox, listbox};
+enum textboxes{none=0, ipbox, portbox, nickbox, roomnamebox, passwordbox, seedbox, listbox, vxmaxbox, vymaxbox, aybox, vjumpbox};
 modes mode=connectroom;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol, protbuffers[3];
@@ -105,11 +105,11 @@ float deltagamelist=120;
 
 //zmienne do lobby
 string lobbyname;
-sf::Text lobbynamet, seedinput;
-sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2;
-sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys;
+sf::Text lobbynamet, ainfo[4], seedinput, vxmaxtext, vymaxtext, aytext, vjumptext;
+sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2, advancedt;
+sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys, advanceds;
 int playersamount=2;
-bool ready=0, changingsettings=0;;
+bool ready=0, changingsettings=0, advancedb=0;
 list<sf::Vector2u> spawnpoints;
 
 
@@ -124,7 +124,7 @@ float mapscale=0.2;
 unsigned int turntime=0, clockframe=0, no18delta=0;
 
 //fizyka
-float vxmax=2, vymax=875, ax=4, ay=437, vjump=-300;
+int vxmax=2, vymax=875, ay=437, vjump=-300;
 sf::Clock clocker;
 sf::Time lastittime, currentittime, starttime;
 bool started=0;
@@ -451,6 +451,32 @@ void protocol1(string buffer){
     }else cout<<"nick must have no more than 20 letters\n";
 }
 
+void protocol10(){
+    if(connected){
+        unsigned char to_send[1];
+        to_send[0]=0x10;
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+            cout<<"poszlo 0x10\n";
+            gamelist.clear();
+            lastgamelistelement=0;
+            deltagamelist=120;
+        }else cout<<"sending error 0x10\n";
+    }else cout<<"not connected, cannot get room list\n";
+}
+
+bool protocol3(){
+    if(connected){
+        unsigned char to_send[1];
+        to_send[0]=0x3;
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+            cout<<"room leaved\n";
+            mode=connectroom;
+            return 1;
+        }else cout<<"sending error 0x3\n";
+    }else cout<<"not connected, cannot leave room\n";
+    return 0;
+}
+
 void protocol20(string buffer, string buffer2){
     if(connected){
         unsigned char to_send[22+(buffer.length())];
@@ -468,6 +494,24 @@ void protocol20(string buffer, string buffer2){
         if(clientsocket.send(to_send, 22+(buffer.length()))==sf::Socket::Done) cout<<"poszlo 0x20\n";
         else cout<<"sending error\n";
     }else cout<<"not connected, can not create room\n";
+}
+
+void protocol22(){
+    if(connected){
+        unsigned char to_send[9];
+        to_send[0]=0x22;
+        to_send[1]=(ay>>8)%256;
+        to_send[2]=ay%256;
+        to_send[3]=((-vjump)>>8)%256;
+        to_send[4]=(-vjump)%256;
+        to_send[5]=(vymax>>8)%256;
+        to_send[6]=(vymax)%256;
+        to_send[7]=(vxmax>>8)%256;
+        to_send[8]=(vxmax)%256;
+        if(clientsocket.send(to_send, 9)==sf::Socket::Done){
+            cout<<"poszlo 0x22\n";
+        }else cout<<"sending error 0x22\n";
+    }else cout<<"not connected, cannot set physic\n";
 }
 
 void protocol24(unsigned int seed, unsigned char playersamount){
@@ -512,11 +556,8 @@ void protocol28(){
         to_send[0]=0x28;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){
             cout<<"poszlo 0x28\n";
-            gamelist.clear();
-            lastgamelistelement=0;
-            deltagamelist=120;
         }else cout<<"sending error 0x28\n";
-    }else cout<<"not connected, cannot get room list\n";
+    }else cout<<"not connected, cannot get room settings\n";
 }
 
 void protocol2c(){
@@ -658,6 +699,9 @@ int main(){
         ready2.loadFromFile("img/ready2.bmp");
         readys.setTexture(ready2);
         readys.setPosition(200,30);
+        advancedt.loadFromFile("img/advanced.bmp");
+        advanceds.setTexture(advancedt);
+        advanceds.setPosition(270,30);
         clocks.setPosition(0,0);
         for(int i=0; i<9; i++){
             wormt[i].loadFromFile("img/rob2.0/anim"+to_string(i+1)+".png");
@@ -754,9 +798,6 @@ int main(){
                         vjump=atof(line.c_str());
                     }break;
                     case 4:{
-                        ax=atof(line.c_str());
-                    }break;
-                    case 5:{
                         vxmax=atof(line.c_str());
                     }break;
                     default:{
@@ -767,6 +808,39 @@ int main(){
         }else{
             cout<<"physic.cfg does not exist or is damaged\n";
         }
+        vxmaxtext.setFont(mainfont);
+        vxmaxtext.setString(to_string(vxmax));
+        vxmaxtext.setCharacterSize(12);
+        vxmaxtext.setColor(normalclr);
+        vxmaxtext.setPosition(278,68);
+        vymaxtext.setFont(mainfont);
+        vymaxtext.setString(to_string(vymax));
+        vymaxtext.setCharacterSize(12);
+        vymaxtext.setColor(normalclr);
+        vymaxtext.setPosition(278,98);
+        aytext.setFont(mainfont);
+        aytext.setString(to_string(ay));
+        aytext.setCharacterSize(12);
+        aytext.setColor(normalclr);
+        aytext.setPosition(278,128);
+        vjumptext.setFont(mainfont);
+        vjumptext.setString(to_string(vjump));
+        vjumptext.setCharacterSize(12);
+        vjumptext.setColor(normalclr);
+        vjumptext.setPosition(278,158);
+        for(int i=0; i<4; i++){
+            ainfo[i].setFont(mainfont);
+            ainfo[i].setCharacterSize(12);
+            ainfo[i].setColor(normalclr);
+        }
+        ainfo[0].setString("maxV(x)");
+        ainfo[0].setPosition(278+inputbart.getSize().x, 68);
+        ainfo[1].setString("maxV(y)");
+        ainfo[1].setPosition(278+inputbart.getSize().x, 98);
+        ainfo[2].setString("a(y)");
+        ainfo[2].setPosition(278+inputbart.getSize().x, 128);
+        ainfo[3].setString("jump");
+        ainfo[3].setPosition(278+inputbart.getSize().x, 158);
 /*
         backgroundt.loadFromImage(backgroundi=loadMap("1.map", spawnpoints));
         backgrounds.setTexture(backgroundt, 1);
@@ -937,7 +1011,7 @@ int main(){
                             soundbarexchanged=!soundbarexchanged;
                         }else
                         if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
-                            if(connected){protocol28();
+                            if(connected){protocol10();
                         }
                     }
                     }else{
@@ -1075,10 +1149,29 @@ int main(){
                 if(event.type==sf::Event::MouseButtonPressed){
                     if(textbox==seedbox){
                         seedinput.setColor(normalclr);
+                    }else
+                    if(textbox==vxmaxbox){
+                        vxmaxtext.setColor(normalclr);
+                        vxmax=atof(vxmaxtext.getString().toAnsiString().c_str());
+                    }else
+                    if(textbox==vymaxbox){
+                        vymaxtext.setColor(normalclr);
+                    }else
+                    if(textbox==aybox){
+                        aytext.setColor(normalclr);
+                        ay=atof(aytext.getString().toAnsiString().c_str());
+                    }else
+                    if(textbox==vjumpbox){
+                        vjumptext.setColor(normalclr);
+                        vjump=atof(vjumptext.getString().toAnsiString().c_str());
                     }
+                    textbox=none;
 
                     if((event.mouseButton.x>=lobbyouts.getPosition().x)&&(event.mouseButton.x<=lobbyouts.getPosition().x+lobbyouts.getLocalBounds().width)&&(event.mouseButton.y>=lobbyouts.getPosition().y)&&(event.mouseButton.y<=lobbyouts.getPosition().y+lobbyouts.getLocalBounds().height)){
-                        mode=connectroom;
+                        protocol3();
+                    }else
+                    if((event.mouseButton.x>=advanceds.getPosition().x)&&(event.mouseButton.x<=advanceds.getPosition().x+advanceds.getLocalBounds().width)&&(event.mouseButton.y>=advanceds.getPosition().y)&&(event.mouseButton.y<=advanceds.getPosition().y+advanceds.getLocalBounds().height)){
+                        advancedb=!advancedb;
                     }else
                     if((event.mouseButton.x>=cb2players.getPosition().x)&&(event.mouseButton.x<=cb2players.getPosition().x+cb2players.getLocalBounds().width)&&(event.mouseButton.y>=cb2players.getPosition().y)&&(event.mouseButton.y<=cb2players.getPosition().y+cb2players.getLocalBounds().height)){
                         switch(playersamount){
@@ -1117,7 +1210,7 @@ int main(){
                         playersamount=4;
                     }else
                     if((changingsettings)&&(event.mouseButton.x>=oksettings.getPosition().x)&&(event.mouseButton.x<=oksettings.getPosition().x+oksettings.getLocalBounds().width)&&(event.mouseButton.y>=oksettings.getPosition().y)&&(event.mouseButton.y<=oksettings.getPosition().y+oksettings.getLocalBounds().height)){
-                        if(seedinput.getString().getSize()<10) protocol24(atoi(seedinput.getString().toAnsiString().c_str()), playersamount);
+                        if(seedinput.getString().getSize()<10) protocol22();
                         else cout<<"seed is too big\n";
                     }else
                     if((event.mouseButton.x>=readys.getPosition().x)&&(event.mouseButton.x<=readys.getPosition().x+readys.getLocalBounds().width)&&(event.mouseButton.y>=readys.getPosition().y)&&(event.mouseButton.y<=readys.getPosition().y+readys.getLocalBounds().height)){
@@ -1132,6 +1225,26 @@ int main(){
                     if((changingsettings)&&(event.mouseButton.x>=seedinput.getPosition().x-8)&&(event.mouseButton.x<=seedinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=seedinput.getPosition().y-8)&&(event.mouseButton.y<=seedinput.getPosition().y-8+inputbars.getLocalBounds().height)){
                         seedinput.setColor(checkedclr);
                         textbox=seedbox;
+                    }else
+                    if((changingsettings)&&(event.mouseButton.x>=vxmaxtext.getPosition().x-8)&&(event.mouseButton.x<=vxmaxtext.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=vxmaxtext.getPosition().y-8)&&(event.mouseButton.y<=vxmaxtext.getPosition().y-8+inputbars.getLocalBounds().height)){
+                        vxmaxtext.setColor(checkedclr);
+                        textbox=vxmaxbox;
+                        vxmax=atof(vxmaxtext.getString().toAnsiString().c_str());
+                    }else
+                    if((changingsettings)&&(event.mouseButton.x>=vymaxtext.getPosition().x-8)&&(event.mouseButton.x<=vymaxtext.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=vymaxtext.getPosition().y-8)&&(event.mouseButton.y<=vymaxtext.getPosition().y-8+inputbars.getLocalBounds().height)){
+                        vymaxtext.setColor(checkedclr);
+                        textbox=vymaxbox;
+                        vymax=atof(vymaxtext.getString().toAnsiString().c_str());
+                    }else
+                    if((changingsettings)&&(event.mouseButton.x>=aytext.getPosition().x-8)&&(event.mouseButton.x<=aytext.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=aytext.getPosition().y-8)&&(event.mouseButton.y<=aytext.getPosition().y-8+inputbars.getLocalBounds().height)){
+                        aytext.setColor(checkedclr);
+                        textbox=aybox;
+                        ay=atof(aytext.getString().toAnsiString().c_str());
+                    }else
+                    if((changingsettings)&&(event.mouseButton.x>=vjumptext.getPosition().x-8)&&(event.mouseButton.x<=vjumptext.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=vjumptext.getPosition().y-8)&&(event.mouseButton.y<=vjumptext.getPosition().y-8+inputbars.getLocalBounds().height)){
+                        vjumptext.setColor(checkedclr);
+                        textbox=vjumpbox;
+                        vjump=atof(vjumptext.getString().toAnsiString().c_str());
                     }
                 }else
                 if(event.type==sf::Event::TextEntered){sf::Text* inputpointer=0;
@@ -1144,7 +1257,56 @@ int main(){
                             seedinput.setString(seedinput.getString()+event.text.unicode);
                         }else
                         if(event.text.unicode==8) inputpointer=&seedinput;
-                        else cout<<", "<<int(event.text.unicode);
+                    }else
+                    if(textbox==vxmaxbox){
+                        if(event.text.unicode==13){
+                            vxmaxtext.setColor(normalclr);
+                            inputpointer=0;
+                            vxmax=atof(vxmaxtext.getString().toAnsiString().c_str());
+                        }else
+                        if((event.text.unicode>='0')&&(event.text.unicode<='9')){
+                            vxmaxtext.setString(vxmaxtext.getString()+event.text.unicode);
+                        }else
+                        if(event.text.unicode==8) inputpointer=&vxmaxtext;
+                    }else
+                    if(textbox==vymaxbox){
+                        if(event.text.unicode==13){
+                            vymaxtext.setColor(normalclr);
+                            inputpointer=0;
+                            vymax=atof(vymaxtext.getString().toAnsiString().c_str());
+                        }else
+                        if((event.text.unicode>='0')&&(event.text.unicode<='9')){
+                            vymaxtext.setString(vymaxtext.getString()+event.text.unicode);
+                        }else
+                        if(event.text.unicode==8) inputpointer=&vymaxtext;
+                    }else
+                    if(textbox==aybox){
+                        if(event.text.unicode==13){
+                            aytext.setColor(normalclr);
+                            inputpointer=0;
+                            ay=atof(aytext.getString().toAnsiString().c_str());
+                        }else
+                        if((event.text.unicode>='0')&&(event.text.unicode<='9')){
+                            aytext.setString(aytext.getString()+event.text.unicode);
+                        }else
+                        if(event.text.unicode==8) inputpointer=&aytext;
+                    }else
+                    if(textbox==vjumpbox){
+                        if(event.text.unicode==13){
+                            vjumptext.setColor(normalclr);
+                            inputpointer=0;
+                            vjump=atof(vjumptext.getString().toAnsiString().c_str());
+                        }else
+                        if((event.text.unicode>='0')&&(event.text.unicode<='9')){
+                            vjumptext.setString(vjumptext.getString()+event.text.unicode);
+                        }else
+                        if(event.text.unicode==8){
+                            buffer=vjumptext.getString();
+                            if(buffer.length()-1){
+                                buffer.erase(buffer.length()-1);
+                                vjumptext.setString(buffer);
+                            }
+                        }
                     }
 
                     if(inputpointer){
@@ -1289,7 +1451,19 @@ int main(){
                             }else{
                                 cout<<"room denied\n";
                             }
-                        }else cout<<"lost response 0x8\n";
+                        }else cout<<"lost response 0x21\n";
+                        continue;
+                    }
+                    if(data[i]==0x23){
+                        i++;
+                        if(i<received){
+                            if(data[i]){
+                                cout<<"physic accepted\n"<<char(7);
+                                protocol24(atoi(seedinput.getString().toAnsiString().c_str()), playersamount);
+                            }else{
+                                cout<<"physic denied\n";
+                            }
+                        }else cout<<"lost response 0x23\n";
                         continue;
                     }
                     if(data[i]==0x25){
@@ -1322,6 +1496,13 @@ int main(){
                         }
                         break;
                     }
+                    if(data[i]==0x29){
+                        receiving=0x29;
+                        deltareceive=i+1;
+                        to_receive=13;
+                        protbufferi[0]=protbufferi[1]=protbufferi[2]=0;
+                        break;
+                    }
                     if(data[i]==0x2d){
                         if(ready){
                             ready=0;
@@ -1346,7 +1527,7 @@ int main(){
                     if(data[i]==0x2f){
                         receiving=0x2f;
                         deltareceive=i+1;
-                        to_receive=4;
+                        to_receive=5;
                         protbufferi[0]=1;
                         cout<<"receiving players\n";
                         break;
@@ -1420,6 +1601,20 @@ int main(){
                         protbuffers[0]="";
                         break;
                     }
+                    if(data[i]==0xe3){
+                        cout<<"server error:\n";
+                        receiving=0xe3;
+                        i++;
+                        if(i<received){
+                            to_receive=data[i];
+                        }else{
+                            cout<<"lost rest of 0xe3\n";
+                            break;
+                        }
+                        deltareceive=i+1;
+                        protbuffers[0]="";
+                        break;
+                    }
                     cout<<"received unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
             }
@@ -1476,6 +1671,7 @@ int main(){
                         if(data[i]){
                             cout<<"joined\n"<<char(7);
                             mode=lobby;
+                            protocol28();
                         }else{
                             cout<<"not joined\n";
                             to_receive=0;
@@ -1495,11 +1691,64 @@ int main(){
                     receiving=0;
                 }
             }else
+            if(receiving==0x29){
+                for(int i=deltareceive; (i<received); i++){
+                    if(to_receive>9){
+                        protbufferi[0]=protbufferi[0]<<8;
+                        protbufferi[0]+=data[i];
+                    }else
+                    if(to_receive>7){
+                        protbufferi[1]=protbufferi[1]<<8;
+                        protbufferi[1]+=data[i];
+                    }else
+                    if(to_receive>5){
+                        protbufferi[2]=protbufferi[2]<<8;
+                        protbufferi[2]+=data[i];
+                    }else
+                    if(to_receive>3){
+                        protbufferi[3]=protbufferi[3]<<8;
+                        protbufferi[3]+=data[i];
+                    }else
+                    if(to_receive>1){
+                        protbufferi[4]=protbufferi[4]<<8;
+                        protbufferi[4]+=data[i];
+                    }else
+                    if(to_receive==1){
+                        seedinput.setString(to_string(protbufferi[0]));
+                        ay=protbufferi[1];
+                        vjump=-protbufferi[2];
+                        vymax=protbufferi[3];
+                        vxmax=protbufferi[4];
+                        cb2players.setTexture(checkboxoff);
+                        cb3players.setTexture(checkboxoff);
+                        cb4players.setTexture(checkboxoff);
+                        switch(data[i]){
+                            case 2:{
+                                cb2players.setTexture(checkboxon);
+                            }break;
+                            case 3:{
+                                cb3players.setTexture(checkboxon);
+                            }break;
+                            case 4:{
+                                cb4players.setTexture(checkboxon);
+                            }break;
+                            default:{
+                                cout<<"wrong required players: "<<data[i]<<"\n";
+                            }break;
+                        }
+                    }
+                    to_receive--;
+                }
+            }else
             if(receiving==0x2f){
                 for(int i=deltareceive; i<received; i++){
                     if(protbufferi[0]){
-                        protbufferi[1]=protbufferi[1]<<8;
-                        protbufferi[1]+=data[i];
+                        if(to_receive==5){
+                            //data[i]==gotowi
+                        }else{
+                            protbufferi[1]=protbufferi[1]<<8;
+                            protbufferi[1]+=data[i];
+                        }
                     }else{
                         if(!(to_receive%21)){
                             if(protbufferi[1]!=40){
@@ -1573,6 +1822,19 @@ int main(){
                         protbuffers[0]+=data[i];
                         cout<<protbuffers[0]<<"\n";
                         MessageBox(0, protbuffers[0].c_str(), "0xe2: server error", MB_OK);
+                        receiving=0;
+                        break;
+                    }
+                    protbuffers[0]+=data[i];
+                }
+            }else
+            if(receiving==0xe3){
+                for(int i=deltareceive; i<received; i++){
+                    to_receive--;
+                    if(!to_receive){
+                        protbuffers[0]+=data[i];
+                        cout<<protbuffers[0]<<"\n";
+                        MessageBox(0, protbuffers[0].c_str(), "0xe3: server error", MB_OK);
                         receiving=0;
                         break;
                     }
@@ -1975,6 +2237,24 @@ int main(){
                 window.draw(oksettings);
             }
             window.draw(readys);
+            window.draw(advanceds);
+            if(advancedb){
+                inputbars.setPosition(vxmaxtext.getPosition()+sf::Vector2f(-8,-8));
+                window.draw(inputbars);
+                window.draw(vxmaxtext);
+                inputbars.setPosition(vymaxtext.getPosition()+sf::Vector2f(-8,-8));
+                window.draw(inputbars);
+                window.draw(vymaxtext);
+                inputbars.setPosition(aytext.getPosition()+sf::Vector2f(-8,-8));
+                window.draw(inputbars);
+                window.draw(aytext);
+                inputbars.setPosition(vjumptext.getPosition()+sf::Vector2f(-8,-8));
+                window.draw(inputbars);
+                window.draw(vjumptext);
+                for(int i=0; i<4; i++){
+                    window.draw(ainfo[i]);
+                }
+            }
             window.draw(soundicons);
             if(soundbarexchanged){
                 window.draw(soundbars);
@@ -1985,3 +2265,5 @@ int main(){
     }
     return 0;
 }
+
+//"Mo¿liwe, ¿e bêdzie dzia³aæ, ale prawdopodobnie nie." Micha³ Marczewski
