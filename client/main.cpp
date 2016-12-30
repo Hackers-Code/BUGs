@@ -64,8 +64,11 @@ bool connect(string ip, string port){
     }
     clientsocket.setBlocking(0);
     udpsocket.setBlocking(0);
+    udpport=0;
     if(udpsocket.bind(udpport)!=sf::Socket::Done){
         cout<<"udp socket can not be binded to "<<port<<"\n";
+    }else{
+        cout<<"udp socket binded to "<<udpsocket.getLocalPort()<<"\n";
     }
     connectionS.setTexture(ont);
     connected=1;
@@ -84,13 +87,14 @@ bool connect(string ip, string port){
 //{
 sf::RenderWindow window(sf::VideoMode(1200, 720), "worms");
 sf::Event event;
-sf::Color bgcolor(40,40,40), checkedclr(0,255,255), normalclr(0,255,0);
-sf::Texture inputbart, binputbart, okt, bgplanet, reloadgamelistt, soundicont, soundbart, soundpointert;
-sf::Sprite  inputbars, binputbars, okconnects, oknicks, okcreaterooms, bgplanes, reloadgamelists, soundicons, soundbars, soundpointers;
+sf::Color bgcolor(40,40,40), checkedclr(0,255,255), normalclr(0,255,0), yourcolor(0,0,0);
+sf::Texture inputbart, binputbart, okt, bgplanet, reloadgamelistt, soundicont, soundbart, soundpointert, colorpointert, colorbart[3], maskt[9], maskchooset[9], maskrt, masklt;
+sf::Sprite  inputbars, binputbars, okconnects, oknicks, okcreaterooms, bgplanes, reloadgamelists, soundicons, soundbars, soundpointers, colorpointers[3], colorbars[3], maskchoose, maskrs, maskls;
 sf::Image bgplanei;
 sf::Font mainfont;
 sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwordinput;
 sf::Music soundtrack;
+sf::RectangleShape yourcolordisplay;
 bool bounds[4];//up,right,down,left
 bool soundbarexchanged=0, soundpointerpressed=0;
 enum modes{ingame, connectroom, lobby};
@@ -99,7 +103,7 @@ modes mode=connectroom;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol, protbuffers[3];
 size_t received=0;
-unsigned int myid=0, to_receive=0, udpto_receive=0, to_ignore=0, udpto_ignore=0, lastgamelistelement=0, frame=0, protbufferi[6];
+unsigned int myid=0, to_receive=0, udpto_receive=0, to_ignore=0, udpto_ignore=0, lastgamelistelement=0, frame=0, protbufferi[6], colorpointerpressed=3, choosedmask=0;
 float deltagamelist=120;
 
 
@@ -751,11 +755,38 @@ int main(){
         turntimet.setCharacterSize(25);
         turntimet.setColor(normalclr);
         turntimet.setPosition(40,0);
+        colorbart[0].loadFromFile("img/redbar.bmp");
+        colorbart[1].loadFromFile("img/greenbar.bmp");
+        colorbart[2].loadFromFile("img/bluebar.bmp");
+        colorpointert.loadFromFile("img/colorpointer.png");
+        for(int i=0; i<3; i++){
+            colorbars[i].setTexture(colorbart[i]);
+            colorbars[i].setPosition(800, 25+25*i);
+            colorpointers[i].setTexture(colorpointert);
+            colorpointers[i].setPosition(796, 15+25*i);
+        }
         for(int i=0; i<INFO_AMOUNT; i++){
             info[i].setFont(mainfont);
             info[i].setCharacterSize(12);
             info[i].setColor(normalclr);
         }
+        yourcolordisplay.setPosition(910, 10);
+        yourcolordisplay.setSize(sf::Vector2f(50,50));
+        yourcolordisplay.setFillColor(yourcolor);
+        masklt.loadFromFile("img/left.bmp");
+        maskrt.loadFromFile("img/right.bmp");
+        maskls.setTexture(masklt);
+        maskrs.setTexture(maskrt);
+        maskls.setPosition(960, 25);
+        maskrs.setPosition(1050, 25);
+        for(int i=0; i<9; i++){
+            maskchooset[i].loadFromFile("img/mask/"+to_string(i+1)+".png");
+        }
+        for(int i=0; i<9; i++){
+            maskt[i].loadFromFile("img/mask_ingame/"+to_string(i+1)+".png");
+        }
+        maskchoose.setTexture(maskchooset[choosedmask]);
+        maskchoose.setPosition(990, 10);
         info[0].setString("ip");
         info[0].setPosition(150,8);
         info[1].setString("port");
@@ -1011,9 +1042,21 @@ int main(){
                             soundbarexchanged=!soundbarexchanged;
                         }else
                         if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
-                            if(connected){protocol10();
+                            if(connected){protocol10();}
+                        }else
+                        if((event.mouseButton.x>=maskrs.getPosition().x)&&(event.mouseButton.x<=maskrs.getPosition().x+maskrs.getLocalBounds().width)&&(event.mouseButton.y>=maskrs.getPosition().y)&&(event.mouseButton.y<=maskrs.getPosition().y+maskrs.getLocalBounds().height)){
+                            if(!choosedmask) choosedmask=8;
+                            else choosedmask--;
+                            maskchoose.setTexture(maskchooset[choosedmask]);
+                        }else
+                        if((event.mouseButton.x>=maskls.getPosition().x)&&(event.mouseButton.x<=maskls.getPosition().x+maskls.getLocalBounds().width)&&(event.mouseButton.y>=maskls.getPosition().y)&&(event.mouseButton.y<=maskls.getPosition().y+maskls.getLocalBounds().height)){
+                            choosedmask=(choosedmask+1)%9;
+                            maskchoose.setTexture(maskchooset[choosedmask]);
                         }
-                    }
+                        for(int i=0; i<3; i++)
+                            if((event.mouseButton.x>=colorpointers[i].getPosition().x)&&(event.mouseButton.x<=colorpointers[i].getPosition().x+colorpointers[i].getLocalBounds().width)&&(event.mouseButton.y>=colorpointers[i].getPosition().y)&&(event.mouseButton.y<=colorpointers[i].getPosition().y+colorpointers[i].getLocalBounds().height)){
+                                colorpointerpressed=i;
+                            }
                     }else{
                         int listelementbuffer=int(event.mouseButton.y-deltagamelist)/int(inputbars.getLocalBounds().height);
                         if((listelementbuffer<=lastgamelistelement)&&(listelementbuffer>0)){
@@ -1137,11 +1180,27 @@ int main(){
                 }else
                 if(event.type==sf::Event::MouseButtonReleased){
                     soundpointerpressed=0;
+                    colorpointerpressed=3;
                 }else
                 if(event.type==sf::Event::MouseMoved){
                     if(soundpointerpressed){
                         soundtrack.setVolume((event.mouseMove.y-30)*(event.mouseMove.y>30)-(event.mouseMove.y-130)*(event.mouseMove.y>130));
                         soundpointers.setPosition(1139, 24+soundtrack.getVolume());
+                    }else
+                    if(colorpointerpressed<3){
+                        colorpointers[colorpointerpressed].setPosition(((event.mouseMove.x)+((event.mouseMove.x<796)*(796-event.mouseMove.x))-((event.mouseMove.x>896)*(event.mouseMove.x-896))), colorpointers[colorpointerpressed].getPosition().y);
+                        switch(colorpointerpressed){
+                            case 0:{
+                                yourcolor.r=(colorpointers[0].getPosition().x-796)*255/100;
+                            }break;
+                            case 1:{
+                                yourcolor.g=(colorpointers[1].getPosition().x-796)*255/100;
+                            }break;
+                            case 2:{
+                                yourcolor.b=(colorpointers[2].getPosition().x-796)*255/100;
+                            }break;
+                        }
+                        yourcolordisplay.setFillColor(yourcolor);
                     }
                 }
             }else
@@ -1504,15 +1563,20 @@ int main(){
                         break;
                     }
                     if(data[i]==0x2d){
-                        if(ready){
-                            ready=0;
-                            readys.setTexture(ready2);
-                            cout<<"unready\n"<<char(7);
-                        }else{
-                            ready=1;
-                            readys.setTexture(ready1);
-                            cout<<"ready\n"<<char(7);
-                        }
+                        i++;
+                        if(i<received){
+                            if(data[i]){
+                                if(ready){
+                                    ready=0;
+                                    readys.setTexture(ready2);
+                                    cout<<"unready\n"<<char(7);
+                                }else{
+                                    ready=1;
+                                    readys.setTexture(ready1);
+                                    cout<<"ready\n"<<char(7);
+                                }
+                            }else cout<<"changing ready denied\n";
+                        }else cout<<"lost response 0x2d\n";
                         continue;
                     }
                     if(data[i]==0x30){
@@ -2214,7 +2278,15 @@ int main(){
             window.draw(okcreaterooms);
             window.draw(reloadgamelists);
             window.draw(connectionS);
+            window.draw(maskrs);
+            window.draw(maskls);
+            window.draw(maskchoose);
+            window.draw(yourcolordisplay);
             window.draw(soundicons);
+            for(int i=0; i<3; i++){
+                window.draw(colorbars[i]);
+                window.draw(colorpointers[i]);
+            }
             if(soundbarexchanged){
                 window.draw(soundbars);
                 window.draw(soundpointers);
@@ -2266,4 +2338,5 @@ int main(){
     return 0;
 }
 
-//"Mo¿liwe, ¿e bêdzie dzia³aæ, ale prawdopodobnie nie." Micha³ Marczewski
+//"MoÂ¿liwe, Â¿e bÃªdzie dziaÂ³aÃ¦, ale prawdopodobnie nie." MichaÂ³ Marczewski
+//"Obawiam siÄ™, Å¼e bÄ™dziemy siÄ™ na spawnie spawniÄ‡" Jakub Olszewski
