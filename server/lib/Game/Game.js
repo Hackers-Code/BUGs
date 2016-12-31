@@ -35,7 +35,7 @@ class Game {
 
 	loadMap( id )
 	{
-		MapInterface.getParsedMap( id, this.initWorld );
+		MapInterface.getParsedMap( id, this.initWorld.bind( this ) );
 	}
 
 	initWorld( err, data )
