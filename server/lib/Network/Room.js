@@ -128,6 +128,7 @@ class Room {
 					maxPlayers
 				};
 				this.preparePlayersList();
+				this.checkIfAllConfirmed();
 				return true;
 			}
 		}
@@ -157,7 +158,6 @@ class Room {
 				if( this.players.length === this.maxPlayers )
 				{
 					this.status = Status.waitingForConfirming;
-					this.checkIfAllConfirmed();
 				}
 				return true;
 			}
@@ -177,7 +177,7 @@ class Room {
 		this.game.loadMap( this.mapID );
 		for( let i = 0 ; i < this.players.length ; i++ )
 		{
-			this.players[ i ].response.send( { opcode : 0x14 } );
+			console.log( 'Starting game' );
 		}
 		this.checkIfAllLoadedMap();
 	}
