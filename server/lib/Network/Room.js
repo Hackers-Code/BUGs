@@ -20,7 +20,6 @@ class Room {
 		this.roomsStorage = roomsStorage;
 		this.players = [];
 		this.players.push( new Player( client ) );
-		client.player = this.players[ 0 ];
 		this.status = Status.uninitialized;
 		this.mapID = 1;
 		this.maxPlayers = 2;
@@ -154,8 +153,7 @@ class Room {
 		{
 			if( password.compare( this.password ) === 0 )
 			{
-				this.players.push( client );
-				client.player = this.players[ this.players.length - 1 ];
+				this.players.push( new Player( client ) );
 				if( this.players.length === this.maxPlayers )
 				{
 					this.status = Status.waitingForConfirming;

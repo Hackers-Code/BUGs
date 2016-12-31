@@ -1,6 +1,7 @@
 class Player {
 	constructor( client )
 	{
+		client.player = this;
 		this.response = client.response;
 		this.id = client.id;
 		this.confirmed = false;
@@ -22,7 +23,7 @@ class Player {
 
 	confirm()
 	{
-		this.confirmed = true;
+		this.confirmed = !this.confirmed;
 	}
 }
 
