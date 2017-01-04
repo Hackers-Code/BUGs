@@ -177,7 +177,7 @@ class Room {
 		this.game.loadMap( this.mapID );
 		for( let i = 0 ; i < this.players.length ; i++ )
 		{
-			console.log( 'Starting game' );
+			this.players[ i ].response.send( { opcode : 0x30 } );
 		}
 		this.checkIfAllLoadedMap();
 	}

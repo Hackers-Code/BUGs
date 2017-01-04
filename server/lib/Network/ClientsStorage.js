@@ -33,7 +33,7 @@ class ClientsStorage {
 		{
 			if( this.clients.status >= ClientStatus.inGame )
 			{
-				console.log( void 0 );
+				//
 			}
 			if( this.clients.status >= ClientStatus.inLobby )
 			{
