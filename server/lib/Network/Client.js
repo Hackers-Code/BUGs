@@ -86,6 +86,8 @@ class Client {
 		if( this.room !== null )
 		{
 			this.room.leave( this.id );
+			this.room = null;
+			this.player = null;
 			return true;
 		}
 		return false;
