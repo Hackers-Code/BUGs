@@ -10,6 +10,7 @@ class Player {
 		this.worms = [];
 		this.colour = [];
 		this.mask = 0;
+		this.port = 0;
 	}
 
 	setProperties( data )
@@ -25,6 +26,16 @@ class Player {
 	confirm()
 	{
 		this.confirmed = !this.confirmed;
+	}
+
+	setMapLoaded()
+	{
+		this.mapLoaded = true;
+	}
+
+	setUDP( port )
+	{
+		this.port = port;
 	}
 }
 

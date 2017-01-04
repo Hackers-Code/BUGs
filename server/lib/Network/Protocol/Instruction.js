@@ -122,6 +122,16 @@ const InstructionMap = {
 		rule : '',
 		type : InstructionTypes.server
 	},
+	0x31 : {
+		rule : '',
+		type : InstructionTypes.client,
+		callback : 'setMapLoaded'
+	},
+	0x34 : {
+		rule : 'port:2',
+		type : InstructionTypes.client,
+		callback : 'setUDP'
+	},
 	0xe0 : {
 		rule : 'length:1;error:length',
 		type : InstructionTypes.server

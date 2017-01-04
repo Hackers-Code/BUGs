@@ -166,6 +166,26 @@ class Client {
 		}
 	}
 
+	setMapLoaded()
+	{
+		if( this.player !== null )
+		{
+			this.player.setMapLoaded();
+			return true;
+		}
+		return false;
+	}
+
+	setUDP( data )
+	{
+		if( this.player !== null )
+		{
+			this.player.setUDP( data.port );
+			return true;
+		}
+		return false;
+	}
+
 	jump()
 	{
 		if( this.room !== null && this.isYourMove === true )
