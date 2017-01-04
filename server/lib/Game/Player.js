@@ -19,6 +19,7 @@ class Player {
 		this.colour.push( data.colourG );
 		this.colour.push( data.colourB );
 		this.mask = data.mask;
+		return true;
 	}
 
 	confirm()

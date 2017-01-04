@@ -139,7 +139,11 @@ class Client {
 
 	setPlayerProperties( data )
 	{
-		return this.player.setProperties( data );
+		if( this.player !== null )
+		{
+			return this.player.setProperties( data );
+		}
+		return false;
 	}
 
 	switchReady()
