@@ -33,10 +33,11 @@ class ClientsStorage {
 		{
 			if( this.clients.status >= ClientStatus.inGame )
 			{
-				if( this.clients.status >= ClientStatus.inLobby )
-				{
-					this.clients[ client ].leaveLobby();
-				}
+				console.log( void 0 );
+			}
+			if( this.clients.status >= ClientStatus.inLobby )
+			{
+				this.clients[ client ].leaveLobby();
 			}
 			if( this.clients.status >= ClientStatus.named )
 			{
