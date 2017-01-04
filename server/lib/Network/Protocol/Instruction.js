@@ -118,6 +118,10 @@ const InstructionMap = {
 		rule : 'ready:1;count:4;players(index:1;name:20)*count',
 		type : InstructionTypes.server
 	},
+	0x30 : {
+		rule : '',
+		type : InstructionTypes.server
+	},
 	0xe0 : {
 		rule : 'length:1;error:length',
 		type : InstructionTypes.server
