@@ -90,7 +90,7 @@ bool connect(string ip, string port){
 sf::RenderWindow window(sf::VideoMode(1200, 720), "worms");
 sf::Event event;
 sf::Color bgcolor(40,40,40), checkedclr(0,255,255), normalclr(0,255,0), yourcolor(0,0,0);
-sf::Texture inputbart, binputbart, okt, bgplanet, reloadgamelistt, soundicont, soundbart, soundpointert, colorpointert, colorbart[3], maskt[9], maskchooset[9], maskrt, masklt;
+sf::Texture inputbart, binputbart, okt, bgplanet, reloadgamelistt, soundicont, soundbart, soundpointert, colorpointert, colorbart[3], maskt[10], maskchooset[10], maskrt, masklt;
 sf::Sprite  inputbars, binputbars, okconnects, oknicks, okcreaterooms, okrgbm, bgplanes, reloadgamelists, soundicons, soundbars, soundpointers, colorpointers[3], colorbars[3], maskchoose, maskrs, maskls;
 sf::Image bgplanei;
 sf::Font mainfont;
@@ -317,7 +317,7 @@ class worm{public:
 
     void next_anim(){
         animcount++;
-        if(animcount>8){
+        if(animcount>9){
             animcount=0;
         }
         sprite.setTexture(wormt[animcount]);
@@ -443,8 +443,6 @@ bool colide(sf::Vector2f pixelin, sf::Image &imagein){
     else
         return 1;
 }
-
-void protocol34(unsigned short port);
 
 void protocol1(string buffer){
     if(buffer.length()<=20){
@@ -604,22 +602,16 @@ void protocol2e(){
 
 void protocol31(){
     if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x31;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){protocol34(udpport);
+        unsigned char to_send[3];
+        to_send[0]=0x34;
+        to_send[1]=(udpport>>8)%256;
+        to_send[2]=udpport%256;
+        if(clientsocket.send(to_send, 3)==sf::Socket::Done){
         }else cout<<"sending error 0x31\n";
-    }else cout<<"not connected, cannot get worms list\n";
+    }else cout<<"not connected, cannot get turn time\n";
 }
 
 void protocol34(unsigned short port){
-    if(connected){
-        unsigned char to_send[3];
-        to_send[0]=0x34;
-        to_send[1]=(port>>8)%256;
-        to_send[2]=port%256;
-        if(clientsocket.send(to_send, 3)==sf::Socket::Done){
-        }else cout<<"sending error 0x34\n";
-    }else cout<<"not connected, cannot get turn time\n";
 }
 
 bool protocol37(){return 1;
@@ -801,11 +793,11 @@ int main(){
         maskrs.setTexture(maskrt);
         maskls.setPosition(960, 25);
         maskrs.setPosition(1050, 25);
-        for(int i=0; i<9; i++){
-            maskchooset[i].loadFromFile("img/mask/"+to_string(i+1)+".png");
+        for(int i=0; i<10; i++){
+            maskchooset[i].loadFromFile("img/mask/"+to_string(i)+".png");
         }
-        for(int i=0; i<9; i++){
-            maskt[i].loadFromFile("img/mask_ingame/"+to_string(i+1)+".png");
+        for(int i=0; i<10; i++){
+            maskt[i].loadFromFile("img/mask_ingame/"+to_string(i)+".png");
         }
         maskchoose.setTexture(maskchooset[choosedmask]);
         maskchoose.setPosition(990, 10);
@@ -1299,13 +1291,13 @@ int main(){
                         vjump=atof(vjumptext.getString().toAnsiString().c_str());
                     }else
                     if((event.mouseButton.x>=maskrs.getPosition().x)&&(event.mouseButton.x<=maskrs.getPosition().x+maskrs.getLocalBounds().width)&&(event.mouseButton.y>=maskrs.getPosition().y)&&(event.mouseButton.y<=maskrs.getPosition().y+maskrs.getLocalBounds().height)){
-                        if(!choosedmask) choosedmask=8;
-                        else choosedmask--;
-                        maskchoose.setTexture(maskchooset[choosedmask]);
+                        choosedmask=(choosedmask+1)%10;
+                        maskchoose.setTexture(maskchooset[choosedmask], 1);
                     }else
                     if((event.mouseButton.x>=maskls.getPosition().x)&&(event.mouseButton.x<=maskls.getPosition().x+maskls.getLocalBounds().width)&&(event.mouseButton.y>=maskls.getPosition().y)&&(event.mouseButton.y<=maskls.getPosition().y+maskls.getLocalBounds().height)){
-                        choosedmask=(choosedmask+1)%9;
-                        maskchoose.setTexture(maskchooset[choosedmask]);
+                        if(!choosedmask) choosedmask=9;
+                        else choosedmask--;
+                        maskchoose.setTexture(maskchooset[choosedmask], 1);
                     }else
                     if((event.mouseButton.x>=okrgbm.getPosition().x)&&(event.mouseButton.x<=okrgbm.getPosition().x+okrgbm.getLocalBounds().width)&&(event.mouseButton.y>=okrgbm.getPosition().y)&&(event.mouseButton.y<=okrgbm.getPosition().y+okrgbm.getLocalBounds().height)){
                         protocol2a(yourcolordisplay.getFillColor(), choosedmask);
@@ -1622,6 +1614,7 @@ int main(){
                         backgrounds.setTexture(backgroundt, 1);
                         backgrounds.setScale(0.2,0.2);
                         mode=ingame;
+                        protocol31();
                         break;
                     }
                     if(data[i]==0x2f){
@@ -1883,7 +1876,6 @@ int main(){
                             for(int i=0; i<playersamount; i++){
                                 cout<<"player["<<i<<"]="<<int(players[i].id)<<", "<<players[i].name<<"\n";
                             }
-                            protocol31();
                             break;
                         }
                     }
@@ -2053,7 +2045,6 @@ int main(){
                         }
                     }
                 }
-                protocol31();
                 no18delta=0;
             }
         }
@@ -2266,15 +2257,6 @@ int main(){
                         }
                     }
                 }
-            }
-        }
-
-        if((mode==ingame)&&(connected)){
-            no18delta++;
-            if(no18delta>40){
-                no18delta=0;
-                protocol31();
-                cout<<"resending 0x17 (response time out)\n";
             }
         }
 
