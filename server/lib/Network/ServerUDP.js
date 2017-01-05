@@ -40,7 +40,7 @@ class ServerUDP {
 			{
 				receivers.forEach( ( element ) =>
 				{
-					console.log( element.port );
+					console.log( buffer );
 					this.server.send( buffer, element.port, element.ip );
 				} );
 			}
