@@ -166,20 +166,11 @@ class Client {
 		}
 	}
 
-	setMapLoaded()
-	{
-		if( this.player !== null )
-		{
-			this.player.setMapLoaded();
-			return true;
-		}
-		return false;
-	}
-
 	setUDP( data )
 	{
 		if( this.player !== null )
 		{
+			this.player.setMapLoaded();
 			this.player.setUDP( data.port );
 			return true;
 		}
