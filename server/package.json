@@ -1,0 +1,29 @@
+{
+  "name": "creepy-crawlies-server",
+  "version": "0.0.1",
+  "description": "Game server for creepy-crawlies",
+  "main": "main.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha tests"
+  },
+  "keywords": [
+    "game",
+    "worms",
+    "creepy-crawlies",
+    "multiplayer",
+    "online"
+  ],
+  "author": "BOAKGP",
+  "license": "WTFPL",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hackers-Code/Creepy-crawlies"
+  }
+}
