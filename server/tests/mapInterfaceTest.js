@@ -4,6 +4,7 @@ const expect = chai.expect;
 const MapInterface = require( './../lib/MapInterface/MapInterface' );
 const MapLoader = require( './../lib/MapInterface/MapLoader' );
 const MapParser = require( './../lib/MapInterface/MapParser' );
+const MapDownloader = require( './../lib/MapInterface/MapDownloader' );
 
 describe( 'MapInterface', function()
 {
@@ -84,5 +85,13 @@ describe( 'MapParser', function()
 	it( 'parse() should return object if map is correct', function()
 	{
 		expect( MapParser.parse( Buffer.from( '0000000000000000010000000000000000', 'hex' ) ) ).to.be.an( 'object' );
+	} );
+} );
+
+describe( 'MapDownloader', () =>
+{
+	it( 'connect() should return boolean', () =>
+	{
+
 	} );
 } );
