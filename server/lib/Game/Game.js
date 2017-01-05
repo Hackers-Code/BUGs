@@ -18,6 +18,7 @@ class Game {
 		this.whoseTurnID = 0;
 		this.wormID = 0;
 		this.wormsList = null;
+		this.updateWormsList();
 	}
 
 	setPhysics( physics )
@@ -149,7 +150,7 @@ class Game {
 		{
 			worms.push( element.getWormState() );
 		} );
-		let tick = this.tick;
+		let tick = this.frame;
 		let count = worms.length;
 		this.wormsList = {
 			opcode : 0x32,
@@ -162,6 +163,8 @@ class Game {
 
 	getWorms()
 	{
+		console.log( 'printing this' );
+		console.log( this );
 		return this.wormsList;
 	}
 }

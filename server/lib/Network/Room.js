@@ -234,7 +234,7 @@ class Room {
 				return;
 			}
 		}
-		this.roomsStorage.app.udp.socket.addTask( this.players, this.game.getWorms.bind( this ) );
+		this.roomsStorage.app.udp.socket.addTask( this.players, this.game.getWorms.bind( this.game ) );
 		setTimeout( this.game.start.bind( this.game ), 3000 );
 	}
 
