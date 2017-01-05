@@ -1,4 +1,6 @@
 const dgram = require( 'dgram' );
+const Instruction = require( './Protocol/Instruction' );
+const Parser = require( './Protocol/Parser' );
 class ServerUDP {
 	constructor( reject, app )
 	{
@@ -6,6 +8,9 @@ class ServerUDP {
 		this.options = app.config.tcp;
 		this.clients = app.clientsStorage;
 		this.server = dgram.createSocket( 'udp4' );
+		this.tasks = [];
+		this.tickrate = 16;
+		this.parser = new Parser( 'opcode:1' );
 		this.server.on( 'message', ( data, rinfo ) =>
 		{
 
@@ -21,6 +26,20 @@ class ServerUDP {
 		} );
 
 		this.server.bind( this.options );
+	}
+
+	addTask( receivers, func )
+	{
+		let timeout = setInterval( () =>
+		{
+			let msg = func();
+			let buffer = this.parser.encode( Instruction.Map[ msg.opcode ].rule, msg );
+			receivers.forEach( ( element ) =>
+			{
+				this.server.send( buffer, element.port, element.ip );
+			} );
+		}, 1000 / this.tickrate );
+		this.tasks.push( timeout );
 	}
 }
 module.exports = ServerUDP;

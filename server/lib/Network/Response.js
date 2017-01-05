@@ -15,6 +15,7 @@ class Response {
 		let buffer = this.parser.encode( Instruction.Map[ opcode ].rule, data );
 		if( buffer !== false )
 		{
+			console.log( buffer );
 			this.socket.write( buffer );
 		}
 		else

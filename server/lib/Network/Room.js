@@ -19,7 +19,8 @@ class Room {
 		this.admin = client.id;
 		this.roomsStorage = roomsStorage;
 		this.players = [];
-		this.players.push( new Player( client ) );
+		this.playersID = 0;
+		this.players.push( new Player( client, this.playersID++ ) );
 		this.status = Status.uninitialized;
 		this.mapID = 1;
 		this.maxPlayers = 2;
@@ -154,7 +155,7 @@ class Room {
 		{
 			if( password.compare( this.password ) === 0 )
 			{
-				this.players.push( new Player( client ) );
+				this.players.push( new Player( client, this.playersID++ ) );
 				if( this.players.length === this.maxPlayers )
 				{
 					this.status = Status.waitingForConfirming;
@@ -233,6 +234,7 @@ class Room {
 				return;
 			}
 		}
+		this.app.udp.socket.addTask( this.players, this.game.getWorms.bind( this ) );
 		setTimeout( this.game.start.bind( this.game ), 3000 );
 	}
 

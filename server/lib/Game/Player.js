@@ -1,16 +1,34 @@
+const Worm = require( './Worm' );
 class Player {
-	constructor( client )
+	constructor( client, playerID )
 	{
 		client.player = this;
 		this.response = client.response;
 		this.id = client.id;
+		this.playerID = playerID;
 		this.confirmed = false;
 		this.mapLoaded = false;
 		this.name = client.name;
 		this.worms = [];
+		this.actualWorm = 0;
 		this.colour = [];
 		this.mask = 0;
+		this.ip = client.socket.remoteAddress;
 		this.port = 0;
+		this.isYourTurn = false;
+	}
+
+	addWorm( spawn, id )
+	{
+		let worm = new Worm( spawn, this.playerID, id );
+		this.worms.push( worm );
+	}
+
+	chooseWorm()
+	{
+		let retval = this.actualWorm;
+		this.actualWorm = this.actualWorm + 1 % this.worms.length;
+		return retval;
 	}
 
 	setProperties( data )
@@ -36,6 +54,11 @@ class Player {
 	setUDP( port )
 	{
 		this.port = port;
+	}
+
+	getWorms()
+	{
+		return this.worms;
 	}
 }
 

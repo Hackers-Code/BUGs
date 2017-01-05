@@ -17,6 +17,7 @@ class World {
 				this.spawns.push( spawn );
 			} );
 		}
+		this.unusedSpawns = this.spawns;
 		if( typeof parsedMap.blocks !== 'undefined' )
 		{
 			parsedMap.blocks.forEach( ( element ) =>
@@ -33,6 +34,14 @@ class World {
 				this.killingZones.push( killingZone );
 			} );
 		}
+	}
+
+	getUniqueSpawn()
+	{
+		let index = Math.floor( Math.random() * this.unusedSpawns.length );
+		let spawn = this.unusedSpawns[ index ];
+		this.unusedSpawns.splice( index, 1 );
+		return spawn;
 	}
 }
 

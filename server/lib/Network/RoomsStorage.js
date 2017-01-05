@@ -4,8 +4,9 @@ const UniqueNameStorage = require( './../Utils/UniqueNameStorage' );
 const SearchEngine = require( './../Utils/SearchEngine' );
 const Room = require( './Room' );
 class RoomsStorage {
-	constructor()
+	constructor( app )
 	{
+		this.app = app;
 		this.availableGamesResponse = null;
 		this.rooms = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
