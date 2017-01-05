@@ -53,7 +53,7 @@ class Player {
 
 	setUDP( port )
 	{
-		this.port = port;
+		this.port = port.readUInt16BE( 0 );
 	}
 
 	getWorms()
