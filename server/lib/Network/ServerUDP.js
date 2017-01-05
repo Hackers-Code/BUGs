@@ -33,11 +33,10 @@ class ServerUDP {
 		let timeout = setInterval( () =>
 		{
 			let msg = func();
-			console.log( func );
-			console.log( msg );
 			let opcode = msg.opcode;
 			msg.opcode = Buffer.from( [ opcode ] );
 			let buffer = this.parser.encode( Instruction.Map[ opcode ].rule, msg );
+			console.log( buffer );
 			receivers.forEach( ( element ) =>
 			{
 				this.server.send( buffer, element.port, element.ip );

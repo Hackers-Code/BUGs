@@ -165,8 +165,6 @@ class Game {
 
 	getWorms()
 	{
-		console.log( 'printing this' );
-		console.log( this );
 		return this.wormsList;
 	}
 }
