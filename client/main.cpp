@@ -63,12 +63,14 @@ bool connect(string ip, string port){
         return 0;
     }
     clientsocket.setBlocking(0);
+    cout<<clientsocket.getRemotePort()<<"\n";
     udpsocket.setBlocking(0);
     udpport=0;
     if(udpsocket.bind(udpport)!=sf::Socket::Done){
-        cout<<"udp socket can not be binded to "<<port<<"\n";
+        cout<<"udp socket can not be bound to "<<port<<"\n";
     }else{
-        cout<<"udp socket binded to "<<udpsocket.getLocalPort()<<"\n";
+        udpport=udpsocket.getLocalPort();
+        cout<<"udp socket bound to "<<udpport<<"\n";
     }
     connectionS.setTexture(ont);
     connected=1;
@@ -89,7 +91,7 @@ sf::RenderWindow window(sf::VideoMode(1200, 720), "worms");
 sf::Event event;
 sf::Color bgcolor(40,40,40), checkedclr(0,255,255), normalclr(0,255,0), yourcolor(0,0,0);
 sf::Texture inputbart, binputbart, okt, bgplanet, reloadgamelistt, soundicont, soundbart, soundpointert, colorpointert, colorbart[3], maskt[9], maskchooset[9], maskrt, masklt;
-sf::Sprite  inputbars, binputbars, okconnects, oknicks, okcreaterooms, bgplanes, reloadgamelists, soundicons, soundbars, soundpointers, colorpointers[3], colorbars[3], maskchoose, maskrs, maskls;
+sf::Sprite  inputbars, binputbars, okconnects, oknicks, okcreaterooms, okrgbm, bgplanes, reloadgamelists, soundicons, soundbars, soundpointers, colorpointers[3], colorbars[3], maskchoose, maskrs, maskls;
 sf::Image bgplanei;
 sf::Font mainfont;
 sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwordinput;
@@ -442,6 +444,8 @@ bool colide(sf::Vector2f pixelin, sf::Image &imagein){
         return 1;
 }
 
+void protocol34(unsigned short port);
+
 void protocol1(string buffer){
     if(buffer.length()<=20){
         if(connected){
@@ -564,6 +568,20 @@ void protocol28(){
     }else cout<<"not connected, cannot get room settings\n";
 }
 
+void protocol2a(sf::Color input, unsigned char maskid){
+    if(connected){
+        unsigned char to_send[5];
+        to_send[0]=0x2a;
+        to_send[1]=input.r;
+        to_send[2]=input.g;
+        to_send[3]=input.b;
+        to_send[4]=maskid;
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+            cout<<"poszlo 0x2a\n";
+        }else cout<<"sending error 0x2a\n";
+    }else cout<<"not connected, cannot set player settings\n";
+}
+
 void protocol2c(){
     if(connected){
         unsigned char to_send[1];
@@ -588,21 +606,23 @@ void protocol31(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x31;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){protocol34(udpport);
         }else cout<<"sending error 0x31\n";
     }else cout<<"not connected, cannot get worms list\n";
 }
 
-void protocol34(){
+void protocol34(unsigned short port){
     if(connected){
-        unsigned char to_send[1];
+        unsigned char to_send[3];
         to_send[0]=0x34;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+        to_send[1]=(port>>8)%256;
+        to_send[2]=port%256;
+        if(clientsocket.send(to_send, 3)==sf::Socket::Done){
         }else cout<<"sending error 0x34\n";
     }else cout<<"not connected, cannot get turn time\n";
 }
 
-bool protocol37(){
+bool protocol37(){return 1;
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x37;
@@ -612,7 +632,7 @@ bool protocol37(){
     return 0;
 }
 
-bool protocol38(){
+bool protocol38(){return 1;
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x38;
@@ -622,7 +642,7 @@ bool protocol38(){
     return 0;
 }
 
-bool protocol39(){
+bool protocol39(){return 1;
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x39;
@@ -676,6 +696,8 @@ int main(){
         okcreaterooms.setPosition(500,60);
         oksettings.setTexture(okt);
         oksettings.setPosition(0,180);
+        okrgbm.setTexture(okt);
+        okrgbm.setPosition(910,60);
         ont.loadFromFile("img/on.bmp");
         offt.loadFromFile("img/off.bmp");
         connectionS.setTexture(offt);
@@ -934,13 +956,13 @@ int main(){
                                 }
                             }
                             if(fhasfloor){
-                                //if(protocol37()){
+                                if(protocol37()){
                                     (*currentworm).V.y+=vjump;
                                     (*currentworm).walking=0;
                                     (*currentworm).V.x=0;
                                     (*currentworm).animcount=0;
                                     (*currentworm).sprite.setTexture(wormt[0]);
-                                //}
+                                }
                             }
                         }
                     }
@@ -948,7 +970,7 @@ int main(){
                 if((event.type==sf::Event::KeyPressed)||(event.type==sf::Event::KeyReleased)){
                     if(event.key.code==sf::Keyboard::A){
                         if((currentworm)&&((*currentworm).V.x<=0)&&(((event.type==sf::Event::KeyPressed)&&(!(*currentworm).walking))||((event.type==sf::Event::KeyReleased)&&((*currentworm).walking)))){
-                            //if(protocol38()){
+                            if(protocol38()){
                                 if(!(*currentworm).walking){
                                     (*currentworm).V.x=-vxmax;
                                     (*currentworm).walking=1;
@@ -959,12 +981,12 @@ int main(){
                                     (*currentworm).animcount=0;
                                     (*currentworm).sprite.setTexture(wormt[0]);
                                 }
-                            //}
+                            }
                         }
                     }else
                     if(event.key.code==sf::Keyboard::D){
                         if((currentworm)&&((*currentworm).V.x>=0)&&(((event.type==sf::Event::KeyPressed)&&(!(*currentworm).walking))||((event.type==sf::Event::KeyReleased)&&((*currentworm).walking)))){
-                            //if(protocol39()){
+                            if(protocol39()){
                                 if(!(*currentworm).walking){
                                     (*currentworm).V.x=vxmax;
                                     (*currentworm).walking=1;
@@ -975,7 +997,7 @@ int main(){
                                     (*currentworm).animcount=0;
                                     (*currentworm).sprite.setTexture(wormt[0]);
                                 }
-                            //}
+                            }
                         }
                     }
                 }
@@ -1043,20 +1065,7 @@ int main(){
                         }else
                         if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
                             if(connected){protocol10();}
-                        }else
-                        if((event.mouseButton.x>=maskrs.getPosition().x)&&(event.mouseButton.x<=maskrs.getPosition().x+maskrs.getLocalBounds().width)&&(event.mouseButton.y>=maskrs.getPosition().y)&&(event.mouseButton.y<=maskrs.getPosition().y+maskrs.getLocalBounds().height)){
-                            if(!choosedmask) choosedmask=8;
-                            else choosedmask--;
-                            maskchoose.setTexture(maskchooset[choosedmask]);
-                        }else
-                        if((event.mouseButton.x>=maskls.getPosition().x)&&(event.mouseButton.x<=maskls.getPosition().x+maskls.getLocalBounds().width)&&(event.mouseButton.y>=maskls.getPosition().y)&&(event.mouseButton.y<=maskls.getPosition().y+maskls.getLocalBounds().height)){
-                            choosedmask=(choosedmask+1)%9;
-                            maskchoose.setTexture(maskchooset[choosedmask]);
                         }
-                        for(int i=0; i<3; i++)
-                            if((event.mouseButton.x>=colorpointers[i].getPosition().x)&&(event.mouseButton.x<=colorpointers[i].getPosition().x+colorpointers[i].getLocalBounds().width)&&(event.mouseButton.y>=colorpointers[i].getPosition().y)&&(event.mouseButton.y<=colorpointers[i].getPosition().y+colorpointers[i].getLocalBounds().height)){
-                                colorpointerpressed=i;
-                            }
                     }else{
                         int listelementbuffer=int(event.mouseButton.y-deltagamelist)/int(inputbars.getLocalBounds().height);
                         if((listelementbuffer<=lastgamelistelement)&&(listelementbuffer>0)){
@@ -1180,27 +1189,11 @@ int main(){
                 }else
                 if(event.type==sf::Event::MouseButtonReleased){
                     soundpointerpressed=0;
-                    colorpointerpressed=3;
                 }else
                 if(event.type==sf::Event::MouseMoved){
                     if(soundpointerpressed){
                         soundtrack.setVolume((event.mouseMove.y-30)*(event.mouseMove.y>30)-(event.mouseMove.y-130)*(event.mouseMove.y>130));
                         soundpointers.setPosition(1139, 24+soundtrack.getVolume());
-                    }else
-                    if(colorpointerpressed<3){
-                        colorpointers[colorpointerpressed].setPosition(((event.mouseMove.x)+((event.mouseMove.x<796)*(796-event.mouseMove.x))-((event.mouseMove.x>896)*(event.mouseMove.x-896))), colorpointers[colorpointerpressed].getPosition().y);
-                        switch(colorpointerpressed){
-                            case 0:{
-                                yourcolor.r=(colorpointers[0].getPosition().x-796)*255/100;
-                            }break;
-                            case 1:{
-                                yourcolor.g=(colorpointers[1].getPosition().x-796)*255/100;
-                            }break;
-                            case 2:{
-                                yourcolor.b=(colorpointers[2].getPosition().x-796)*255/100;
-                            }break;
-                        }
-                        yourcolordisplay.setFillColor(yourcolor);
                     }
                 }
             }else
@@ -1304,7 +1297,23 @@ int main(){
                         vjumptext.setColor(checkedclr);
                         textbox=vjumpbox;
                         vjump=atof(vjumptext.getString().toAnsiString().c_str());
+                    }else
+                    if((event.mouseButton.x>=maskrs.getPosition().x)&&(event.mouseButton.x<=maskrs.getPosition().x+maskrs.getLocalBounds().width)&&(event.mouseButton.y>=maskrs.getPosition().y)&&(event.mouseButton.y<=maskrs.getPosition().y+maskrs.getLocalBounds().height)){
+                        if(!choosedmask) choosedmask=8;
+                        else choosedmask--;
+                        maskchoose.setTexture(maskchooset[choosedmask]);
+                    }else
+                    if((event.mouseButton.x>=maskls.getPosition().x)&&(event.mouseButton.x<=maskls.getPosition().x+maskls.getLocalBounds().width)&&(event.mouseButton.y>=maskls.getPosition().y)&&(event.mouseButton.y<=maskls.getPosition().y+maskls.getLocalBounds().height)){
+                        choosedmask=(choosedmask+1)%9;
+                        maskchoose.setTexture(maskchooset[choosedmask]);
+                    }else
+                    if((event.mouseButton.x>=okrgbm.getPosition().x)&&(event.mouseButton.x<=okrgbm.getPosition().x+okrgbm.getLocalBounds().width)&&(event.mouseButton.y>=okrgbm.getPosition().y)&&(event.mouseButton.y<=okrgbm.getPosition().y+okrgbm.getLocalBounds().height)){
+                        protocol2a(yourcolordisplay.getFillColor(), choosedmask);
                     }
+                    for(int i=0; i<3; i++)
+                        if((event.mouseButton.x>=colorpointers[i].getPosition().x)&&(event.mouseButton.x<=colorpointers[i].getPosition().x+colorpointers[i].getLocalBounds().width)&&(event.mouseButton.y>=colorpointers[i].getPosition().y)&&(event.mouseButton.y<=colorpointers[i].getPosition().y+colorpointers[i].getLocalBounds().height)){
+                            colorpointerpressed=i;
+                        }
                 }else
                 if(event.type==sf::Event::TextEntered){sf::Text* inputpointer=0;
                     if(textbox==seedbox){
@@ -1395,11 +1404,27 @@ int main(){
                 }else
                 if(event.type==sf::Event::MouseButtonReleased){
                     soundpointerpressed=0;
+                    colorpointerpressed=3;
                 }else
                 if(event.type==sf::Event::MouseMoved){
                     if(soundpointerpressed){
                         soundtrack.setVolume((event.mouseMove.y-30)*(event.mouseMove.y>30)-(event.mouseMove.y-130)*(event.mouseMove.y>130));
                         soundpointers.setPosition(1139, 24+soundtrack.getVolume());
+                    }else
+                    if(colorpointerpressed<3){
+                        colorpointers[colorpointerpressed].setPosition(((event.mouseMove.x)+((event.mouseMove.x<796)*(796-event.mouseMove.x))-((event.mouseMove.x>896)*(event.mouseMove.x-896))), colorpointers[colorpointerpressed].getPosition().y);
+                        switch(colorpointerpressed){
+                            case 0:{
+                                yourcolor.r=(colorpointers[0].getPosition().x-796)*255/100;
+                            }break;
+                            case 1:{
+                                yourcolor.g=(colorpointers[1].getPosition().x-796)*255/100;
+                            }break;
+                            case 2:{
+                                yourcolor.b=(colorpointers[2].getPosition().x-796)*255/100;
+                            }break;
+                        }
+                        yourcolordisplay.setFillColor(yourcolor);
                     }
                 }
             }
@@ -1555,12 +1580,23 @@ int main(){
                         }
                         break;
                     }
-                    if(data[i]==0x29){
+                    if(data[i]==0x29){cout<<"0x29\n";
                         receiving=0x29;
                         deltareceive=i+1;
                         to_receive=13;
                         protbufferi[0]=protbufferi[1]=protbufferi[2]=0;
                         break;
+                    }
+                    if(data[i]==0x2b){
+                        i++;
+                        if(i<received){
+                            if(data[i]){
+                                cout<<"player settings accepted\n"<<char(7);
+                            }else{
+                                cout<<"player settings denied\n";
+                            }
+                        }else cout<<"lost response 0x2b\n";
+                        continue;
                     }
                     if(data[i]==0x2d){
                         i++;
@@ -1682,7 +1718,6 @@ int main(){
                     cout<<"received unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
             }
-
             if(receiving==0x11){
                 if(deltareceive){
                     for(int i=deltareceive; i<deltareceive+4; i++){
@@ -1800,6 +1835,7 @@ int main(){
                                 cout<<"wrong required players: "<<data[i]<<"\n";
                             }break;
                         }
+                        receiving=0;
                     }
                     to_receive--;
                 }
@@ -1904,9 +1940,13 @@ int main(){
                     }
                     protbuffers[0]+=data[i];
                 }
+            }else
+            if(receiving){
+                cout<<"wtf? unknown receiving\n";
+                receiving=0;
             }
         }
-        if(udpsocket.receive(data, 1024, received, serverip, udpport)){
+        if(udpsocket.receive(data, 1024, received, serverip, udpport)!=sf::Socket::Done){
             if(!receiving)
             for(int i=0; i<received; i++){
                 if(!udpto_ignore){
@@ -1994,7 +2034,6 @@ int main(){
                                     worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
                                     (*wpbuf).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
                                     wormpointers.push_back(wpbuf);
-                                    protocol34();
                                 }
                                 else{
                                     for(int j=0; j<wormpointers.size(); j++){
@@ -2018,6 +2057,8 @@ int main(){
                 no18delta=0;
             }
         }
+        udpport=udpsocket.getLocalPort();
+        serverip=clientsocket.getRemoteAddress();
         frame++;
         if(!(frame%120)){
             if(clientsocket.getRemoteAddress()==sf::IpAddress::None){
@@ -2040,7 +2081,6 @@ int main(){
                 if(clockframe>7)
                     clockframe=0;
                 clocks.setTexture(clockt[clockframe]);
-                protocol34();
             }
         }
 
@@ -2278,21 +2318,22 @@ int main(){
             window.draw(okcreaterooms);
             window.draw(reloadgamelists);
             window.draw(connectionS);
-            window.draw(maskrs);
-            window.draw(maskls);
-            window.draw(maskchoose);
-            window.draw(yourcolordisplay);
             window.draw(soundicons);
-            for(int i=0; i<3; i++){
-                window.draw(colorbars[i]);
-                window.draw(colorpointers[i]);
-            }
             if(soundbarexchanged){
                 window.draw(soundbars);
                 window.draw(soundpointers);
             }
         }else
         if(mode==lobby){
+            window.draw(maskrs);
+            window.draw(maskls);
+            window.draw(maskchoose);
+            window.draw(yourcolordisplay);
+            window.draw(okrgbm);
+            for(int i=0; i<3; i++){
+                window.draw(colorbars[i]);
+                window.draw(colorpointers[i]);
+            }
             window.draw(connectionS);
             window.draw(lobbynamet);
             window.draw(lobbyouts);
