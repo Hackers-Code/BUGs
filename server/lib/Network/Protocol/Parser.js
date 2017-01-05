@@ -11,6 +11,7 @@ class Parser {
 		let rules = this.createRule( ruleString );
 		if( rules === false )
 		{
+			console.log( 'rules' );
 			return false;
 		}
 		let offset = 0;
@@ -32,6 +33,7 @@ class Parser {
 				}
 				else
 				{
+					console.log( 'normal' );
 					return false;
 				}
 			}
@@ -52,6 +54,7 @@ class Parser {
 					}
 					else
 					{
+						console.log( 'condition' );
 						return false;
 					}
 				}
@@ -67,6 +70,7 @@ class Parser {
 					}
 					if( i + 1 === rule.allowedValues.length )
 					{
+						console.log( 'restricted' );
 						return false;
 					}
 				}
@@ -82,6 +86,7 @@ class Parser {
 				}
 				else
 				{
+					console.log( 'restricted' );
 					return false;
 				}
 			}
@@ -100,6 +105,7 @@ class Parser {
 						}
 						else
 						{
+							console.log( 'array' );
 							return false;
 						}
 					}

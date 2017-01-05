@@ -36,11 +36,16 @@ class ServerUDP {
 			let opcode = msg.opcode;
 			msg.opcode = Buffer.from( [ opcode ] );
 			let buffer = this.parser.encode( Instruction.Map[ opcode ].rule, msg );
+			console.log( Instruction.Map[ opcode ].rule );
 			console.log( buffer );
-			receivers.forEach( ( element ) =>
+			console.log( msg );
+			if( buffer instanceof Buffer )
 			{
-				this.server.send( buffer, element.port, element.ip );
-			} );
+				receivers.forEach( ( element ) =>
+				{
+					this.server.send( buffer, element.port, element.ip );
+				} );
+			}
 		}, 1000 / this.tickrate );
 		this.tasks.push( timeout );
 	}

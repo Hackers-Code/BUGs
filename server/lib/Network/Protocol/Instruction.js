@@ -115,7 +115,7 @@ const InstructionMap = {
 		response : 0x2f
 	},
 	0x2f : {
-		rule : 'ready:1;count:4;players(index:1;name:20)*count',
+		rule : 'ready:1;count:4;players(index:1,name:20)*count',
 		type : InstructionTypes.server
 	},
 	0x30 : {
@@ -128,7 +128,7 @@ const InstructionMap = {
 		callback : 'setMapLoaded'
 	},
 	0x32 : {
-		rule : 'tick:4;count:4;worms(owner:1;x:4;y:4;hp:1;id:1;speedX:2;speedY:2)*count',
+		rule : 'tick:4;count:4;worms(owner:1,x:4,y:4,hp:1,id:1,speedX:2,speedY:2)*count',
 		type : InstructionTypes.server,
 	},
 	0x33 : {
