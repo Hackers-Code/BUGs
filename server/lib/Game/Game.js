@@ -157,7 +157,7 @@ class Game {
 			count,
 			worms
 		};
-		setImmediate( this.updateWormsList );
+		setImmediate( this.updateWormsList.bind( this ) );
 	}
 
 	getWorms()
