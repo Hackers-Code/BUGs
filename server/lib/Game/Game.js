@@ -7,7 +7,7 @@ class Game {
 		this.world = null;
 		this.timeleft = 60;
 		this.lastClockTime = 0;
-		this.frames = 0;
+		this.frame = 0;
 		this.lastFrameTime = 0;
 		this.gravity = 475;
 		this.maxSpeedX = 100;
@@ -150,8 +150,10 @@ class Game {
 		{
 			worms.push( element.getWormState() );
 		} );
-		let tick = this.frame;
-		let count = worms.length;
+		let tick = Buffer.alloc( 4 );
+		tick.writeUInt32BE( this.frame, 0 );
+		let count = Buffer.alloc( 4 );
+		count.writeUInt32BE( worms.length, 0 );
 		this.wormsList = {
 			opcode : 0x32,
 			tick,
