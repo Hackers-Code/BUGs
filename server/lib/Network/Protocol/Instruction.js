@@ -124,7 +124,7 @@ const InstructionMap = {
 		response : 0x2f
 	},
 	0x2f : {
-		rule : 'ready:1;count:4;players(index:1,name:20)*count',
+		rule : 'ready:1;count:4;players(index:1,name:20,colourR:1,colourG:1,colourB:1,mask:1)*count',
 		type : InstructionTypes.server
 	},
 	0x30 : {

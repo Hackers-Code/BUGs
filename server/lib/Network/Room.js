@@ -203,11 +203,13 @@ class Room {
 		let players = [];
 		for( let i = 0 ; i < this.players.length ; i++ )
 		{
-			let id = Buffer.alloc( 1 );
-			id.writeInt8( i, 0 );
 			players.push( {
-				id : id,
-				name : this.players[ i ].name
+				id : this.players[ i ].playersID,
+				name : this.players[ i ].name,
+				colourR : this.players[ i ].colour.R,
+				colourG : this.players[ i ].colour.G,
+				colourB : this.players[ i ].colour.B,
+				mask : this.players[ i ].mask
 			} );
 		}
 		let ready = Buffer.alloc( 1 );
@@ -217,6 +219,7 @@ class Room {
 			count,
 			players
 		};
+		setTimeout( this.preparePlayersList.bind( this ), 1000 );
 	}
 
 	getPlayers()

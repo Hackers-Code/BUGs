@@ -53,7 +53,12 @@ class Game {
 		this.world = new World( data );
 		this.players.forEach( ( element ) =>
 		{
-			element.addWorm( this.world.getUniqueSpawn(), this.wormID++ );
+			element.addWorld( this.world );
+			for( let i = 0 ; i < this.wormsPerPlayer ; i++ )
+			{
+				element.addWorm( this.world.getUniqueSpawn(), this.wormID++ );
+			}
+
 		} );
 		this.updateWormsList();
 	}
@@ -105,35 +110,11 @@ class Game {
 	{
 		let diffTime = new Date().getTime() - this.lastFrameTime;
 		if( diffTime >= 1000 / this.maxFramesPerSecond )
-		{/*
-		 for( let i = 0 ; i < this.worms.length ; i++ )
-		 {
-		 let worm = this.worms[ i ];
-		 if( worm.speedY < 0 )
-		 {
-		 }
-		 if( this.checkCollisionTop( worm.y, worm.x ) )
-		 {
-		 worm.speedY = 0;
-		 }
-		 if( !this.checkCollisionBottom( worm.y, worm.height, worm.x ) )
-		 {
-		 worm.speedY += worm.accelerationY * (diffTime / 1000);
-		 if( worm.speedY > worm.maxSpeedY )
-		 {
-		 worm.speedY = worm.maxSpeedY;
-		 }
-		 if( this.checkCollisionBottom( worm.y + worm.speedY * (diffTime / 1000), worm.height, worm.x ) )
-		 {
-		 worm.speedY = 0;
-		 continue;
-		 }
-		 }
-
-		 worm.y += worm.speedY * (
-		 diffTime / 1000
-		 );
-		 }*/
+		{
+			this.players.forEach( ( element ) =>
+			{
+				element.update( diffTime );
+			} );
 			this.frames++;
 			this.updateWormsList();
 			this.lastFrameTime = new Date().getTime();
@@ -146,7 +127,11 @@ class Game {
 		let tmp = [];
 		this.players.forEach( ( element ) =>
 		{
-			tmp.concat( element.getWorms() );
+			let worms = element.getWorms();
+			worms.forEach( ( element ) =>
+			{
+				tmp.push( element );
+			} );
 		} );
 		let worms = [];
 		tmp.forEach( ( element ) =>
@@ -158,7 +143,7 @@ class Game {
 		let count = Buffer.alloc( 4 );
 		count.writeUInt32BE( worms.length, 0 );
 		this.wormsList = {
-			opcode : 0x32,
+			opcode : Buffer.from( [ 0x32 ] ),
 			tick,
 			count,
 			worms
@@ -171,64 +156,3 @@ class Game {
 	}
 }
 module.exports = Game;
-/*TODO:Methods to implement
- checkCollisionLeft( worm )
- {
- for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
- {
- let block = this.mapParser.blocks[ i ];
- if( (worm.y >= block.y) && (worm.y <= block.y + block.height) && ( worm.x <= block.x ) && ( worm.x >= block.x + block.width) )
- {
- return true;
- }
- }
- return false;
- }
-
- checkCollisionRight( worm )
- {
- for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
- {
- let block = this.mapParser.blocks[ i ];
- if( (worm.y >= block.y) && (worm.y <= block.y + block.height) && ( worm.x >= block.x ) && ( worm.x <= block.x + block.width) )
- {
- return true;
- }
- }
- return false;
- }
-
- checkCollisionTop( y, x )
- {
- for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
- {
- let block = this.mapParser.blocks[ i ];
- if( (y >= block.y) && (y <= block.y + block.height) && ( x >= block.x ) && ( x <= block.x + block.width) )
- {
- return true;
- }
- }
- return false;
- }
-
- checkCollisionBottom( y, height, x )
- {
- for( let i = 0 ; i < this.mapParser.blocks.length ; i++ )
- {
- let block = this.mapParser.blocks[ i ];
- if( (y + height <= block.y + block.height) && (y + height >= block.y) && ( x >= block.x ) && ( x <= block.x + block.width) )
- {
- return true;
- }
- }
- return false;
- }
-
- jump()
- {
- if( this.worms[ this.worm ].speedY === 0 )
- {
- this.worms[ this.worm ].speedY = -300;
- }
- }
- */

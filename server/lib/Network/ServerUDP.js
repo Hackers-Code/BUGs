@@ -15,7 +15,6 @@ class ServerUDP {
 		this.server.on( 'message', ( data, rinfo ) =>
 		{
 			console.log( data );
-			console.log( rinfo );
 			let opcode = data[ 0 ];
 			let object = this.parser.decode( Instruction.Map[ opcode ].rule, data );
 			let index = SearchEngine.findByUniqueID( this.clients.clients, object.id );
@@ -42,14 +41,13 @@ class ServerUDP {
 		let timeout = setInterval( () =>
 		{
 			let msg = func();
-			let opcode = msg.opcode;
-			msg.opcode = Buffer.from( [ opcode ] );
+			let opcode = msg.opcode.readUInt8( 0 );
 			let buffer = this.parser.encode( Instruction.Map[ opcode ].rule, msg );
 			if( buffer instanceof Buffer )
 			{
 				receivers.forEach( ( element ) =>
 				{
-					console.log( buffer );
+					//console.log( buffer );
 					this.server.send( buffer, element.udp.port, element.udp.address );
 				} );
 			}

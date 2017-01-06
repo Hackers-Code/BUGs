@@ -17,6 +17,14 @@ class Worm {
 		this.height = 45;
 	}
 
+	jump()
+	{
+		if( this.speedY === 0 )
+		{
+			this.speedY = -300;
+		}
+	}
+
 	getWormState()
 	{
 		let owner = Buffer.alloc( 1 );
