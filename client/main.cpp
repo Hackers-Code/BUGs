@@ -393,6 +393,7 @@ class player{public:
         color    =input.color;
         hpbart   =input.hpbart;
         hpbars   =input.hpbars;
+        return input;
     }
 };
 vector<player> players;
@@ -1962,7 +1963,6 @@ int main(){
                                 players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
                             protbufferi[1]=0;
                             protbuffers[0]="";
-                            cout<<players.size()<<" players:\n";
                             for(int i=0; i<playersamount; i++){
                                 cout<<"player["<<i<<"]="<<int(players[i].id)<<", "<<players[i].name<<"\n";
                             }
