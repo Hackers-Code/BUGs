@@ -167,7 +167,7 @@ class Client {
 	{
 		if( this.room !== null )
 		{
-			this.room.getPlayers();
+			return this.room.getPlayers();
 		}
 	}
 
