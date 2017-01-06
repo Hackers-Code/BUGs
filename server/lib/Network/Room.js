@@ -102,6 +102,10 @@ class Room {
 			if( id.compare( this.admin ) === 0 )
 			{
 				this.maxPlayers = config.maxPlayers.readInt8( 0 );
+				if( this.maxPlayers < 2 || this.maxPlayers > 4 )
+				{
+					return false;
+				}
 				this.mapID = config.mapID.readInt32BE( 0 );
 				if( !MapInterface.mapExists( this.mapID ) )
 				{
