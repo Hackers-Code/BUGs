@@ -1897,17 +1897,7 @@ int main(){
                         }
                     }else{
                         if(!(to_receive%25)){
-                            if(protbufferi[1]!=40){
-                                bool thisplayerexists=0;
-                                for(int j=0; j<players.size(); j++){
-                                    if(players[j].id==protbufferi[1]){
-                                        players[j]=player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]);
-                                        thisplayerexists=1;
-                                        break;
-                                    }
-                                }
-                                if(!thisplayerexists)
-                                    players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
+                            if(protbufferi[1]!=40){players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
                             }
                             protbufferi[1]=data[i];
                             protbuffers[0]="";
@@ -1936,6 +1926,7 @@ int main(){
                     to_receive--;
                     if(!to_receive){
                         if(protbufferi[0]){//end of metadata
+                            players.clear();
                             protbufferi[0]=0;
                             if(protbufferi[1]==0){
                                 cout<<"empty player list?\ndisconnecting\n";
@@ -1948,22 +1939,10 @@ int main(){
                         }else
                         {//end of protocol
                             receiving=0;
-                            playersamount=protbufferi[1]+1;
-                            if(playersamount<players.size())
-                                players.erase(players.begin()+playersamount, players.end());
-                            bool thisplayerexists=0;
-                            for(int j=0; j<players.size(); j++){
-                                if(players[j].id==protbufferi[1]){
-                                    players[j]=player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]);
-                                    thisplayerexists=1;
-                                    break;
-                                }
-                            }
-                            if(!thisplayerexists)
-                                players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
+                            players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
                             protbufferi[1]=0;
                             protbuffers[0]="";
-                            for(int i=0; i<playersamount; i++){
+                            for(int i=0; i<players.size(); i++){
                                 cout<<"player["<<i<<"]="<<int(players[i].id)<<", "<<players[i].name<<"\n";
                             }
                             break;
