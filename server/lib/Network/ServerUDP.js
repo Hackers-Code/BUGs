@@ -14,12 +14,14 @@ class ServerUDP {
 		this.parser = new Parser( 'opcode:1' );
 		this.server.on( 'message', ( data, rinfo ) =>
 		{
+			console.log( data );
+			console.log( rinfo );
 			let opcode = data[ 0 ];
 			let object = this.parser.decode( Instruction.Map[ opcode ].rule, data );
 			let index = SearchEngine.findByUniqueID( this.clients.clients, object.id );
 			if( index !== -1 )
 			{
-				this.clients.clients[ Instruction.Map[ opcode ].callback ]( rinfo );
+				this.clients.clients[ index ][ Instruction.Map[ opcode ].callback ]( rinfo );
 			}
 		} );
 		this.server.on( 'error', ( err ) =>
