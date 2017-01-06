@@ -338,17 +338,18 @@ worm *currentworm=0;
 
 class player{public:
     worm worms[5];
-    unsigned char id, hp, emptyworm;
+    unsigned char id, hp, emptyworm, mask;
     string name;
     sf::Text namet;
     sf::Color color;
     sf::Texture hpbart;
     sf::Sprite hpbars;
 
-    player(unsigned int idin=0, string namein="guest"){
+    player(unsigned int idin=0, string namein="guest", sf::Color colorin=playercolors[0], unsigned char maskin=1){
         id=idin;
         name=namein;
-        color=playercolors[id];
+        color=colorin;
+        mask=maskin;
         hp=0;
         emptyworm=0;
         namet.setString(namein);
@@ -380,6 +381,19 @@ class player{public:
         }
     }
 
+    player operator =(player input){
+        for(int i=0; i<5; i++){
+            worms[i]=input.worms[i];
+        }
+        id       =input.id;
+        hp       =input.hp;
+        emptyworm=input.emptyworm;
+        mask     =input.mask;
+        name     =input.name;
+        color    =input.color;
+        hpbart   =input.hpbart;
+        hpbars   =input.hpbars;
+    }
 };
 vector<player> players;
 
@@ -1881,36 +1895,74 @@ int main(){
                             protbufferi[1]+=data[i];
                         }
                     }else{
-                        if(!(to_receive%21)){
+                        if(!(to_receive%25)){
                             if(protbufferi[1]!=40){
-                                players.push_back(player(protbufferi[1], protbuffers[0]));
+                                bool thisplayerexists=0;
+                                for(int j=0; j<players.size(); j++){
+                                    if(players[j].id==protbufferi[1]){
+                                        players[j]=player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]);
+                                        thisplayerexists=1;
+                                        break;
+                                    }
+                                }
+                                if(!thisplayerexists)
+                                    players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
                             }
                             protbufferi[1]=data[i];
                             protbuffers[0]="";
-                        }else{
+                        }else
+                        if(to_receive%25>4){
                             if(data[i])
                                 protbuffers[0]+=data[i];
+                        }else
+                        if(to_receive%25>3){
+                            if(data[i])
+                                protbufferi[2]=data[i];
+                        }else
+                        if(to_receive%25>2){
+                            if(data[i])
+                                protbufferi[3]=data[i];
+                        }else
+                        if(to_receive%25>1){
+                            if(data[i])
+                                protbufferi[4]=data[i];
+                        }else
+                        if(to_receive%25>0){
+                            if(data[i])
+                                protbufferi[5]=data[i];
                         }
                     }
                     to_receive--;
                     if(!to_receive){
                         if(protbufferi[0]){//end of metadata
                             protbufferi[0]=0;
-                            to_receive=21*protbufferi[1];
                             if(protbufferi[1]==0){
                                 cout<<"empty player list?\ndisconnecting\n";
                                 receiving=0;
                                 clientsocket.disconnect();
                                 break;
                             }
+                            to_receive=25*protbufferi[1];
                             protbufferi[1]=40;
                         }else
                         {//end of protocol
                             receiving=0;
                             playersamount=protbufferi[1]+1;
-                            players.push_back(player(protbufferi[1], protbuffers[0]));
+                            if(playersamount<players.size())
+                                players.erase(players.begin()+playersamount, players.end());
+                            bool thisplayerexists=0;
+                            for(int j=0; j<players.size(); j++){
+                                if(players[j].id==protbufferi[1]){
+                                    players[j]=player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]);
+                                    thisplayerexists=1;
+                                    break;
+                                }
+                            }
+                            if(!thisplayerexists)
+                                players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
                             protbufferi[1]=0;
                             protbuffers[0]="";
+                            cout<<players.size()<<" players:\n";
                             for(int i=0; i<playersamount; i++){
                                 cout<<"player["<<i<<"]="<<int(players[i].id)<<", "<<players[i].name<<"\n";
                             }
@@ -2110,6 +2162,11 @@ int main(){
                 if(clockframe>7)
                     clockframe=0;
                 clocks.setTexture(clockt[clockframe]);
+            }
+        }
+        if(!(frame%60)){
+            if((mode==lobby)&&(connected)){
+                protocol2e();
             }
         }
 
