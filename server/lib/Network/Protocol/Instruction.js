@@ -127,9 +127,9 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x31 : {
-		rule : 'port:2',
+		rule : '',
 		type : InstructionTypes.client,
-		callback : 'setUDP'
+		callback : 'connectUDP'
 	},
 	0x32 : {
 		rule : 'tick:4;count:4;worms(owner:1,x:4,y:4,hp:1,id:1,speedX:2,speedY:2)*count',
