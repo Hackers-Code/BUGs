@@ -88,7 +88,7 @@ class World {
 		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let block = this.blocks[ i ];
-			if( (worm.y + height <= block.y + block.height) && (worm.y + height >= block.y) && ( worm.x >= block.x ) && ( worm.x <= block.x + block.width) )
+			if( (worm.y + worm.height <= block.y + block.height) && (worm.y + worm.height >= block.y) && ( worm.x >= block.x ) && ( worm.x <= block.x + block.width) )
 			{
 				return true;
 			}
