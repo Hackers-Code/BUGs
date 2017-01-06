@@ -27,6 +27,7 @@ class Room {
 		this.roomConfigResponse = null;
 		this.playersList = null;
 		this.game = new Game( this.players );
+		this.preparePlayersList();
 	}
 
 	leave( id )
@@ -128,7 +129,6 @@ class Room {
 					maxSpeedY,
 					maxPlayers
 				};
-				this.preparePlayersList();
 				this.checkIfAllConfirmed();
 				return true;
 			}
