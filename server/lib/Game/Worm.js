@@ -36,11 +36,11 @@ class Worm {
 		let y = Buffer.alloc( 4 );
 		y.writeUInt32BE( this.y, 0 );
 		let hp = Buffer.alloc( 1 );
-		hp.writeUInt32BE( this.hp, 0 );
+		hp.writeUInt8( this.hp, 0 );
 		let speedX = Buffer.alloc( 2 );
-		speedX.writeUInt32BE( this.speedX, 0 );
+		speedX.writeUInt16BE( this.speedX, 0 );
 		let speedY = Buffer.alloc( 2 );
-		speedY.writeUInt32BE( this.speedY, 0 );
+		speedY.writeUInt16BE( this.speedY, 0 );
 		return {
 			owner,
 			id,
