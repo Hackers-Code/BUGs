@@ -28,6 +28,10 @@ const InstructionMap = {
 		rule : 'length:1;reason:length',
 		type : InstructionTypes.server
 	},
+	0x05 : {
+		rule : 'id:4',
+		type : InstructionTypes.server
+	},
 	0x10 : {
 		rule : '',
 		callback : 'listGames',

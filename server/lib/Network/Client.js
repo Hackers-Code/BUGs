@@ -18,6 +18,10 @@ class Client {
 		this.name = Buffer.alloc( 20 );
 		this.response = new Response( socket );
 		this.request = new Request( this, this.response );
+		this.response.send( {
+			opcode : 0x05,
+			id : this.id
+		} );
 		this.room = null;
 		this.player = null;
 		this.socket.on( 'data', ( data ) =>

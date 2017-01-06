@@ -92,6 +92,6 @@ describe( 'MapDownloader', () =>
 {
 	it( 'connect() should return boolean', () =>
 	{
-
+		expect( MapDownloader )
 	} );
 } );

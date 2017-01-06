@@ -38,7 +38,16 @@ const ConfigManager = {
 				port : 31337,
 				address : '0.0.0.0'
 			},
-			max_clients : 3
+			max_clients : 3,
+			resources : {
+				"localization" : {
+					"host" : "hackers-code.boakgp.hekko24.pl",
+					"port" : 80,
+				},
+				"maps" : {
+					"path" : "/maps"
+				}
+			}
 		};
 		fs.writeFile( ConfigDirectory, JSON.stringify( defaultConfig ), callback );
 	}
