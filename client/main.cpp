@@ -457,19 +457,6 @@ void protocol1(string buffer){
     }else cout<<"nick must have no more than 20 letters\n";
 }
 
-void protocol10(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x10;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-            cout<<"poszlo 0x10\n";
-            gamelist.clear();
-            lastgamelistelement=0;
-            deltagamelist=120;
-        }else cout<<"sending error 0x10\n";
-    }else cout<<"not connected, cannot get room list\n";
-}
-
 bool protocol3(){
     if(connected){
         unsigned char to_send[1];
@@ -481,6 +468,31 @@ bool protocol3(){
         }else cout<<"sending error 0x3\n";
     }else cout<<"not connected, cannot leave room\n";
     return 0;
+}
+
+void protocol6(){
+    unsigned char to_send[5];
+    to_send[0]=6;
+    protbufferi[0]=myid;
+    for(int i=4; i>0; i--){
+        to_send[i]+=protbufferi[0]%256;
+        protbufferi[0]=protbufferi[0]>>8;
+    }
+    udpsocket.send(to_send, 5, serverip, udpport);
+    protbufferi[0]=0;
+}
+
+void protocol10(){
+    if(connected){
+        unsigned char to_send[1];
+        to_send[0]=0x10;
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+            cout<<"poszlo 0x10\n";
+            gamelist.clear();
+            lastgamelistelement=0;
+            deltagamelist=120;
+        }else cout<<"sending error 0x10\n";
+    }else cout<<"not connected, cannot get room list\n";
 }
 
 void protocol20(string buffer, string buffer2){
@@ -603,15 +615,12 @@ void protocol2e(){
 void protocol31(){
     if(connected){
         unsigned char to_send[3];
-        to_send[0]=0x34;
+        to_send[0]=0x31;
         to_send[1]=(udpport>>8)%256;
         to_send[2]=udpport%256;
         if(clientsocket.send(to_send, 3)==sf::Socket::Done){
         }else cout<<"sending error 0x31\n";
     }else cout<<"not connected, cannot get turn time\n";
-}
-
-void protocol34(unsigned short port){
 }
 
 bool protocol37(){return 1;
@@ -624,13 +633,18 @@ bool protocol37(){return 1;
     return 0;
 }
 
-bool protocol38(){return 1;
+bool protocol38(){//return 1;
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x38;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){return 1;
+        if(udpsocket.send(to_send, 1, serverip, udpport)==sf::Socket::Done){
+            udpport=udpsocket.getLocalPort();
+            serverip=clientsocket.getRemoteAddress();
+            return 1;
         }else cout<<"sending error 0x38\n";
     }else cout<<"not connected, can not move\n";
+        udpport=udpsocket.getLocalPort();
+        serverip=clientsocket.getRemoteAddress();
     return 0;
 }
 
@@ -1510,6 +1524,11 @@ int main(){
                         }else cout<<"lost response 0x2\n";
                         continue;
                     }
+                    if(data[i]==5){
+                        receiving=5;
+                        deltareceive=i+1;
+                        break;
+                    }
                     if(data[i]==0x11){
                         receiving=0x11;
                         deltareceive=i+1;
@@ -1711,6 +1730,23 @@ int main(){
                     cout<<"received unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
             }
+            if(receiving==5){
+                for(int i=deltareceive; i<deltareceive+4; i++){
+                    if(i>=received){
+                        cout<<deltareceive+4-i<<"/"<<4<<" of id missed\n";
+                        receiving=0;
+                        break;
+                    }
+                    protbufferi[0]=protbufferi[0]<<8;
+                    protbufferi[0]+=data[i];
+                }
+                myid=protbufferi[0];
+                protbufferi[0]=0;
+                cout<<"your id="<<myid<<"\n";
+                deltareceive=0;
+                receiving=0;
+                protocol6();
+            }else
             if(receiving==0x11){
                 if(deltareceive){
                     for(int i=deltareceive; i<deltareceive+4; i++){
