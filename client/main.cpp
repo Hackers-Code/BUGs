@@ -475,10 +475,12 @@ void protocol6(){
     to_send[0]=6;
     protbufferi[0]=myid;
     for(int i=4; i>0; i--){
-        to_send[i]+=protbufferi[0]%256;
+        to_send[i]=protbufferi[0]%256;
         protbufferi[0]=protbufferi[0]>>8;
     }
-    udpsocket.send(to_send, 5, serverip, udpport);
+    if(udpsocket.send(to_send, 5, serverip, 31337)!=sf::Socket::Done){
+        cout<<"sending error 0x6\n";
+    }
     protbufferi[0]=0;
 }
 
