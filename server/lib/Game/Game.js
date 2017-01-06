@@ -103,9 +103,9 @@ class Game {
 
 	update()
 	{
-		/*let diffTime = new Date().getTime() - this.lastFrameTime;
-		 if( diffTime >= 1000 / this.maxFramesPerSecond )
-		 {
+		let diffTime = new Date().getTime() - this.lastFrameTime;
+		if( diffTime >= 1000 / this.maxFramesPerSecond )
+		{/*
 		 for( let i = 0 ; i < this.worms.length ; i++ )
 		 {
 		 let worm = this.worms[ i ];
@@ -129,13 +129,16 @@ class Game {
 		 continue;
 		 }
 		 }
-		 worm.y += worm.speedY * (diffTime / 1000);
-		 }
-		 this.frames++;
-		 this.updateWormsList();
-		 this.lastFrameTime = new Date().getTime();
-		 }
-		 setImmediate( this.update.bind( this ) );*/
+
+		 worm.y += worm.speedY * (
+		 diffTime / 1000
+		 );
+		 }*/
+			this.frames++;
+			this.updateWormsList();
+			this.lastFrameTime = new Date().getTime();
+		}
+		setImmediate( this.update.bind( this ) );
 	}
 
 	updateWormsList()
@@ -160,7 +163,6 @@ class Game {
 			count,
 			worms
 		};
-		setImmediate( this.updateWormsList.bind( this ) );
 	}
 
 	getWorms()
