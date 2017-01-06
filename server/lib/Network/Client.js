@@ -18,6 +18,7 @@ class Client {
 		this.name = Buffer.alloc( 20 );
 		this.response = new Response( socket );
 		this.request = new Request( this, this.response );
+		this.udp = null;
 		this.response.send( {
 			opcode : 0x05,
 			id : this.id
@@ -170,15 +171,19 @@ class Client {
 		}
 	}
 
-	setUDP( data )
+	mapLoaded()
 	{
 		if( this.player !== null )
 		{
 			this.player.setMapLoaded();
-			this.player.setUDP( data.port );
 			return true;
 		}
 		return false;
+	}
+
+	setUDP( rinfo )
+	{
+		this.udp = rinfo;
 	}
 
 	jump()

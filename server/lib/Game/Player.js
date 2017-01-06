@@ -13,8 +13,7 @@ class Player {
 		this.actualWorm = 0;
 		this.colour = [];
 		this.mask = 0;
-		this.ip = client.socket.remoteAddress;
-		this.port = 0;
+		this.udp = client.udp;
 		this.isYourTurn = false;
 	}
 
@@ -49,11 +48,6 @@ class Player {
 	setMapLoaded()
 	{
 		this.mapLoaded = true;
-	}
-
-	setUDP( port )
-	{
-		this.port = port.readUInt16BE( 0 );
 	}
 
 	getWorms()

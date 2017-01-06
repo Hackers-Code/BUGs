@@ -32,6 +32,11 @@ const InstructionMap = {
 		rule : 'id:4',
 		type : InstructionTypes.server
 	},
+	0x06 : {
+		rule : 'id:4',
+		callback : 'setUDP',
+		type : InstructionTypes.client
+	},
 	0x10 : {
 		rule : '',
 		callback : 'listGames',
@@ -129,7 +134,7 @@ const InstructionMap = {
 	0x31 : {
 		rule : '',
 		type : InstructionTypes.client,
-		callback : 'connectUDP'
+		callback : 'mapLoaded'
 	},
 	0x32 : {
 		rule : 'tick:4;count:4;worms(owner:1,x:4,y:4,hp:1,id:1,speedX:2,speedY:2)*count',

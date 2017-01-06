@@ -1,6 +1,7 @@
 const dgram = require( 'dgram' );
 const Instruction = require( './Protocol/Instruction' );
 const Parser = require( './Protocol/Parser' );
+const SearchEngine = require( './../Utils/SearchEngine' );
 class ServerUDP {
 	constructor( reject, app )
 	{
@@ -13,7 +14,13 @@ class ServerUDP {
 		this.parser = new Parser( 'opcode:1' );
 		this.server.on( 'message', ( data, rinfo ) =>
 		{
-
+			let opcode = data[ 0 ];
+			let object = this.parser.decode( Instruction.Map[ opcode ].rule, data );
+			let index = SearchEngine.findByUniqueID( this.clients.clients, object.id );
+			if( index !== -1 )
+			{
+				this.clients.clients[ Instruction.Map[ opcode ].callback ]( rinfo );
+			}
 		} );
 		this.server.on( 'error', ( err ) =>
 		{
@@ -41,7 +48,7 @@ class ServerUDP {
 				receivers.forEach( ( element ) =>
 				{
 					console.log( buffer );
-					this.server.send( buffer, element.port, element.ip );
+					this.server.send( buffer, element.udp.port, element.udp.address );
 				} );
 			}
 		}, 1000 / this.tickrate );
