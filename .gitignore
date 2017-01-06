@@ -38,6 +38,3 @@ jspm_packages
 .node_repl_history
 
 */config.json
-
-server/lib/MapInterface/maps/1.map
-*.map
