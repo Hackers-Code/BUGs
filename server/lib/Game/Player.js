@@ -5,7 +5,7 @@ class Player {
 		client.player = this;
 		this.response = client.response;
 		this.id = client.id;
-		this.playerID = Buffer.from( [ playerID ] );
+		this.playerID = playerID;
 		this.confirmed = false;
 		this.mapLoaded = false;
 		this.name = client.name;

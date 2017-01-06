@@ -204,7 +204,7 @@ class Room {
 		for( let i = 0 ; i < this.players.length ; i++ )
 		{
 			players.push( {
-				id : this.players[ i ].playersID,
+				id : Buffer.from( [ this.players[ i ].playersID ] ),
 				name : this.players[ i ].name,
 				colourR : this.players[ i ].colour.R,
 				colourG : this.players[ i ].colour.G,
