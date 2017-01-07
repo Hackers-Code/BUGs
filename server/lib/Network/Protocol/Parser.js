@@ -37,59 +37,6 @@ class Parser {
 					return false;
 				}
 			}
-			else if( rule.type === 'condition' )
-			{
-				if( typeof object[ rule.required_parameter ] !== 'undefined' && Buffer.compare(
-						object[ rule.required_parameter ], Buffer.from( [ parseInt( rule.required_value ) ] ) ) === 0 )
-				{
-					if( isNaN( parseInt( rule.length ) ) )
-					{
-						rule.length = object[ rule.length ].readInt8( 0 );
-					}
-					if( object[ rule.name ] instanceof Buffer )
-					{
-						buffer = Buffer.concat( [
-							buffer, object[ rule.name ]
-						] );
-					}
-					else
-					{
-						console.log( 'condition' );
-						return false;
-					}
-				}
-			}
-			else if( rule.type === 'restricted' )
-			{
-				for( let i = 0 ; i < rule.allowedValues.length ; i++ )
-				{
-					if( Buffer.compare( object[ rule.name ],
-							Buffer.from( [ parseInt( rule.allowedValues[ i ] ) ] ) ) === 0 )
-					{
-						break;
-					}
-					if( i + 1 === rule.allowedValues.length )
-					{
-						console.log( 'restricted' );
-						return false;
-					}
-				}
-				if( isNaN( parseInt( rule.length ) ) )
-				{
-					rule.length = object[ rule.length ].readInt8( 0 );
-				}
-				if( object[ rule.name ] instanceof Buffer )
-				{
-					buffer = Buffer.concat( [
-						buffer, object[ rule.name ]
-					] );
-				}
-				else
-				{
-					console.log( 'restricted' );
-					return false;
-				}
-			}
 			else if( rule.type === 'array' )
 			{
 				for( let i = 0 ; i < object[ rule.multiplier ].readInt32BE( 0 ) ; i++ )
@@ -143,38 +90,6 @@ class Parser {
 				}
 				object[ rule.name ] = buffer.slice( offset, offset += parseInt( rule.length ) );
 			}
-			else if( rule.type === 'condition' )
-			{
-				if( typeof object[ rule.required_parameter ] !== 'undefined' && Buffer.compare(
-						object[ rule.required_parameter ], Buffer.from( [ parseInt( rule.required_value ) ] ) ) === 0 )
-				{
-					if( isNaN( parseInt( rule.length ) ) )
-					{
-						rule.length = object[ rule.length ].readInt8( 0 );
-					}
-					object[ rule.name ] = buffer.slice( offset, offset += parseInt( rule.length ) );
-				}
-			}
-			else if( rule.type === 'restricted' )
-			{
-				if( isNaN( parseInt( rule.length ) ) )
-				{
-					rule.length = object[ rule.length ].readInt8( 0 );
-				}
-				object[ rule.name ] = buffer.slice( offset, offset += parseInt( rule.length ) );
-				for( let i = 0 ; i < rule.allowedValues.length ; i++ )
-				{
-					if( Buffer.compare( object[ rule.name ],
-							Buffer.from( [ parseInt( rule.allowedValues[ i ] ) ] ) ) === 0 )
-					{
-						break;
-					}
-					if( i + 1 === rule.allowedValues.length )
-					{
-						return false;
-					}
-				}
-			}
 			else if( rule.type === 'array' )
 			{
 				let games = [];
@@ -221,9 +136,7 @@ class Parser {
 		ruleString = this.concatRule( ruleString );
 		ruleString = ruleString.split( ';' );
 		let normalRuleRegexp = /^\w+:\w+$/;
-		let conditionRuleRegexp = /^\w+:\w+&\w+=[0-9]*$/;
 		let arrayRuleRegexp = /^\w+\((?:\w|,|:)+\)\*\w+$/;
-		let restrictedRuleRegexp = /^\w+:\w+\[(?:\w|,)+]$/;
 		for( let i = 0 ; i < ruleString.length ; i++ )
 		{
 			if( ruleString[ i ].match( normalRuleRegexp ) )
@@ -231,21 +144,6 @@ class Parser {
 				let tmp = ruleString[ i ].split( ':' );
 				rule.push( {
 					type : 'normal', name : tmp[ 0 ], length : tmp[ 1 ]
-				} );
-			}
-			else if( ruleString[ i ].match( conditionRuleRegexp ) )
-			{
-				let tmp = ruleString[ i ].split( '&' );
-				rule.push( {
-					type : 'condition', name : tmp[ 0 ].split( ':' )[ 0 ], length : tmp[ 0 ].split( ':' )[ 1 ],
-					required_parameter : tmp[ 1 ].split( '=' )[ 0 ], required_value : tmp[ 1 ].split( '=' )[ 1 ]
-				} );
-			}
-			else if( ruleString[ i ].match( restrictedRuleRegexp ) )
-			{
-				let tmp = ruleString[ i ].match( /^(\w+):(\w+)\[((\w|,)+)]$/ );
-				rule.push( {
-					type : 'restricted', name : tmp[ 1 ], length : tmp[ 2 ], allowedValues : tmp[ 3 ].split( ',' )
 				} );
 			}
 			else if( ruleString[ i ].match( arrayRuleRegexp ) )

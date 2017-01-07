@@ -6,7 +6,7 @@ class ServerUDP {
 	constructor( reject, app )
 	{
 		this.logger = app.logger;
-		this.options = app.config.tcp;
+		this.options = app.config.udp;
 		this.clients = app.clientsStorage;
 		this.server = dgram.createSocket( 'udp4' );
 		this.tasks = [];
@@ -17,7 +17,7 @@ class ServerUDP {
 			let opcode = data[ 0 ];
 			let object = this.parser.decode( Instruction.Map[ opcode ].rule, data );
 			let index = SearchEngine.findByUniqueID( this.clients.clients, object.id );
-			if( index !== -1 )
+			if( index !== -1 && index !== false )
 			{
 				this.clients.clients[ index ][ Instruction.Map[ opcode ].callback ]( rinfo );
 			}
