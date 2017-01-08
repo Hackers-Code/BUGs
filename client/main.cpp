@@ -65,8 +65,7 @@ bool connect(string ip, string port){
     clientsocket.setBlocking(0);
     cout<<clientsocket.getRemotePort()<<"\n";
     udpsocket.setBlocking(0);
-    udpport=0;
-    if(udpsocket.bind(udpport)!=sf::Socket::Done){
+    if(udpsocket.bind(udpsocket.getLocalPort())!=sf::Socket::Done){
         cout<<"udp socket can not be bound to "<<port<<"\n";
     }else{
         udpport=udpsocket.getLocalPort();
@@ -274,7 +273,7 @@ class worm{public:
     sf::Vector2f position, V;
     unsigned int hp, team, id, animcount;
     int direction;
-    sf::Sprite sprite;
+    sf::Sprite sprite, wormmask;
     sf::Text text;
     bool walking;
 
@@ -298,20 +297,12 @@ class worm{public:
         walking=0;
     }
 
-    worm operator =(worm input){
-        position=input.position;
-        hp=input.hp;
-        direction=input.direction;
-        team=input.team;
-        id=input.id;
-        sprite=input.sprite;
-        text=input.text;
-        return input;
-    }
+    worm operator =(worm input);
 
     void draw(sf::RenderWindow &window){
         if(hp<=0)return;
         window.draw(sprite);
+        window.draw(wormmask);
         window.draw(text);
     }
 
@@ -326,8 +317,12 @@ class worm{public:
     void update(){
         sprite.setPosition((deltabg+position)*mapscale);
         sprite.setScale(mapscale*direction, mapscale);
-        if(direction==-1)
+        wormmask.setPosition((deltabg+position+sf::Vector2f(12, -1))*mapscale);
+        wormmask.setScale(mapscale*direction, mapscale);
+        if(direction==-1){
             sprite.move(sprite.getLocalBounds().width*mapscale, 0);
+            wormmask.setPosition(sf::Vector2f((sprite.getPosition().x-12*mapscale), (sprite.getPosition().y-1*mapscale)));
+        }
         text.setPosition((deltabg+position+sf::Vector2f(0,-20))*mapscale);
         text.setScale(mapscale, mapscale);
         text.setString("HP="+to_string(hp));
@@ -397,6 +392,18 @@ class player{public:
     }
 };
 vector<player> players;
+
+worm worm::operator =(worm input){
+    position =input.position;
+    hp       =input.hp;
+    direction=input.direction;
+    id       =input.id;
+    sprite   =input.sprite;
+    text     =input.text;
+    team     =input.team;
+    wormmask.setTexture(maskt[players[team].mask], 1);
+    return input;
+}
 
 void placek(sf::Image &image, int x, int y,unsigned int r){
     sf::Vector2f margins;
@@ -486,13 +493,15 @@ bool protocol3(){
 }
 
 void protocol6(){
-    unsigned char to_send[5];
+    unsigned char to_send[7];
     to_send[0]=6;
     protbufferi[0]=myid;
     for(int i=4; i>0; i--){
         to_send[i]=protbufferi[0]%256;
         protbufferi[0]=protbufferi[0]>>8;
     }
+    to_send[5]=(udpsocket.getLocalPort()>>8)%256;
+    to_send[6]=udpsocket.getLocalPort()%256;
     if(udpsocket.send(to_send, 5, serverip, 31337)!=sf::Socket::Done){
         cout<<"sending error 0x6\n";
     }
@@ -2007,10 +2016,15 @@ int main(){
                 receiving=0;
             }
         }
-        if(udpsocket.receive(data, 1024, received, serverip, udpport)!=sf::Socket::Done){
+        sf::IpAddress aelirsydgfbheljrkd; unsigned short arisdhbskufghkarudh;
+        if(udpsocket.receive(data, 1024, received, aelirsydgfbheljrkd, arisdhbskufghkarudh)!=sf::Socket::Done){
             if(!receiving)
             for(int i=0; i<received; i++){
                 if(!udpto_ignore){
+                    if(data[i]==7){
+                        cout<<"UDP connection established\n";
+                        continue;
+                    }
                     if(data[i]==0x32){
                         receiving=0x32;
                         udpdeltareceive=i+1;
