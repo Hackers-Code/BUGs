@@ -44,7 +44,9 @@ class ServerUDP {
 			let msg = func();
 			let opcode = msg.opcode.readUInt8( 0 );
 			let buffer = this.parser.encode( Instruction.Map[ opcode ].rule, msg );
-			console.log( buffer );
+			console.log();
+			console.log( buffer.toString( 'hex' ) );
+			console.log();
 			if( buffer instanceof Buffer )
 			{
 				receivers.forEach( ( element ) =>

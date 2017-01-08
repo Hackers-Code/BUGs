@@ -223,7 +223,6 @@ class Room {
 			count,
 			players
 		};
-		console.log( this.playersList );
 		setTimeout( this.preparePlayersList.bind( this ), 1000 );
 	}
 
