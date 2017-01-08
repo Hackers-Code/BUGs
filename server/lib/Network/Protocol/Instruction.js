@@ -37,6 +37,10 @@ const InstructionMap = {
 		callback : 'setUDP',
 		type : InstructionTypes.client
 	},
+	0x07 : {
+		rule : '',
+		type : InstructionTypes.server
+	},
 	0x10 : {
 		rule : '',
 		callback : 'listGames',
