@@ -12,6 +12,7 @@ class ServerUDP {
 		this.tasks = [];
 		this.tickrate = 16;
 		this.parser = new Parser( 'opcode:1' );
+		this.taskID = 0;
 		this.server.on( 'message', ( data, rinfo ) =>
 		{
 			let opcode = data[ 0 ];
@@ -44,9 +45,6 @@ class ServerUDP {
 			let msg = func();
 			let opcode = msg.opcode.readUInt8( 0 );
 			let buffer = this.parser.encode( Instruction.Map[ opcode ].rule, msg );
-			console.log();
-			console.log( buffer.toString( 'hex' ) );
-			console.log();
 			if( buffer instanceof Buffer )
 			{
 				receivers.forEach( ( element ) =>
@@ -55,7 +53,21 @@ class ServerUDP {
 				} );
 			}
 		}, 1000 / this.tickrate );
-		this.tasks.push( timeout );
+		this.tasks.push( {
+			timeout,
+			id : this.taskID++
+		} );
+		return this.taskID - 1;
+	}
+
+	removeTask( id )
+	{
+		let index = SearchEngine.findByUniqueID( this.tasks, id );
+		if( index !== false && index !== -1 )
+		{
+			clearInterval( this.tasks[ index ].timeout );
+			this.tasks.splice( index, 1 );
+		}
 	}
 }
 module.exports = ServerUDP;

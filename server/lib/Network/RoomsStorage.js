@@ -65,6 +65,10 @@ class RoomsStorage {
 		let room = SearchEngine.findByUniqueID( this.rooms, id );
 		if( room !== false && room !== -1 )
 		{
+			this.rooms[ room ].tasks.forEach( ( element ) =>
+			{
+				this.app.udp.removeTask( element );
+			} );
 			this.rooms.splice( room, 1 );
 			return true;
 		}
