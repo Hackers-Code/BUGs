@@ -11,6 +11,7 @@ class Request {
 
 	handleRequest( data )
 	{
+		console.log( data );
 		if( data.length > 0 )
 		{
 			let instruction = Instruction.Map[ data[ 0 ] ];

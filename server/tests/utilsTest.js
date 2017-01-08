@@ -1,7 +1,6 @@
 'use strict';
 const chai = require( 'chai' );
 const expect = chai.expect;
-const Numbers = require( './../lib/Utils/Numbers' );
 const UniqueKeyGenerator = require( './../lib/Utils/UniqueKeyGenerator' );
 const UniqueNameStorage = require( './../lib/Utils/UniqueNameStorage' );
 const SearchEngine = require( './../lib/Utils/SearchEngine' );

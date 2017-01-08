@@ -10,6 +10,7 @@ class Response {
 
 	send( data )
 	{
+		console.log( data );
 		let opcode = data.opcode;
 		data.opcode = Buffer.from( [ opcode ] );
 		let buffer = this.parser.encode( Instruction.Map[ opcode ].rule, data );

@@ -1,6 +1,5 @@
 'use strict';
 const fs = require( 'fs' );
-const Numbers = require( './../Utils/Numbers' );
 const MapLoader = {
 	loadMap : function( mapID, callback )
 	{
