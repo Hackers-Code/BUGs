@@ -47,7 +47,7 @@ unsigned int deltareceive=0, udpdeltareceive=0;
 unsigned short udpport;
 sf::Texture ont, offt;
 sf::Sprite connectionS;
-bool connected=0;
+bool connected=0, udpconnected=0;
 
 bool connect(string ip, string port){
     sf::IpAddress ipaddress0(ip);
@@ -65,12 +65,10 @@ bool connect(string ip, string port){
     clientsocket.setBlocking(0);
     cout<<clientsocket.getRemotePort()<<"\n";
     udpsocket.setBlocking(0);
-    if(udpsocket.bind(udpsocket.getLocalPort())!=sf::Socket::Done){
-        cout<<"udp socket can not be bound to "<<port<<"\n";
-    }else{
-        udpport=udpsocket.getLocalPort();
-        cout<<"udp socket bound to "<<udpport<<"\n";
-    }
+    udpsocket.bind(0);
+    udpport=udpsocket.getLocalPort();
+    cout<<"UDP port="<<udpport<<"\n";
+    udpconnected=1;
     connectionS.setTexture(ont);
     connected=1;
     serverip=ip;
@@ -111,9 +109,9 @@ float deltagamelist=120;
 //zmienne do lobby
 string lobbyname;
 sf::Text lobbynamet, ainfo[4], seedinput, vxmaxtext, vymaxtext, aytext, vjumptext;
-sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2, advancedt;
-sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys, advanceds;
-int playersamount=2;
+sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2, advancedt, plreadyt[2];
+sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys, advanceds, plreadys[2];
+int playersamount=2, playersready=0;
 bool ready=0, changingsettings=0, advancedb=0;
 list<sf::Vector2u> spawnpoints;
 
@@ -350,14 +348,15 @@ class player{public:
         namet.setString(namein);
         namet.setCharacterSize(12);
         namet.setColor(color);
-        namet.setPosition(0,id*40);
+        namet.setPosition(0,60+id*40);
+        namet.setFont(mainfont);
 
         sf::Image image;
         image.create(1,1,color);
         hpbart.loadFromImage(image);
         hpbars.setTexture(hpbart,1);
         hpbars.setScale(hp, 10);
-        hpbars.setPosition(0, 30+40*id);
+        hpbars.setPosition(0, 90+40*id);
     }
 
     bool addworm(worm newworm){
@@ -376,6 +375,10 @@ class player{public:
         }
     }
 
+    void lobbydraw(sf::RenderWindow &window){
+        window.draw(namet);
+    }
+
     player operator =(player input){
         for(int i=0; i<5; i++){
             worms[i]=input.worms[i];
@@ -388,6 +391,16 @@ class player{public:
         color    =input.color;
         hpbart   =input.hpbart;
         hpbars   =input.hpbars;
+        namet.setString(name);
+        namet.setColor(color);
+        namet.setPosition(0,60+id*40);
+
+        sf::Image image;
+        image.create(1,1,color);
+        hpbart.loadFromImage(image);
+        hpbars.setTexture(hpbart,1);
+        hpbars.setScale(hp, 10);
+        hpbars.setPosition(0, 90+40*id);
         return input;
     }
 };
@@ -633,7 +646,6 @@ void protocol2e(){
         unsigned char to_send[1];
         to_send[0]=0x2e;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-            cout<<"poszlo 0x2e\n";
         }else cout<<"sending error 0x2e\n";
     }else cout<<"not connected, cannot get players list\n";
 }
@@ -767,6 +779,10 @@ int main(){
         for(int i=0; i<8; i++){
             clockt[i].loadFromFile("img/clock/clock"+to_string(i+1)+".png");
         }
+        plreadyt[0].loadFromFile("img/ready0.png");
+        plreadyt[1].loadFromFile("img/ready1.png");
+        plreadys[0].setTexture(plreadyt[0]);
+        plreadys[1].setTexture(plreadyt[1]);
 
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
@@ -1550,6 +1566,23 @@ int main(){
                         }else cout<<"lost response 0x2\n";
                         continue;
                     }
+                    if(data[i]==4){
+                        receiving=4;
+                        deltareceive=i+1;
+                        mode=connectroom;
+                        wormpointers.clear();
+                        players.clear();
+                        turntime=playersready=ready=playersamount=0;
+                        currentworm=0;
+                        protbuffers[0]="";
+                        i++;
+                        if(i<received){
+                            to_receive=data[i];
+                        }else{
+                            cout<<"lost rest of 0x04, but you are still kicked :P\n";
+                        }
+                        break;
+                    }
                     if(data[i]==5){
                         receiving=5;
                         deltareceive=i+1;
@@ -1652,6 +1685,13 @@ int main(){
                         }else cout<<"lost response 0x2d\n";
                         continue;
                     }
+                    if(data[i]==0x2f){
+                        receiving=0x2f;
+                        deltareceive=i+1;
+                        to_receive=5;
+                        protbufferi[0]=1;
+                        break;
+                    }
                     if(data[i]==0x30){
                         soundtrack.stop();
                         protocol2e();
@@ -1660,14 +1700,6 @@ int main(){
                         backgrounds.setScale(0.2,0.2);
                         mode=ingame;
                         protocol31();
-                        break;
-                    }
-                    if(data[i]==0x2f){
-                        receiving=0x2f;
-                        deltareceive=i+1;
-                        to_receive=5;
-                        protbufferi[0]=1;
-                        cout<<"receiving players\n";
                         break;
                     }
                     if(data[i]==0x33){
@@ -1756,6 +1788,19 @@ int main(){
                     cout<<"received unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
             }
+            if(receiving==4){
+                for(int i=deltareceive; i<received; i++){
+                    to_receive--;
+                    if(!to_receive){
+                        protbuffers[0]+=data[i];
+                        cout<<"0x04: "<<protbuffers[0]<<"\n";
+                        MessageBox(0, protbuffers[0].c_str(), "You were kicked", MB_OK);
+                        receiving=0;
+                        break;
+                    }
+                    protbuffers[0]+=data[i];
+                }
+            }else
             if(receiving==5){
                 for(int i=deltareceive; i<deltareceive+4; i++){
                     if(i>=received){
@@ -1899,7 +1944,11 @@ int main(){
                 for(int i=deltareceive; i<received; i++){
                     if(protbufferi[0]){
                         if(to_receive==5){
-                            //data[i]==gotowi
+                            playersready=data[i];
+                            if(playersready>playersamount){
+                                cout<<playersready<<" players ready, and "<<playersamount<<" players expected\n";
+                                playersready=0;
+                            }
                         }else{
                             protbufferi[1]=protbufferi[1]<<8;
                             protbufferi[1]+=data[i];
@@ -1951,9 +2000,6 @@ int main(){
                             players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
                             protbufferi[1]=0;
                             protbuffers[0]="";
-                            for(int i=0; i<players.size(); i++){
-                                cout<<"player["<<i<<"]="<<int(players[i].id)<<", "<<players[i].name<<"\n";
-                            }
                             break;
                         }
                     }
@@ -2017,7 +2063,7 @@ int main(){
             }
         }
         sf::IpAddress aelirsydgfbheljrkd; unsigned short arisdhbskufghkarudh;
-        if(udpsocket.receive(data, 1024, received, aelirsydgfbheljrkd, arisdhbskufghkarudh)!=sf::Socket::Done){
+        if((udpsocket.receive(data, 1024, received, aelirsydgfbheljrkd, arisdhbskufghkarudh)==sf::Socket::Done)&&(udpconnected)){
             if(!receiving)
             for(int i=0; i<received; i++){
                 if(!udpto_ignore){
@@ -2028,7 +2074,7 @@ int main(){
                     if(data[i]==0x32){
                         receiving=0x32;
                         udpdeltareceive=i+1;
-                        udpto_receive=4;
+                        udpto_receive=8;
                         protbufferi[0]=1;
                         for(int j=1; j<7; j++)
                             protbufferi[j]=0;
@@ -2060,31 +2106,34 @@ int main(){
                                         }
                                     }
                                 }
+                                protbufferi[1]=protbufferi[2]=protbufferi[3]=protbufferi[4]=protbufferi[5]=0;
                             }else{
-                                if(protbufferi[1]!=40)
+                                if(protbufferi[1]!=40){
                                     cout<<"wrong data, playerid="<<protbufferi[1]<<"\n";
+                                    system("pause");
+                                }
                             }
                             protbufferi[1]=data[i];
                         }else
-                        if((to_receive%15)>=11){
+                        if((udpto_receive%15)>=11){
                             protbufferi[2]=protbufferi[2]<<8;
                             protbufferi[2]+=data[i];
                         }else
-                        if((to_receive%15)>=7){
+                        if((udpto_receive%15)>=7){
                             protbufferi[3]=protbufferi[3]<<8;
                             protbufferi[3]+=data[i];
                         }else
-                        if((to_receive%15)==6){
+                        if((udpto_receive%15)==6){
                             protbufferi[4]=data[i];
                         }else
-                        if((to_receive%15)==5){
+                        if((udpto_receive%15)==5){
                             protbufferi[5]=data[i];
                         }else
-                        if((to_receive%15)>=3){
+                        if((udpto_receive%15)>=3){
                             protbufferi[6]=protbufferi[6]<<8;
                             protbufferi[6]+=data[i];
                         }else
-                        if((to_receive%15)>=1){
+                        if((udpto_receive%15)>=1){
                             protbufferi[7]=protbufferi[7]<<8;
                             protbufferi[7]+=data[i];
                         }
@@ -2093,11 +2142,8 @@ int main(){
                     if(!udpto_receive){
                         if(protbufferi[0]){//end of metadata
                             protbufferi[0]=0;
-                            udpto_receive=11*protbufferi[1];
+                            udpto_receive=15*protbufferi[1];
                             if(protbufferi[1]==0){
-                                cout<<"empty worms list?\ndisconnecting\n";
-                                receiving=0;
-                                clientsocket.disconnect();
                                 break;
                             }
                             protbufferi[1]=40;
@@ -2109,6 +2155,7 @@ int main(){
                                     worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
                                     (*wpbuf).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
                                     wormpointers.push_back(wpbuf);
+                                    cout<<"all worms loaded\n";
                                 }
                                 else{
                                     for(int j=0; j<wormpointers.size(); j++){
@@ -2121,6 +2168,7 @@ int main(){
                                 }
                             }else{
                                 cout<<"wrong data, playerid="<<protbufferi[1]<<"\n";
+                                protbufferi[1]=protbufferi[2]=protbufferi[3]=protbufferi[4]=protbufferi[5]=0;
                             }
                             for(int j=1; j<7; j++)
                                 protbufferi[j]=0;
@@ -2418,6 +2466,17 @@ int main(){
                 window.draw(cb3players);
                 window.draw(cb4players);
                 window.draw(oksettings);
+            }else{
+                for(int i=0; i<players.size(); i++)
+                    players[i].lobbydraw(window);
+                for(int i=0; i<playersamount; i++){
+                    plreadys[0].setPosition(361+i*15, 30);
+                    window.draw(plreadys[0]);
+                }
+                for(int i=0; i<playersready; i++){
+                    plreadys[1].setPosition(361+i*15, 30);
+                    window.draw(plreadys[1]);
+                }
             }
             window.draw(readys);
             window.draw(advanceds);
