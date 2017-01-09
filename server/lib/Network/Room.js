@@ -218,7 +218,7 @@ class Room {
 			} );
 		}
 		let ready = Buffer.alloc( 1 );
-		ready.writeUInt8( this.getReadyPlayersAmount, 0 );
+		ready.writeUInt8( this.getReadyPlayersAmount(), 0 );
 		this.playersList = {
 			ready,
 			count,
