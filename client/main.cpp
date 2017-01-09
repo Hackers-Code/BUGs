@@ -1567,8 +1567,6 @@ int main(){
                         continue;
                     }
                     if(data[i]==4){
-                        receiving=4;
-                        deltareceive=i+1;
                         mode=connectroom;
                         wormpointers.clear();
                         players.clear();
@@ -1580,7 +1578,10 @@ int main(){
                             to_receive=data[i];
                         }else{
                             cout<<"lost rest of 0x04, but you are still kicked :P\n";
+                            break;
                         }
+                        receiving=4;
+                        deltareceive=i+1;
                         break;
                     }
                     if(data[i]==5){
@@ -2092,7 +2093,7 @@ int main(){
                         protbufferi[1]+=data[i];
                     }else{
                         if(!(udpto_receive%15)){
-                            if(protbufferi[1]<4){
+                            if(players.size()>protbufferi[1]){
                                 if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]))){
                                     worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
                                     (*wpbuf).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
@@ -2109,7 +2110,7 @@ int main(){
                                 protbufferi[1]=protbufferi[2]=protbufferi[3]=protbufferi[4]=protbufferi[5]=0;
                             }else{
                                 if(protbufferi[1]!=40){
-                                    cout<<"wrong data, playerid="<<protbufferi[1]<<"\n";
+                                    cout<<"wrong data, playerid="<<protbufferi[1]<<", but we have only "<<players.size()<<" players\n";
                                     system("pause");
                                 }
                             }
@@ -2150,7 +2151,7 @@ int main(){
                         }else
                         {//end of protocol
                             receiving=0;
-                            if(protbufferi[1]<4){
+                            if(players.size()>protbufferi[1]){
                                 if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]))){
                                     worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
                                     (*wpbuf).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
@@ -2167,7 +2168,7 @@ int main(){
                                     }
                                 }
                             }else{
-                                cout<<"wrong data, playerid="<<protbufferi[1]<<"\n";
+                                cout<<"wrong data, playerid="<<protbufferi[1]<<", but we have only "<<players.size()<<" players\n";
                                 protbufferi[1]=protbufferi[2]=protbufferi[3]=protbufferi[4]=protbufferi[5]=0;
                             }
                             for(int j=1; j<7; j++)
