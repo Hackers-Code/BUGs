@@ -35,7 +35,7 @@ class Room {
 	{
 		if( this.status < Status.inGame )
 		{
-			if( id === this.admin )
+			if( this.admin.compare( id ) === 0 )
 			{
 				this.roomsStorage.removeRoom( this.id );
 				let adminIndex = SearchEngine.findByUniqueID( this.players, id );
@@ -49,6 +49,7 @@ class Room {
 				{
 					element.response.send( {
 						opcode : 0x04,
+						length : Buffer.from( [ reason.length ] ),
 						reason : reason
 					} );
 				} );

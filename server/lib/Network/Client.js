@@ -83,7 +83,7 @@ class Client {
 	{
 		if( this.status === ClientStatus.inLobby || this.status === ClientStatus === ClientStatus.inGame )
 		{
-			this.leaveRoom();
+			this.leaveLobby();
 		}
 	}
 

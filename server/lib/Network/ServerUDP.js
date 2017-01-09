@@ -10,10 +10,6 @@ class ServerUDP {
 		this.clients = app.clientsStorage;
 		this.server = dgram.createSocket( 'udp4' );
 		this.tasks = [];
-		setInterval( () =>
-		{
-			console.log( 'Tasks count: ' + this.tasks.length );
-		}, 1000 );
 		this.tickrate = 16;
 		this.parser = new Parser( 'opcode:1' );
 		this.taskID = 0;
