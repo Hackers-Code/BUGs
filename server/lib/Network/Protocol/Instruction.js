@@ -10,7 +10,7 @@ const InstructionMap = {
 		type : InstructionTypes.server
 	},
 	0x01 : {
-		rule : 'nick:20',
+		rule : 'name:20',
 		callback : 'setName',
 		response : 0x02,
 		type : InstructionTypes.client

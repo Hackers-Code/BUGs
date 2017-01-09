@@ -31,15 +31,14 @@ class ClientsStorage {
 		let client = SearchEngine.findByUniqueID( this.clients, id );
 		if( client !== false && client !== -1 )
 		{
-			if( this.clients.status >= ClientStatus.inGame )
+			if( this.clients[ client ].status >= ClientStatus.inGame )
 			{
-				//
 			}
-			if( this.clients.status >= ClientStatus.inLobby )
+			if( this.clients[ client ].status >= ClientStatus.inLobby )
 			{
 				this.clients[ client ].leaveLobby();
 			}
-			if( this.clients.status >= ClientStatus.named )
+			if( this.clients[ client ].status >= ClientStatus.named )
 			{
 				this.uniqueNameStorage.removeName( this.clients[ client ].name )
 			}

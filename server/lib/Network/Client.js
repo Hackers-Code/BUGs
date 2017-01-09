@@ -40,7 +40,7 @@ class Client {
 
 	setName( data )
 	{
-		if( this.clientsStorage.addName( data.nick ) )
+		if( this.clientsStorage.addName( data.name ) )
 		{
 			if( this.status === ClientStatus.named )
 			{
@@ -49,7 +49,7 @@ class Client {
 					return false;
 				}
 			}
-			this.name = data.nick;
+			this.name = data.name;
 			this.status = ClientStatus.named;
 			return true;
 		}
@@ -71,6 +71,7 @@ class Client {
 			}, this );
 			if( room !== false )
 			{
+				this.status = ClientStatus.inLobby;
 				this.room = room;
 				return true;
 			}
@@ -80,9 +81,9 @@ class Client {
 
 	leaveRoom()
 	{
-		if( this.status === ClientStatus.inLobby )
+		if( this.status === ClientStatus.inLobby || this.status === ClientStatus === ClientStatus.inGame )
 		{
-			this.leaveLobby();
+			this.leaveRoom();
 		}
 	}
 
@@ -121,6 +122,7 @@ class Client {
 			if( room !== false )
 			{
 				this.room = room;
+				this.status = ClientStatus.inLobby;
 				return true;
 			}
 		}
@@ -176,6 +178,7 @@ class Client {
 		if( this.player !== null )
 		{
 			this.player.setMapLoaded();
+			this.status = ClientStatus.inGame;
 			return true;
 		}
 		return false;

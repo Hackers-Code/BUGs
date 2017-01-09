@@ -10,6 +10,10 @@ class ServerUDP {
 		this.clients = app.clientsStorage;
 		this.server = dgram.createSocket( 'udp4' );
 		this.tasks = [];
+		setInterval( () =>
+		{
+			console.log( 'Tasks count: ' + this.tasks.length );
+		}, 1000 );
 		this.tickrate = 16;
 		this.parser = new Parser( 'opcode:1' );
 		this.taskID = 0;
@@ -62,7 +66,7 @@ class ServerUDP {
 
 	removeTask( id )
 	{
-		let index = SearchEngine.findByUniqueID( this.tasks, id );
+		let index = SearchEngine.findByID( this.tasks, id );
 		if( index !== false && index !== -1 )
 		{
 			clearInterval( this.tasks[ index ].timeout );
