@@ -1,16 +1,16 @@
 'use strict';
 class Worm {
-	constructor( position, owner, id )
+	constructor( position, owner, id, physics )
 	{
 		this.x = position.x;
 		this.y = position.y;
 		this.hp = 200;
 		this.speedX = 0;
 		this.speedY = 0;
-		this.accelerationX = 4;
-		this.accelerationY = 437;
-		this.maxSpeedX = 2;
-		this.maxSpeedY = 875;
+		this.accelerationY = physics.gravity;
+		this.maxSpeedX = physics.maxSpeedX;
+		this.maxSpeedY = physics.maxSpeedY;
+		this.jumpHeight = physics.jumpHeight;
 		this.owner = owner;
 		this.id = id;
 		this.width = 40;
@@ -21,7 +21,7 @@ class Worm {
 	{
 		if( this.speedY === 0 )
 		{
-			this.speedY = -300;
+			this.speedY = this.jumpHeight;
 		}
 	}
 
@@ -38,9 +38,9 @@ class Worm {
 		let hp = Buffer.alloc( 1 );
 		hp.writeUInt8( this.hp, 0 );
 		let speedX = Buffer.alloc( 2 );
-		speedX.writeUInt16BE( this.speedX, 0 );
+		speedX.writeInt16BE( this.speedX, 0 );
 		let speedY = Buffer.alloc( 2 );
-		speedY.writeUInt16BE( this.speedY, 0 );
+		speedY.writeInt16BE( this.speedY, 0 );
 		return {
 			owner,
 			id,

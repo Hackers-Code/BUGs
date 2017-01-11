@@ -22,9 +22,9 @@ class Player {
 		this.world = null;
 	}
 
-	addWorm( spawn, id )
+	addWorm( spawn, id, physics )
 	{
-		let worm = new Worm( spawn, this.playerID, id );
+		let worm = new Worm( spawn, this.playerID, id, physics );
 		this.worms.push( worm );
 	}
 
@@ -61,6 +61,7 @@ class Player {
 
 	update( diffTime )
 	{
+		console.log( 'In player' );
 		for( let i = 0 ; i < this.worms.length ; i++ )
 		{
 			let worm = this.worms[ i ];

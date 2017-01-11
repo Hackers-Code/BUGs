@@ -38,6 +38,7 @@ class Room {
 			if( this.admin.compare( id ) === 0 )
 			{
 				this.roomsStorage.removeRoom( this.id );
+				this.game = null;
 				let adminIndex = SearchEngine.findByUniqueID( this.players, id );
 				if( adminIndex !== false && adminIndex !== -1 )
 				{

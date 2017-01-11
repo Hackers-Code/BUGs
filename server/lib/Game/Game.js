@@ -56,7 +56,12 @@ class Game {
 			element.addWorld( this.world );
 			for( let i = 0 ; i < this.wormsPerPlayer ; i++ )
 			{
-				element.addWorm( this.world.getUniqueSpawn(), this.wormID++ );
+				element.addWorm( this.world.getUniqueSpawn(), this.wormID++, {
+					gravity : this.gravity,
+					maxSpeedX : this.maxSpeedX,
+					maxSpeedY : this.maxSpeedY,
+					jumpHeight : this.jumpHeight
+				} );
 			}
 
 		} );
