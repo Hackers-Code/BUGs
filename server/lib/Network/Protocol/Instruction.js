@@ -148,6 +148,10 @@ const InstructionMap = {
 		rule : 'worm_id:1',
 		type : InstructionTypes.server
 	},
+	0x35 : {
+		rule : 'tick:4;seconds:1',
+		type : InstructionTypes.server
+	},
 	0x36 : {
 		rule : '',
 		type : InstructionTypes.server

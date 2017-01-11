@@ -103,7 +103,13 @@ class Game {
 
 	getTimeLeft()
 	{
-		return parseInt( this.timeleft );
+		let tick = Buffer.alloc( 4 );
+		tick.writeUInt32BE( this.frame, 0 );
+		return {
+			opcode : Buffer.from( [ 0x35 ] ),
+			seconds : Buffer.from( [ parseInt( this.timeleft ) ] ),
+			tick
+		};
 	}
 
 	update()
