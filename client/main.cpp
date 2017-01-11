@@ -102,7 +102,8 @@ modes mode=connectroom;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol, protbuffers[3];
 size_t received=0;
-unsigned int myid=0, to_receive=0, udpto_receive=0, to_ignore=0, udpto_ignore=0, lastgamelistelement=0, frame=0, protbufferi[6], colorpointerpressed=3, choosedmask=0;
+unsigned int myid=0, to_receive=0, udpto_receive=0, to_ignore=0, udpto_ignore=0, lastgamelistelement=0, frame=0, protbufferi[8], colorpointerpressed=3, choosedmask=0;
+short protbuffersh[2];
 float deltagamelist=120;
 
 
@@ -941,8 +942,7 @@ int main(){
         ainfo[2].setString("a(y)");
         ainfo[2].setPosition(278+inputbart.getSize().x, 128);
         ainfo[3].setString("jump");
-        ainfo[3].setPosition(278+inputbart.getSize().x, 158);
-/*
+        ainfo[3].setPosition(278+inputbart.getSize().x, 158);/*
         backgroundt.loadFromImage(backgroundi=loadMap("1.map", spawnpoints));
         backgrounds.setTexture(backgroundt, 1);
         backgrounds.setScale(0.2,0.2);
@@ -2059,7 +2059,7 @@ int main(){
                 }
             }else
             if(receiving){
-                cout<<"wtf? unknown receiving\n";
+                cout<<"wtf? unknown receiving ("<<receiving<<")\n";
                 receiving=0;
             }
         }
@@ -2081,6 +2081,12 @@ int main(){
                             protbufferi[j]=0;
                         break;
                     }
+                    if(data[i]==0x35){
+                        receiving=0x35;
+                        udpdeltareceive=i+5;
+                        udpto_receive=1;
+                        break;
+                    }
                     cout<<"recieved unknown UDP protocol: "<<int(data[i])<<"\n";
                 }else udpto_ignore--;
             }
@@ -2096,18 +2102,18 @@ int main(){
                             if(players.size()>protbufferi[1]){
                                 if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]))){
                                     worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
-                                    (*wpbuf).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
+                                    (*wpbuf).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
                                     wormpointers.push_back(wpbuf);
                                 }else{
                                     for(int j=0; j<wormpointers.size(); j++){
                                         if((*wormpointers[j]).id==protbufferi[5]){
                                             (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
-                                            (*wormpointers[j]).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
+                                            (*wormpointers[j]).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
                                             break;
                                         }
                                     }
                                 }
-                                protbufferi[1]=protbufferi[2]=protbufferi[3]=protbufferi[4]=protbufferi[5]=0;
+                                protbufferi[1]=protbufferi[2]=protbufferi[3]=protbufferi[4]=protbufferi[5]=protbuffersh[0]=protbuffersh[1]=0;
                             }else{
                                 if(protbufferi[1]!=40){
                                     cout<<"wrong data, playerid="<<protbufferi[1]<<", but we have only "<<players.size()<<" players\n";
@@ -2131,12 +2137,12 @@ int main(){
                             protbufferi[5]=data[i];
                         }else
                         if((udpto_receive%15)>=3){
-                            protbufferi[6]=protbufferi[6]<<8;
-                            protbufferi[6]+=data[i];
+                            protbuffersh[0]=protbuffersh[0]<<8;
+                            protbuffersh[0]+=data[i];
                         }else
                         if((udpto_receive%15)>=1){
-                            protbufferi[7]=protbufferi[7]<<8;
-                            protbufferi[7]+=data[i];
+                            protbuffersh[1]=protbuffersh[1]<<8;
+                            protbuffersh[1]+=data[i];
                         }
                     }
                     udpto_receive--;
@@ -2154,7 +2160,7 @@ int main(){
                             if(players.size()>protbufferi[1]){
                                 if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]))){
                                     worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
-                                    (*wpbuf).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
+                                    (*wpbuf).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
                                     wormpointers.push_back(wpbuf);
                                     cout<<"all worms loaded\n";
                                 }
@@ -2162,14 +2168,14 @@ int main(){
                                     for(int j=0; j<wormpointers.size(); j++){
                                         if((*wormpointers[j]).id==protbufferi[5]){
                                             (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
-                                            (*wormpointers[j]).V=sf::Vector2f(protbufferi[6], protbufferi[7]);
+                                            (*wormpointers[j]).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
                                             break;
                                         }
                                     }
                                 }
                             }else{
                                 cout<<"wrong data, playerid="<<protbufferi[1]<<", but we have only "<<players.size()<<" players\n";
-                                protbufferi[1]=protbufferi[2]=protbufferi[3]=protbufferi[4]=protbufferi[5]=0;
+                                protbufferi[1]=protbufferi[2]=protbufferi[3]=protbufferi[4]=protbufferi[5]=protbuffersh[0]=protbuffersh[1]=0;
                             }
                             for(int j=1; j<7; j++)
                                 protbufferi[j]=0;
@@ -2178,6 +2184,18 @@ int main(){
                     }
                 }
                 no18delta=0;
+            }else
+            if(receiving==0x35){
+                if(udpdeltareceive<received){
+                    turntime=data[udpdeltareceive];
+                    if(!turntime){
+                        clocks.setTexture(clockt[0]);
+                        clockframe=0;
+                    }
+                    turntimet.setString(to_string(turntime)+"s");
+                }else
+                    cout<<"missed rest of 0x35";
+                receiving=0;
             }
         }
         udpport=udpsocket.getLocalPort();
@@ -2295,7 +2313,7 @@ int main(){
                             for(int k=0; k<=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y; k++){
                                 for(int j=(*wormpointers[i]).position.x; j<=(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
                                     if(colide(sf::Vector2f(j, ((*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height+k)), backgroundi)){
-                                        fcolided=1;
+                                        fcolided=1;cout<<'B';
                                         colisionpos=sf::Vector2f(j, ((*wormpointers[i]).position.y+k));
                                         break;
                                     }
@@ -2306,7 +2324,7 @@ int main(){
                             if(fcolided){
                                 (*wormpointers[i]).position=colisionpos;
                                 (*wormpointers[i]).V.y=0;
-                            }else{
+                            }else{cout<<'A';
                                 (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
                                 (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
                                 if((*wormpointers[i]).V.y>vymax)
