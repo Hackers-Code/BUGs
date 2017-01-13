@@ -33,11 +33,10 @@ class App {
 
 	runUDP()
 	{
-		this.udp = UDP( this.config.UDP_port, ( rinfo, data ) =>
+		this.udp = UDP( this.config.UDP_port, ( msg, rinfo ) =>
 		{
-			console.log( 'message' );
 			console.log( rinfo );
-			console.log( data );
+			console.log( msg );
 		}, ( err ) =>
 		{
 			this.logger.error( err.message );
