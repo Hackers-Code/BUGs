@@ -307,7 +307,7 @@ class worm{public:
 
     void next_anim(){
         animcount++;
-        if(animcount>9){
+        if(animcount>8){
             animcount=0;
         }
         sprite.setTexture(wormt[animcount]);
@@ -672,7 +672,7 @@ bool protocol37(){return 1;
     return 0;
 }
 
-bool protocol38(){//return 1;
+bool protocol38(){return 1;
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x38;
@@ -1001,15 +1001,12 @@ int main(){
                             for(int i=0; i<wormt[0].getSize().x; i++){
                                 if(colide(sf::Vector2f(i+(*currentworm).position.x, (*currentworm).position.y+wormt[0].getSize().y), backgroundi)){
                                     fhasfloor=1;
+                                    break;
                                 }
                             }
                             if(fhasfloor){
                                 if(protocol37()){
                                     (*currentworm).V.y+=vjump;
-                                    (*currentworm).walking=0;
-                                    (*currentworm).V.x=0;
-                                    (*currentworm).animcount=0;
-                                    (*currentworm).sprite.setTexture(wormt[0]);
                                 }
                             }
                         }
@@ -2306,7 +2303,7 @@ int main(){
                             }
                         }
                     }
-                    if((*wormpointers[i]).V.y>0){
+                    if((*wormpointers[i]).V.y>0){//NIE TYKAC\/
                         if(!(*wormpointers[i]).V.x){
                             bool fcolided=0;
                             sf::Vector2f colisionpos;
@@ -2324,7 +2321,7 @@ int main(){
                             if(fcolided){
                                 (*wormpointers[i]).position=colisionpos;
                                 (*wormpointers[i]).V.y=0;
-                            }else{cout<<'A';
+                            }else{
                                 (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
                                 (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
                                 if((*wormpointers[i]).V.y>vymax)
@@ -2332,51 +2329,128 @@ int main(){
                             }
                             (*wormpointers[i]).update();
                         }else
-                        if((*wormpointers[i]).V.x>0){//  `.
+                        if((*wormpointers[i]).V.x>0){//  `..
                             bool fcolided=0, mdir;
-                            sf::Vector2f colisionpos;
-                            float maxVel=(*wormpointers[i]).V.x, minVel;
-                            if(maxVel>(*wormpointers[i]).V.y){
-                                minVel=(*wormpointers[i]).V.y;
-                                mdir=0;
-                            }else{
-                                minVel=maxVel;
-                                maxVel=(*wormpointers[i]).V.y;
-                                mdir=1;
-                            }
-                            if(mdir){
-                                for(int j=0; j<maxVel*(currentittime-lastittime).asSeconds(); j++){
-                                    for(int k=0; k<wormt[0].getSize().x; k++){
-                                        if(colide(sf::Vector2f(int(k+j/minVel)+(*wormpointers[i]).position.x, (*wormpointers[i]).position.y+wormt[0].getSize().y+j), backgroundi)){
+                            sf::Vector2f colisionpos;   //pozycja w ktorej znajdzie sie worm
+                            float wormDeltaVx=(*wormpointers[i]).V.x*(currentittime-lastittime).asSeconds(), wormDeltaVy=(*wormpointers[i]).V.y*(currentittime-lastittime).asSeconds();
+                            if(wormDeltaVx>=wormDeltaVy){
+                                for(int j=0; j<wormDeltaVx; j++){
+                                    for(int k=0; k<wormt[0].getSize().y; k++){
+                                        if(colide(sf::Vector2f((*wormpointers[i]).position.x+wormt[0].getSize().x+j, (*wormpointers[i]).position.y+k+int(j*wormDeltaVy/wormDeltaVx)), backgroundi)){//bool colide(sf::Vector2f pixel, sf::Image map);
                                             fcolided=1;
-                                            colisionpos=sf::Vector2f(int(j/minVel)+(*wormpointers[i]).position.x, (*wormpointers[i]).position.y+j-1);
+                                            colisionpos=sf::Vector2f((*wormpointers[i]).position.x+j-1, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx));
                                             break;
                                         }
-                                        if((k==wormt[0].getSize().x-1)&&(int(j/minVel)>int((j-1)/minVel))){
-                                            for(int l=0; l<wormt[0].getSize().y; l++){
-                                                if(colide(sf::Vector2f(int(j/minVel)+(*wormpointers[i]).position.x+k, (*wormpointers[i]).position.y+l), backgroundi)){
-                                                    fcolided=1;
-                                                    colisionpos=sf::Vector2f(int(j/minVel)+(*wormpointers[i]).position.x, (*wormpointers[i]).position.y+j-1);
-                                                    break;
-                                                }
-                                            }
-                                            if(fcolided)
+                                    }
+                                    if(fcolided)
+                                        break;
+                                    if((j)&&(int(j*wormDeltaVy/wormDeltaVx)!=int((j-1)*wormDeltaVy/wormDeltaVx))){
+                                        for(int k=0; k<wormt[0].getSize().x; k++){
+                                            if(colide(sf::Vector2f((*wormpointers[i]).position.x+k+j, (*wormpointers[i]).position.y+wormt[0].getSize().y+int(j*wormDeltaVy/wormDeltaVx)), backgroundi)){
+                                                fcolided=1;
+                                                colisionpos=sf::Vector2f((*wormpointers[i]).position.x+j-1, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx));
                                                 break;
+                                            }
                                         }
                                     }
                                     if(fcolided)
                                         break;
                                 }
-                            }else{//--------------------------------------------------------------------------------------------------------------------------to do
-
+                            }
+                            else{//--------------------------------------------------------------------------------------------------------------------------
+                                for(int j=0; j<wormDeltaVy; j++){
+                                    for(int k=0; k<wormt[0].getSize().x; k++){
+                                        if(colide(sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)+k, (*wormpointers[i]).position.y+wormt[0].getSize().y+j), backgroundi)){
+                                            fcolided=1;
+                                            colisionpos=sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)-1, (*wormpointers[i]).position.y+j);
+                                            break;
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                    if((j)&&(int(j*wormDeltaVx/wormDeltaVy)!=int((j-1)*wormDeltaVx/wormDeltaVy))){
+                                        for(int k=0; k<wormt[0].getSize().y; k++){
+                                            if(colide(sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy), (*wormpointers[i]).position.y+j+k), backgroundi)){
+                                                fcolided=1;
+                                                colisionpos=sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)-1, (*wormpointers[i]).position.y+j+k);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                }
                             }
                             if(fcolided){
-                                (*wormpointers[i]).position=colisionpos;
                                 (*wormpointers[i]).V.y=0;
-                                if((*wormpointers[i]).V.x!=vxmax)(*wormpointers[i]).V.x=0;
+                                (*wormpointers[i]).position=colisionpos;
                             }else{
-                                (*wormpointers[i]).position.x+=int((*wormpointers[i]).V.x*(currentittime-lastittime).asSeconds());
-                                (*wormpointers[i]).position.y+=int((*wormpointers[i]).V.y*(currentittime-lastittime).asSeconds());
+                                (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
+                                (*wormpointers[i]).position.x+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x);
+                                (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
+                                if((*wormpointers[i]).V.y>vymax)
+                                    (*wormpointers[i]).V.y=vymax;
+                            }
+                            (*wormpointers[i]).update();
+                        }else
+                        /*if((*wormpointers[i]).V.x<0)*/{//  ./
+                            bool fcolided=0, mdir;
+                            sf::Vector2f colisionpos;
+                            float wormDeltaVx=(*wormpointers[i]).V.x*(currentittime-lastittime).asSeconds(), wormDeltaVy=(*wormpointers[i]).V.y*(currentittime-lastittime).asSeconds();
+                            if(-wormDeltaVx>=wormDeltaVy){
+                                for(int j=0; j>wormDeltaVx; j--){
+                                    for(int k=0; k<wormt[0].getSize().y; k++){
+                                        if(colide(sf::Vector2f((*wormpointers[i]).position.x+j, (*wormpointers[i]).position.y+k+int(j*wormDeltaVy/wormDeltaVx)), backgroundi)){
+                                            fcolided=1;
+                                            colisionpos=sf::Vector2f((*wormpointers[i]).position.x+j+1, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx));
+                                            break;
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                    if((j)&&(int(j*wormDeltaVy/wormDeltaVx)!=int((j-1)*wormDeltaVy/wormDeltaVx))){
+                                        for(int k=0; k<wormt[0].getSize().x; k++){
+                                            if(colide(sf::Vector2f((*wormpointers[i]).position.x+k+j, (*wormpointers[i]).position.y+wormt[0].getSize().y+int(j*wormDeltaVy/wormDeltaVx)), backgroundi)){
+                                                fcolided=1;
+                                                colisionpos=sf::Vector2f((*wormpointers[i]).position.x+j+1, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx));
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                }
+                            }
+                            else{//--------------------------------------------------------------------------------------------------------------------------
+                                for(int j=0; j<wormDeltaVy; j++){
+                                    for(int k=0; k<wormt[0].getSize().x; k++){
+                                        if(colide(sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)+k, (*wormpointers[i]).position.y+wormt[0].getSize().y+j), backgroundi)){
+                                            fcolided=1;
+                                            colisionpos=sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)+1, (*wormpointers[i]).position.y+j);
+                                            break;
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                    if((j)&&(int(j*wormDeltaVx/wormDeltaVy)!=int((j-1)*wormDeltaVx/wormDeltaVy))){
+                                        for(int k=0; k<wormt[0].getSize().y; k++){
+                                            if(colide(sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy), (*wormpointers[i]).position.y+j+k), backgroundi)){
+                                                fcolided=1;
+                                                colisionpos=sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)+1, (*wormpointers[i]).position.y+j+k);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                }
+                            }
+                            if(fcolided){
+                                (*wormpointers[i]).V.y=0;
+                                (*wormpointers[i]).position=colisionpos;
+                            }else{
+                                (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
+                                (*wormpointers[i]).position.x+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x);
                                 (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
                                 if((*wormpointers[i]).V.y>vymax)
                                     (*wormpointers[i]).V.y=vymax;
@@ -2408,6 +2482,134 @@ int main(){
                             (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
                             if((*wormpointers[i]).V.y>vymax)
                                 (*wormpointers[i]).V.y=vymax;
+                            (*wormpointers[i]).update();
+                        }else
+                        if((*wormpointers[i]).V.x>0){//  /^
+                            bool fcolided=0, mdir;
+                            sf::Vector2f colisionpos;
+                            float wormDeltaVx=(*wormpointers[i]).V.x*(currentittime-lastittime).asSeconds(), wormDeltaVy=(*wormpointers[i]).V.y*(currentittime-lastittime).asSeconds();
+                            if(wormDeltaVx>=-wormDeltaVy){
+                                for(int j=0; j<wormDeltaVx; j++){
+                                    for(int k=0; k<wormt[0].getSize().y; k++){
+                                        if(colide(sf::Vector2f((*wormpointers[i]).position.x+wormt[0].getSize().x+j, (*wormpointers[i]).position.y+k+int(j*wormDeltaVy/wormDeltaVx)), backgroundi)){//bool colide(sf::Vector2f pixel, sf::Image map);
+                                            fcolided=1;
+                                            colisionpos=sf::Vector2f((*wormpointers[i]).position.x+j-1, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx));
+                                            break;
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                    if((j)&&(int(j*wormDeltaVy/wormDeltaVx)!=int((j-1)*wormDeltaVy/wormDeltaVx))){
+                                        for(int k=0; k<wormt[0].getSize().x; k++){
+                                            if(colide(sf::Vector2f((*wormpointers[i]).position.x+k+j, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx)), backgroundi)){
+                                                fcolided=1;
+                                                colisionpos=sf::Vector2f((*wormpointers[i]).position.x+j-1, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx));
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                }
+                            }
+                            else{//--------------------------------------------------------------------------------------------------------------------------
+                                for(int j=0; j>wormDeltaVy; j--){
+                                    for(int k=0; k<wormt[0].getSize().x; k++){
+                                        if(colide(sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)+k, (*wormpointers[i]).position.y+j), backgroundi)){
+                                            fcolided=1;
+                                            colisionpos=sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)-1, (*wormpointers[i]).position.y+j);
+                                            break;
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                    if((j)&&(int(j*wormDeltaVx/wormDeltaVy)!=int((j-1)*wormDeltaVx/wormDeltaVy))){
+                                        for(int k=0; k<wormt[0].getSize().y; k++){
+                                            if(colide(sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy), (*wormpointers[i]).position.y+j+k), backgroundi)){
+                                                fcolided=1;
+                                                colisionpos=sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)-1, (*wormpointers[i]).position.y+j+k);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                }
+                            }
+                            if(fcolided){
+                                (*wormpointers[i]).V.y=0;
+                                (*wormpointers[i]).position=colisionpos;
+                            }else{
+                                (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
+                                (*wormpointers[i]).position.x+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x);
+                                (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
+                                if((*wormpointers[i]).V.y>vymax)
+                                    (*wormpointers[i]).V.y=vymax;
+                            }
+                            (*wormpointers[i]).update();
+                        }else
+                        /*if((*wormpointers[i]).V.x<0)*/{//  ^`.
+                            bool fcolided=0, mdir;
+                            sf::Vector2f colisionpos;
+                            float wormDeltaVx=(*wormpointers[i]).V.x*(currentittime-lastittime).asSeconds(), wormDeltaVy=(*wormpointers[i]).V.y*(currentittime-lastittime).asSeconds();
+                            if(-wormDeltaVx>=-wormDeltaVy){
+                                for(int j=0; j>wormDeltaVx; j--){
+                                    for(int k=0; k<wormt[0].getSize().y; k++){
+                                        if(colide(sf::Vector2f((*wormpointers[i]).position.x+j, (*wormpointers[i]).position.y+k+int(j*wormDeltaVy/wormDeltaVx)), backgroundi)){
+                                            fcolided=1;
+                                            colisionpos=sf::Vector2f((*wormpointers[i]).position.x+j+1, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx));
+                                            break;
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                    if((j)&&(int(j*wormDeltaVy/wormDeltaVx)!=int((j-1)*wormDeltaVy/wormDeltaVx))){
+                                        for(int k=0; k<wormt[0].getSize().x; k++){
+                                            if(colide(sf::Vector2f((*wormpointers[i]).position.x+k+j, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx)), backgroundi)){
+                                                fcolided=1;
+                                                colisionpos=sf::Vector2f((*wormpointers[i]).position.x+j+1, (*wormpointers[i]).position.y+int(j*wormDeltaVy/wormDeltaVx));
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                }
+                            }
+                            else{//--------------------------------------------------------------------------------------------------------------------------
+                                for(int j=0; j>wormDeltaVy; j--){
+                                    for(int k=0; k<wormt[0].getSize().x; k++){
+                                        if(colide(sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)+k, (*wormpointers[i]).position.y+j), backgroundi)){
+                                            fcolided=1;
+                                            colisionpos=sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)+1, (*wormpointers[i]).position.y+j);
+                                            break;
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                    if((j)&&(int(j*wormDeltaVx/wormDeltaVy)!=int((j-1)*wormDeltaVx/wormDeltaVy))){
+                                        for(int k=0; k<wormt[0].getSize().y; k++){
+                                            if(colide(sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy), (*wormpointers[i]).position.y+j+k), backgroundi)){
+                                                fcolided=1;
+                                                colisionpos=sf::Vector2f((*wormpointers[i]).position.x+int(j*wormDeltaVx/wormDeltaVy)+1, (*wormpointers[i]).position.y+j+k);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if(fcolided)
+                                        break;
+                                }
+                            }
+                            if(fcolided){
+                                (*wormpointers[i]).V.y=0;
+                                (*wormpointers[i]).position=colisionpos;
+                            }else{
+                                (*wormpointers[i]).position.y+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y);
+                                (*wormpointers[i]).position.x+=int((currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x);
+                                (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
+                                if((*wormpointers[i]).V.y>vymax)
+                                    (*wormpointers[i]).V.y=vymax;
+                            }
                             (*wormpointers[i]).update();
                         }
                     }
