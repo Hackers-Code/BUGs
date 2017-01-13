@@ -8,7 +8,7 @@ class ClientsStorage {
 	constructor( app )
 	{
 		this.app = app;
-		this.maxClients = app.config.max_clients;
+		this.maxClients = app.config.maxClients;
 		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );

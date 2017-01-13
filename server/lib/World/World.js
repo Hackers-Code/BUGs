@@ -70,12 +70,12 @@ class World {
 		return false;
 	}
 
-	checkCollisionTop( worm )
+	checkCollisionTop( y, x )
 	{
 		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let block = this.blocks[ i ];
-			if( (worm.y >= block.y) && (worm.y <= block.y + block.height) && ( worm.x >= block.x ) && ( worm.x <= block.x + block.width) )
+			if( (y >= block.y) && (y <= block.y + block.height) && ( x >= block.x ) && ( x <= block.x + block.width) )
 			{
 				return true;
 			}
@@ -83,12 +83,12 @@ class World {
 		return false;
 	}
 
-	checkCollisionBottom( worm )
+	checkCollisionBottom( y, height, x )
 	{
 		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let block = this.blocks[ i ];
-			if( (worm.y + worm.height <= block.y + block.height) && (worm.y + worm.height >= block.y) && ( worm.x >= block.x ) && ( worm.x <= block.x + block.width) )
+			if( (y + height <= block.y + block.height) && (y + height >= block.y) && ( x >= block.x ) && ( x <= block.x + block.width) )
 			{
 				return true;
 			}

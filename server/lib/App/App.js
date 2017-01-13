@@ -3,85 +3,49 @@ const UDP = require( './../Network/ServerUDP' );
 const RoomsStorage = require( './../Network/RoomsStorage' );
 const ClientsStorage = require( './../Network/ClientsStorage' );
 const Logger = require( './Logger' );
-const ConfigManager = require( './ConfigManager' );
 class App {
-	constructor()
+	constructor( config )
 	{
-		let readConfig = new Promise( ConfigManager.read );
-		readConfig.then( ( data ) =>
-		{
-			try
-			{
-				this.config = JSON.parse( data.toString() );
-				this.init();
-			}
-			catch( err )
-			{
-				console.log( 'Could not parse config file' );
-				console.log( `Error: ${err.message}` )
-			}
-		} ).catch( ( err ) =>
-		{
-			console.log(
-				'Could not read config file, if you run this server for the first time remember to execute init.js first' );
-			console.log( `Error: ${err.message}` );
-		} );
-	}
-
-	init()
-	{
+		this.config = config;
 		this.roomsStorage = new RoomsStorage( this );
 		this.clientsStorage = new ClientsStorage( this );
-		this.tcp = {
-			socket : null,
-			lastError : null
-		};
-		this.udp = {
-			socket : null,
-			lastError : null
-		};
-		this.logger = new Logger( this.config, () =>
-		{
-			this.runTCP();
-			this.runUDP();
-		} );
+		this.tcp = null;
+		this.udp = null;
+		this.logger = new Logger( this.config.logFile, this.config.errorFile );
 	}
 
 	runTCP()
 	{
-		let tcp = new Promise( ( resolve, reject ) =>
+		this.tcp = TCP( this.config.TCP_port, ( socket ) =>
 		{
-			this.tcp.socket = new TCP( reject, this );
-		} );
-		tcp.catch( ( err ) =>
+			this.logger.log( `Connection from ${socket.remoteAddress}:${socket.remotePort}` );
+			this.clientsStorage.addClient( socket );
+		}, ( err ) =>
 		{
-			this.logger.error( err );
-			if( err === this.tcp.lastError )
-			{
-				this.logger.error( 'Server shut down due to infinite loop' );
-				return;
-			}
-			this.tcp.lastError = err;
-			this.runTCP();
+			this.logger.error( err.message );
+			this.udp.close();
+		}, () =>
+		{
+			let address = this.tcp.address();
+			this.logger.log( `TCP socket listening on ${address.address}:${address.port}` );
 		} );
 	}
 
 	runUDP()
 	{
-		let udp = new Promise( ( resolve, reject ) =>
+		this.udp = UDP( this.config.UDP_port, ( rinfo, data ) =>
 		{
-			this.udp.socket = new UDP( reject, this );
-		} );
-		udp.catch( ( err ) =>
+			console.log( 'message' );
+			console.log( rinfo );
+			console.log( data );
+		}, ( err ) =>
 		{
-			this.logger.error( err );
-			if( err === this.tcp.lastError )
-			{
-				this.logger.error( 'Server shut down due to infinite loop' );
-				return;
-			}
-			this.udp.lastError = err;
-			this.runUDP();
+			this.logger.error( err.message );
+			this.tcp.close();
+		}, () =>
+		{
+			let address = this.udp.address();
+			this.logger.log( `UDP socket listening on ${address.address}:${address.port}` );
 		} );
 	}
 }

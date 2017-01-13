@@ -61,7 +61,6 @@ class Player {
 
 	update( diffTime )
 	{
-		console.log( 'In player' );
 		for( let i = 0 ; i < this.worms.length ; i++ )
 		{
 			let worm = this.worms[ i ];
@@ -85,7 +84,6 @@ class Player {
 					continue;
 				}
 			}
-
 			worm.y += worm.speedY * (
 					diffTime / 1000
 				);

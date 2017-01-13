@@ -2,13 +2,13 @@
   "name": "creepy-crawlies-server",
   "version": "0.0.1",
   "description": "Game server for creepy-crawlies",
-  "main": "main.js",
+  "main": "start.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
     "test": "mocha tests --recursive --watch",
-    "start": "node main"
+    "start": "node start"
   },
   "keywords": [
     "game",
