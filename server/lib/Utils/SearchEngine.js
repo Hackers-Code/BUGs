@@ -14,17 +14,6 @@ const SearchEngine = {
 			}
 		}
 		return -1;
-	},
-	findByID : function( array, id )
-	{
-		for( let i = 0 ; i < array.length ; i++ )
-		{
-			if( id === array[ i ].id )
-			{
-				return i;
-			}
-		}
-		return -1;
 	}
 };
 module.exports = SearchEngine;
