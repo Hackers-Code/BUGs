@@ -5,8 +5,8 @@ const ClientStatus = {
 	inLobby : 2,
 	inGame : 3
 };
-const Request = require( '././Request' );
-const Response = require( '././Response' );
+const Request = require( '../Network/Request' );
+const Response = require( '../Network/Response' );
 class Client {
 	constructor( socket, id, closeHandler )
 	{
