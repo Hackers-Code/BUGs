@@ -1,5 +1,5 @@
-const MapInterface = require( './../MapInterface/MapInterface' );
-const World = require( './../World/World' );
+const MapInterface = require( '././MapInterface' );
+const World = require( '././World' );
 class Game {
 	constructor( players )
 	{

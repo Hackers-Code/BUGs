@@ -5,15 +5,13 @@ const ClientStatus = {
 	inLobby : 2,
 	inGame : 3
 };
-const Request = require( './Request' );
-const Response = require( './Response' );
+const Request = require( '././Request' );
+const Response = require( '././Response' );
 class Client {
-	constructor( socket, id, app )
+	constructor( socket, id, closeHandler )
 	{
 		this.socket = socket;
 		this.id = id;
-		this.clientsStorage = app.clientsStorage;
-		this.roomsStorage = app.roomsStorage;
 		this.status = ClientStatus.connected;
 		this.name = Buffer.alloc( 20 );
 		this.response = new Response( socket );
@@ -25,17 +23,14 @@ class Client {
 		} );
 		this.room = null;
 		this.player = null;
-		this.socket.on( 'data', ( data ) =>
-		{
-			this.request.handleRequest( data );
-		} );
-		this.socket.on( 'error', ( err ) =>
-		{
-		} );
-		this.socket.on( 'close', () =>
-		{
-			this.clientsStorage.removeClient( this.id );
-		} );
+		this.socket.on( 'data', this.dataHandler );
+		this.socket.on( 'error', ( err ) => {} );
+		this.socket.on( 'close', closeHandler );
+	}
+
+	dataHandler( data )
+	{
+		this.request.handleRequest( data );
 	}
 
 	setName( data )

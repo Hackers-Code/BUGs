@@ -48,7 +48,7 @@ const InstructionMap = {
 		type : InstructionTypes.client
 	},
 	0x11 : {
-		rule : 'count:4;array(id:4,name:20)*count',
+		rule : 'count:4;games(id:4,name:20)*count',
 		type : InstructionTypes.server
 	},
 	0x20 : {

@@ -1,20 +1,39 @@
 'use strict';
-const UniqueKeyGenerator = require( './../Utils/UniqueKeyGenerator' );
-const UniqueNameStorage = require( './../Utils/UniqueNameStorage' );
-const SearchEngine = require( './../Utils/SearchEngine' );
+const UniqueKeyGenerator = require( '../Utils/UniqueKeyGenerator' );
+const UniqueNameStorage = require( '../Utils/UniqueNameStorage' );
+const SearchEngine = require( '../Utils/SearchEngine' );
 const Room = require( './Room' );
 class RoomsStorage {
-	constructor( app )
+	constructor()
 	{
-		this.app = app;
 		this.availableGamesResponse = null;
 		this.rooms = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, '' );
-		this.getAvailableGames();
 	}
 
-	getAvailableGames()
+	getRooms()
+	{
+		return this.rooms;
+	}
+
+	addRoom( settings, client )
+	{
+		if( settings !== null && (typeof settings.name !== 'undefined' || typeof settings.password !== 'undefined' ) )
+		{
+			if( this.uniqueNameStorage.addName( settings.name ) )
+			{
+				let id = this.uniqueKeyGenerator.generateKey();
+				let room = new Room( settings, client, id, this );
+				let length = this.rooms.push( room );
+				return this.rooms[ length - 1 ];
+			}
+			return false;
+		}
+		return false;
+	}
+
+	listAvailableGames()
 	{
 		let gamesCount = 0;
 		let count = Buffer.alloc( 4 );
@@ -33,31 +52,10 @@ class RoomsStorage {
 		}
 		count.writeInt32BE( gamesCount, 0 );
 		this.availableGamesResponse = {
-			count : count,
-			array : games
+			count,
+			games
 		};
-		setTimeout( this.getAvailableGames.bind( this ), 5000 );
-	}
-
-	listAvailableGames()
-	{
 		return this.availableGamesResponse;
-	}
-
-	addRoom( settings, client )
-	{
-		if( typeof settings.name !== 'undefined' || typeof settings.password !== 'undefined' )
-		{
-			if( this.uniqueNameStorage.addName( settings.name ) )
-			{
-				let id = this.uniqueKeyGenerator.generateKey();
-				let room = new Room( settings, client, id, this );
-				let length = this.rooms.push( room );
-				return this.rooms[ length - 1 ];
-			}
-			return false;
-		}
-		return false;
 	}
 
 	removeRoom( id )

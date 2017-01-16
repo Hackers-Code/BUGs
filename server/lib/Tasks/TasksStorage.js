@@ -1,5 +1,5 @@
-const UniqueKeyGenerator = require( '../utils/UniqueKeyGenerator' );
-const SearchEngine = require( '../utils/SearchEngine' );
+const UniqueKeyGenerator = require( '../Utils/UniqueKeyGenerator' );
+const SearchEngine = require( '../Utils/SearchEngine' );
 const Task = require( './Task' );
 class TasksStorage {
 	constructor( tickrate )

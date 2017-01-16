@@ -6,10 +6,10 @@ const Status = {
 	waitingForConfirming : 2,
 	inGame : 3
 };
-const SearchEngine = require( './../Utils/SearchEngine' );
-const Game = require( './../Game/Game' );
-const Player = require( './../Game/Player' );
-const MapInterface = require( './../MapInterface/MapInterface' );
+const SearchEngine = require( '../Utils/SearchEngine' );
+//const Game = require( '../to-test/Game/Game' );
+//const Player = require( '../to-test/Game/Player' );
+const MapInterface = require( '../MapInterface/MapInterface' );
 class Room {
 	constructor( settings, client, id, roomsStorage )
 	{

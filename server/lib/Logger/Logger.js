@@ -7,7 +7,7 @@ class Logger {
 
 	static formatData( data )
 	{
-		return Buffer.from( '[' + new Date( Date.now() ).toLocaleString() + '] ' + data + '\n' );
+		return '[' + new Date( Date.now() ).toLocaleString() + '] ' + data + '\n';
 	}
 
 	log( data )

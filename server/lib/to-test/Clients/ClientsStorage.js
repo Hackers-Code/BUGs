@@ -1,14 +1,13 @@
 'use strict';
-const UniqueKeyGenerator = require( './../Utils/UniqueKeyGenerator' );
-const UniqueNameStorage = require( './../Utils/UniqueNameStorage' );
+const UniqueKeyGenerator = require( '././UniqueKeyGenerator' );
+const UniqueNameStorage = require( '././UniqueNameStorage' );
 const Client = require( './Client' ).Client;
 const ClientStatus = require( './Client' ).ClientStatus;
-const SearchEngine = require( './../Utils/SearchEngine' );
+const SearchEngine = require( '././SearchEngine' );
 class ClientsStorage {
-	constructor( app )
+	constructor( maxClients )
 	{
-		this.app = app;
-		this.maxClients = app.config.maxClients;
+		this.maxClients = maxClients;
 		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
