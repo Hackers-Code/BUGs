@@ -1,5 +1,5 @@
-const Object = require( './Object' );
-class Block extends Object {
+const Collidable = require( './Collidable' );
+class Block extends Collidable {
 	constructor( data )
 	{
 		super( data );

@@ -1,6 +1,6 @@
 'use strict';
-const Room = require( './Room' );
-const RoomsStorage = require( './RoomsStorage' );
+const Room = require( '../lib/Rooms/Room' );
+const RoomsStorage = require( '../lib/Rooms/RoomsStorage' );
 const chai = require( 'chai' );
 const sinon = require( 'sinon' );
 const expect = chai.expect;

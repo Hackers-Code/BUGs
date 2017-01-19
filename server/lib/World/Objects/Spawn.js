@@ -1,5 +1,5 @@
-const Object = require( './Object' );
-class Spawn extends Object {
+const Fixed = require( './Fixed' );
+class Spawn extends Fixed {
 	constructor( data )
 	{
 		super( data );

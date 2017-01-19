@@ -1,5 +1,5 @@
-const Object = require( './Object' );
-class KillingZone extends Object {
+const Collidable = require( './Collidable' );
+class KillingZone extends Collidable {
 	constructor( data )
 	{
 		super( data );
