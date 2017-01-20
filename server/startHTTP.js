@@ -17,7 +17,14 @@ expressApp.get( '/maps/:file', function( req, res )
 	{
 		fs.readFile( process.cwd() + '/resources/maps/' + filename, ( err, data ) =>
 		{
-			res.send( data );
+			if( err )
+			{
+				res.send( 'File not found' );
+			}
+			else
+			{
+				res.send( data );
+			}
 		} );
 	}
 	else
