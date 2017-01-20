@@ -4,9 +4,9 @@ class App {
 	{
 		this.config = options.config;
 		console.log( this.config.mapsList );
-		this.startTCP = options.startTCP;
-		this.startUDP = options.startUDP;
-		this.startHTTP = options.startHTTP;
+		this.startTCP = options.tcpStart;
+		this.startUDP = options.udpStart;
+		this.startHTTP = options.httpStart;
 		this.logger = new Logger( this.config.logFile, this.config.errorFile );
 		this.runTCP();
 		this.runUDP();
