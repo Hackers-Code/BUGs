@@ -3,6 +3,7 @@ class App {
 	constructor( options )
 	{
 		this.config = options.config;
+		console.log( this.config.mapsList );
 		this.startTCP = options.startTCP;
 		this.startUDP = options.startUDP;
 		this.logger = new Logger( this.config.logFile, this.config.errorFile );

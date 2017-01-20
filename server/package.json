@@ -28,5 +28,7 @@
     "type": "git",
     "url": "https://github.com/Hackers-Code/Creepy-crawlies"
   },
-  "dependencies": {}
+  "dependencies": {
+    "express": "^4.14.0"
+  }
 }
