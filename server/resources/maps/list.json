@@ -7,8 +7,8 @@
       "thumbnail": "/maps/test.png",
       "map_file": "/maps/test.map",
       "version": "1",
-      "last_update": "",
-      "created": ""
+      "last_update": "1484998033032",
+      "created": "1484998033032"
     },
     {
       "id": "2",
@@ -17,8 +17,8 @@
       "thumbnail": "/maps/test2.png",
       "map_file": "/maps/test2.map",
       "version": "1",
-      "last_update": "",
-      "created": ""
+      "last_update": "1484998033032",
+      "created": "1484998033032"
     }
   ]
 }

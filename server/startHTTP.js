@@ -6,7 +6,6 @@ module.exports = () =>
 {
 	expressApp.get( '/maps/list.json', function( req, res )
 	{
-		console.log( req );
 		fs.readFile( process.cwd() + '/resources/maps/list.json', ( err, data ) =>
 		{
 			res.send( data );
@@ -37,11 +36,10 @@ module.exports = () =>
 	} );
 	expressApp.get( '*', function( req, res )
 	{
-		console.log( req );
 		fs.readFile( process.cwd() + '/resources/resources.json', ( err, data ) =>
 		{
 			res.send( data );
 		} );
 	} );
-	const httpServer = expressApp.listen( 31338, '0.0.0.0' );
+	expressApp.listen( 31338, '0.0.0.0' );
 };

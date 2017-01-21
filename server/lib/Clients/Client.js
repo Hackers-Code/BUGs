@@ -5,17 +5,13 @@ const ClientStatus = {
 	inLobby : 2,
 	inGame : 3
 };
-const Request = require( '../Network/Request' );
-const Response = require( '../Network/Response' );
 class Client {
-	constructor( socket, id, closeHandler )
+	constructor( functions, id )
 	{
 		this.socket = socket;
 		this.id = id;
 		this.status = ClientStatus.connected;
 		this.name = Buffer.alloc( 20 );
-		this.response = new Response( socket );
-		this.request = new Request( this, this.response );
 		this.udp = null;
 		this.response.send( {
 			opcode : 0x05,
@@ -23,9 +19,14 @@ class Client {
 		} );
 		this.room = null;
 		this.player = null;
-		this.socket.on( 'data', this.dataHandler );
-		this.socket.on( 'error', ( err ) => {} );
-		this.socket.on( 'close', closeHandler );
+	}
+
+	getCallbacks()
+	{
+		return {
+			onData : this.dataHandler,
+			onClose : this.leaveRoom
+		};
 	}
 
 	dataHandler( data )
