@@ -1,16 +1,25 @@
 'use strict';
 const MapLoader = require( './MapLoader' );
 const MapParser = require( './MapParser' );
+const SearchEngine = require( '../utils/SearchEngine' );
 const fs = require( 'fs' );
-
 const MapInterface = {
 
-	getMapsList : function()
+	mapsList : [],
+
+	getMapsList : ( dir, callback ) =>
 	{
-		fs.readFileSync( process.cwd() + '/resources/list' );
+		fs.readFile( dir, ( err, data ) =>
+		{
+			if( err )
+			{
+				callback( err );
+			}
+			this.mapsList = JSON.parse( data );
+		} );
 	},
 
-	getParsedMap : function( id, callback )
+	getParsedMap : ( id, callback ) =>
 	{
 		if( typeof callback !== 'function' )
 		{
@@ -27,9 +36,9 @@ const MapInterface = {
 		} );
 	},
 
-	mapExists : function( id )
+	mapExists : ( id ) =>
 	{
-		return fs.existsSync( __dirname + '/maps/' + id + '.map' );
+		return SearchEngine.findByNumericId( id, mapsList ) !== -1;
 	}
 };
 module.exports = MapInterface;

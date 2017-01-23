@@ -1,6 +1,6 @@
 'use strict';
 const SearchEngine = {
-	findByUniqueID : function( array, id )
+	findByUniqueID : ( array, id ) =>
 	{
 		if( !(id instanceof Buffer) )
 		{
@@ -9,6 +9,17 @@ const SearchEngine = {
 		for( let i = 0 ; i < array.length ; i++ )
 		{
 			if( id.compare( array[ i ].id ) === 0 )
+			{
+				return i;
+			}
+		}
+		return -1;
+	},
+	findByNumericId : ( id, array ) =>
+	{
+		for( let i = 0 ; i < array.length ; i++ )
+		{
+			if( id === array[ i ].id )
 			{
 				return i;
 			}

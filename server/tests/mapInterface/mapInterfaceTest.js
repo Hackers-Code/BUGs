@@ -3,8 +3,15 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 const MapInterface = require( './../../lib/MapInterface/MapInterface' );
 
-describe( 'MapInterface', function()
+describe( 'MapInterface', () =>
 {
+	describe( '#getMapList()', () =>
+	{
+		it( 'loadMap() should return map object for valid map id', function( done )
+		{
+			MapInterface.getMapsList( 1, done );
+		} );
+	} );
 	it( 'loadMap() should return map object for valid map id', function( done )
 	{
 		MapInterface.getParsedMap( 1, done );
