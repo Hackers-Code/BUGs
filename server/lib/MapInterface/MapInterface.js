@@ -2,7 +2,13 @@
 const MapLoader = require( './MapLoader' );
 const MapParser = require( './MapParser' );
 const fs = require( 'fs' );
+
 const MapInterface = {
+
+	getMapsList : function()
+	{
+		fs.readFileSync( process.cwd() + '/resources/list' );
+	},
 
 	getParsedMap : function( id, callback )
 	{

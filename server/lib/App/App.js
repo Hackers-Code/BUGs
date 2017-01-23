@@ -1,4 +1,4 @@
-const Logger = require( 'Logger' );
+const Logger = require( './Logger' );
 const ClientsStorage = require( '../Clients/ClientsStorage' );
 const RoomsStorage = require( '../Rooms/RoomsStorage' );
 const TasksStorage = require( '../Tasks/TasksStorage' );
