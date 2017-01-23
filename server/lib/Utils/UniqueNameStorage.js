@@ -8,6 +8,11 @@ class UniqueNameStorage {
 		this.defaultName.write( defaultName, 0 );
 	}
 
+	getDefault()
+	{
+		return this.defaultName;
+	}
+
 	addName( name )
 	{
 		if( !name instanceof Buffer )

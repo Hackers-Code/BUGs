@@ -7,7 +7,7 @@ class StreamParser {
 
 	appendData( data )
 	{
-		if( data instanceof Buffer )
+		if( Buffer.isBuffer( data ) )
 		{
 			this.buffer = Buffer.concat( [
 				this.buffer,
@@ -21,6 +21,11 @@ class StreamParser {
 	getBuffer()
 	{
 		return this.buffer;
+	}
+
+	clearBuffer()
+	{
+		this.buffer = new Buffer.alloc( 0 );
 	}
 
 	freeBufferToOffset( offset )

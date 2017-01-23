@@ -1,45 +1,8 @@
 'use strict';
 const chai = require( 'chai' );
 const expect = chai.expect;
-const UniqueKeyGenerator = require( './../lib/Utils/UniqueKeyGenerator' );
-const UniqueNameStorage = require( './../lib/Utils/UniqueNameStorage' );
-const SearchEngine = require( './../lib/Utils/SearchEngine' );
-describe( 'UniqueKeyGenerator', function()
-{
-	describe( '#generateKey()', function()
-	{
-		it( 'should return buffer', function()
-		{
-			let ukg = new UniqueKeyGenerator( 4 );
-			expect( ukg.generateKey() instanceof Buffer ).to.equal( true );
-		} );
-	} );
-	describe( '#keyExists()', function()
-	{
-		it( 'should return true for existing key', function()
-		{
-			let ukg = new UniqueKeyGenerator( 4 );
-			let key = ukg.generateKey();
-			expect( ukg.keyExists( key ) ).to.equal( true );
-		} );
-		it( 'should return false for not existing key', function()
-		{
-			let ukg = new UniqueKeyGenerator( 4 );
-			expect( ukg.keyExists( Buffer.from( '00000000', 'hex' ) ) ).to.equal( false );
-		} );
-	} );
-	describe( '#freeKey()', function()
-	{
-		it( 'should make keyExists() return false', function()
-		{
-			let ukg = new UniqueKeyGenerator( 4 );
-			let key = ukg.generateKey();
-			ukg.freeKey( key );
-			expect( ukg.keyExists( key ) ).to.equal( false );
-		} );
-	} );
+const UniqueNameStorage = require( './../../lib/Utils/UniqueNameStorage' );
 
-} );
 describe( 'UniqueNameStorage', function()
 {
 	describe( '#addName()', function()
@@ -107,37 +70,3 @@ describe( 'UniqueNameStorage', function()
 		} );
 	} );
 } );
-
-describe( 'SearchEngine', function()
-{
-	let array = [
-		{
-			id : Buffer.from( '00000001', 'hex' )
-		},
-		{
-			id : Buffer.from( '00000002', 'hex' )
-		},
-		{
-			id : Buffer.from( '00000003', 'hex' )
-		}
-	];
-	describe( '#findByUniqueId()', function()
-	{
-		it( 'should return 1', function()
-		{
-			let id = Buffer.from( '00000002', 'hex' );
-			expect( SearchEngine.findByUniqueID( array, id ) ).to.equal( 1 );
-		} );
-		it( 'should return -1', function()
-		{
-			let id = Buffer.from( '00000004', 'hex' );
-			expect( SearchEngine.findByUniqueID( array, id ) ).to.equal( -1 );
-		} );
-		it( 'should return false', function()
-		{
-			let id = 0;
-			expect( SearchEngine.findByUniqueID( array, id ) ).to.equal( false );
-		} );
-	} );
-} );
-

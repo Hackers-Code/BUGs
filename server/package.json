@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "mocha tests --recursive --watch",
+    "test": "mocha tests --recursive",
     "start": "node start"
   },
   "keywords": [

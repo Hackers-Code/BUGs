@@ -1,5 +1,5 @@
 'use strict';
-const Logger = require( '../lib/Logger/Logger' );
+const Logger = require( '../../lib/App/Logger' );
 const chai = require( 'chai' );
 const expect = chai.expect;
 describe( 'Logger', () =>

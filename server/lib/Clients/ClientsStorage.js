@@ -16,6 +16,11 @@ class ClientsStorage {
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
 	}
 
+	getClients()
+	{
+		return this.clients;
+	}
+
 	addClient( functions )
 	{
 		if( this.clients.length >= this.maxClients )
@@ -29,9 +34,9 @@ class ClientsStorage {
 			return false;
 		}
 		let id = this.uniqueKeyGenerator.generateKey();
-		let client = new Client( functions, id );
-		this.clients.push( client );
-		return this.clients.getCallbacks();
+		let client = new Client( functions, id, this.uniqueNameStorage );
+		let index = this.clients.push( client ) - 1;
+		return this.clients[ index ].getCallbacks();
 	}
 
 	removeClient( id )
@@ -55,16 +60,6 @@ class ClientsStorage {
 			return true;
 		}
 		return false;
-	}
-
-	addName( name )
-	{
-		return this.uniqueNameStorage.addName( name );
-	}
-
-	removeName( name )
-	{
-		return this.uniqueNameStorage.removeName( name );
 	}
 }
 

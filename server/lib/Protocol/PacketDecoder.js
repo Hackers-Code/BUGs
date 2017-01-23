@@ -1,8 +1,9 @@
 'use strict';
+const ClientInstructions = require( './ClientInstructions' );
 class PacketDecoder {
-	constructor( instructions )
+	constructor()
 	{
-		this.instructions = instructions;
+		this.instructions = ClientInstructions;
 	}
 
 	decode( buffer )
@@ -30,6 +31,7 @@ class PacketDecoder {
 				if( offset <= buffer.length )
 				{
 					return {
+						instruction,
 						object,
 						offset
 					};
