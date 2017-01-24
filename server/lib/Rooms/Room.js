@@ -195,7 +195,7 @@ class Room {
 		this.game.loadMap( this.mapID, this.mapsList );
 		for( let i = 0 ; i < this.players.length ; i++ )
 		{
-			this.players[ i ].response.send( { opcode : 0x30 } );
+			this.players[ i ].send( { opcode : 0x30 } );
 		}
 		this.checkIfAllLoadedMap();
 	}
