@@ -12,6 +12,7 @@ module.exports = ( port, connectionHandler, errorHandler, listeningHandler ) =>
 			end : socket.end.bind( socket )
 		} );
 		socket.on( 'data', socketCallbacks.onData );
+		socket.on( 'error', () => {} );
 		socket.on( 'close', socketCallbacks.onClose );
 	} ).on( 'error', errorHandler );
 	server.listen( port, () =>
