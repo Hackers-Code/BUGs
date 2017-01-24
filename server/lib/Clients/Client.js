@@ -48,6 +48,8 @@ class Client {
 			} ) );
 			return;
 		}
+		console.log( this.write );
+		console.log( encoded );
 		this.write( encoded );
 	}
 

@@ -11,10 +11,13 @@ module.exports = ( port, connectionHandler, errorHandler, listeningHandler ) =>
 		if( socketCallbacks !== false )
 		{
 			socket.on( 'data', socketCallbacks.onData );
-			socket.on( 'error', () => {} );
 			socket.on( 'close', socketCallbacks.onClose );
+			socket.on( 'error', () => {} );
 		}
-		socket.end();
+		else
+		{
+			socket.end();
+		}
 	} ).on( 'error', errorHandler );
 	server.listen( port, () =>
 	{
