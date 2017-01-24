@@ -46,7 +46,7 @@ class ClientsStorage {
 			return false;
 		}
 		let id = this.uniqueKeyGenerator.generateKey();
-		let client = new Client( functions, id, this.uniqueNameStorage );
+		let client = new Client( functions, id, this );
 		let index = this.clients.push( client ) - 1;
 		return this.clients[ index ].getCallbacks();
 	}
