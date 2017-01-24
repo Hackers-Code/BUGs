@@ -11,7 +11,7 @@ class App {
 		this.startHTTP = options.httpStart;
 		this.logger = new Logger( this.config.logFile, this.config.errorFile );
 		this.tasksStorage = new TasksStorage( this.config.tickrate );
-		this.roomsStorage = new RoomsStorage();
+		this.roomsStorage = new RoomsStorage( this.logger );
 		this.clientsStorage = new ClientsStorage( this.config.maxClients, this.roomsStorage );
 		this.runTCP();
 		this.runUDP();

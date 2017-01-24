@@ -18,6 +18,7 @@ class Room {
 		this.password = settings.password;
 		this.admin = client.id;
 		this.roomsStorage = roomsStorage;
+		this.logger = roomsStorage.getLogger();
 		this.players = [];
 		this.playersID = 0;
 		this.players.push( new Player( client, this.playersID++ ) );
@@ -29,6 +30,15 @@ class Room {
 		this.game = new Game( this.players );
 		this.tasks = [];
 		this.preparePlayersList();
+		MapInterface.loadAndParseMapsList( process.cwd() + '/resources/maps/list.json', ( err, data ) =>
+		{
+			if( err )
+			{
+				this.logger.error( 'Maps list does not exist' );
+				process.exit( 1 );
+			}
+			this.mapsList = data;
+		} );
 	}
 
 	leave( id )
@@ -110,7 +120,7 @@ class Room {
 					return false;
 				}
 				this.mapID = config.mapID.readInt32BE( 0 );
-				if( !MapInterface.mapExists( this.mapID ) )
+				if( !MapInterface.mapExists( this.mapID, this.mapsList ) )
 				{
 					return false;
 				}
