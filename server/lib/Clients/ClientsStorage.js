@@ -39,7 +39,7 @@ class ClientsStorage {
 		if( this.clients.length >= this.maxClients )
 		{
 			let error = Buffer.from( 'No empty slots on server' );
-			functions.end( this.packetEncoder( {
+			socket.end( this.packetEncoder( {
 				opcode : 0x0,
 				length : Buffer.from( [ error.length ] ),
 				error : error

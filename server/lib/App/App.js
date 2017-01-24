@@ -2,12 +2,11 @@ const Logger = require( './Logger' );
 const ClientsStorage = require( '../Clients/ClientsStorage' );
 const RoomsStorage = require( '../Rooms/RoomsStorage' );
 const TasksStorage = require( '../Tasks/TasksStorage' );
+const net = require( 'net' );
 class App {
 	constructor( options )
 	{
 		this.config = options.config;
-		this.startTCP = options.tcpStart;
-		this.startUDP = options.udpStart;
 		this.startHTTP = options.httpStart;
 		this.logger = new Logger( this.config.logFile, this.config.errorFile );
 		this.tasksStorage = new TasksStorage( this.config.tickrate );
@@ -21,15 +20,19 @@ class App {
 
 	runTCP()
 	{
-		this.startTCP( this.config.TCP_port, ( address, socket ) =>
+		this.tcp = net.createServer( ( socket ) =>
 		{
-			this.logger.log( `Connection from ${address.remoteAddress}:${address.remotePort}` );
-			return this.clientsStorage.addClient( socket );
-		}, ( err ) =>
+			let ip = socket.remoteAddress;
+			let port = socket.remotePort;
+			this.logger.log( `Connection from ${ip}:${port}` );
+			this.clientsStorage.addClient( socket );
+		} ).on( 'error', ( err ) =>
 		{
 			this.logger.error( err.message );
-		}, ( address ) =>
+		} );
+		server.listen( this.config.TCP_port, () =>
 		{
+			let address = server.address();
 			this.logger.log( `TCP socket listening on ${address.address}:${address.port}` );
 		} );
 	}

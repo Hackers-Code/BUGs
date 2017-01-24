@@ -16,6 +16,8 @@ class Client {
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.roomsStorage = clientsStorage.getRoomsStorage();
 		this.socket = socket;
+		this.socket.on( 'data', this.handleData.bind( this ) );
+		this.socket.on( 'close', this.leaveRoom.bind( this ) );
 		this.write = socket.write;
 		this.end = socket.end;
 
@@ -55,14 +57,6 @@ class Client {
 		}
 		console.log( 'Sent by TCP: ' + encoded.toString( 'hex' ) );
 		this.write( encoded );
-	}
-
-	getCallbacks()
-	{
-		return {
-			onData : this.handleData.bind( this ),
-			onClose : this.leaveRoom.bind( this )
-		};
 	}
 
 	handleData( data )
