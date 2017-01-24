@@ -256,16 +256,17 @@ class Room {
 				return;
 			}
 		}
-		this.tasksStorage.addTask( () =>
+		this.tasks.push( this.tasksStorage.addTask( () =>
 		{
 			let data = this.game.getWorms();
 			console.log( data );
-		} );
-		this.tasksStorage.addTask( () =>
+		} ) );
+
+		this.tasks.push( this.tasksStorage.addTask( () =>
 		{
 			let data = this.game.getTimeLeft();
 			console.log( data );
-		} );
+		} ) );
 		setTimeout( this.game.start.bind( this.game ), 3000 );
 	}
 

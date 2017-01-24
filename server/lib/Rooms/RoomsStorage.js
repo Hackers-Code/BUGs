@@ -83,8 +83,10 @@ class RoomsStorage {
 		{
 			this.rooms[ room ].tasks.forEach( ( element ) =>
 			{
-				this.app.udp.socket.removeTask( element );
+				this.tasksStorage.removeTask( element );
 			} );
+			this.uniqueKeyGenerator.freeKey( this.rooms[ room ].id );
+			this.uniqueNameStorage.removeName( this.rooms[ room ].name );;;
 			this.rooms.splice( room, 1 );
 			return true;
 		}
