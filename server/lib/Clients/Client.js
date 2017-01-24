@@ -55,8 +55,8 @@ class Client {
 	getCallbacks()
 	{
 		return {
-			onData : this.handleData,
-			onClose : this.leaveRoom
+			onData : this.handleData.bind( this ),
+			onClose : this.leaveRoom.bind( this )
 		};
 	}
 
