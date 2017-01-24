@@ -3,6 +3,7 @@ const ClientsStorage = require( '../Clients/ClientsStorage' );
 const RoomsStorage = require( '../Rooms/RoomsStorage' );
 const TasksStorage = require( '../Tasks/TasksStorage' );
 const net = require( 'net' );
+const dgram = require( 'dgram' );
 class App {
 	constructor( options )
 	{
@@ -39,18 +40,23 @@ class App {
 
 	runUDP()
 	{
-		this.startUDP( this.config.UDP_port, ( msg, rinfo ) =>
+		this.udp = dgram.createSocket( 'udp4' );
+		this.udp.on( 'message', ( msg, rinfo ) =>
 		{
 			console.log( rinfo );
 			console.log( msg );
-		}, ( err ) =>
+		} );
+		this.udp.on( 'error', ( err ) =>
 		{
 			this.logger.error( err.message );
-		}, ( address, send ) =>
-		{
-			this.logger.log( `UDP socket listening on ${address.address}:${address.port}` );
-			this.udpSend = send;
 		} );
+		this.udp.on( 'listening', () =>
+		{
+			let address = this.udp.address();
+			this.logger.log( `UDP socket listening on ${address.address}:${address.port}` );
+			this.udpSend = this.udp.send;
+		} );
+		this.udp.bind( this.config.UDP_port );
 	}
 }
 module.exports = App;
