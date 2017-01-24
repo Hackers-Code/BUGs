@@ -43,21 +43,24 @@ class Client {
 		if( encoded === false )
 		{
 			let msg = Buffer.from( 'Server error, could not encode packet' );
-			this.write( this.packetEncoder.encode( {
+			let encoded = this.packetEncoder.encode( {
 				opcode : 0xe2,
 				error : msg,
 				length : Buffer.from( [ msg.length ] )
-			} ) );
+			} );
+			console.log( encoded.toString( 'hex' ) );
+			this.write( encoded );
 			return;
 		}
+		console.log( encoded.toString( 'hex' ) );
 		this.write( encoded );
 	}
 
 	getCallbacks()
 	{
 		return {
-			onData : this.handleData,
-			onClose : this.leaveRoom
+			onData : this.handleData.bind( this ),
+			onClose : this.leaveRoom.bind( this )
 		};
 	}
 
