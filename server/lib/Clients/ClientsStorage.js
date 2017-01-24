@@ -7,13 +7,26 @@ const SearchEngine = require( '../Utils/SearchEngine' );
 const PacketEncoder = require( '../Protocol/PacketEncoder' );
 const ServerInstructions = require( '../Protocol/ServerInstructions' );
 class ClientsStorage {
-	constructor( maxClients )
+	constructor( maxClients, roomsStorage )
 	{
-		this.packetEncoder = new PacketEncoder( ServerInstructions );
 		this.maxClients = maxClients;
-		this.clients = [];
+		this.roomsStorage = roomsStorage;
+
+		this.packetEncoder = new PacketEncoder( ServerInstructions );
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
+
+		this.clients = [];
+	}
+
+	getUniqueNameStorage()
+	{
+		return this.uniqueNameStorage;
+	}
+
+	getRoomsStorage()
+	{
+		return this.roomsStorage;
 	}
 
 	getClients()

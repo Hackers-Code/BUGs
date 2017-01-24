@@ -9,10 +9,12 @@ const ClientStatus = {
 	inGame : 3
 };
 class Client {
-	constructor( functions, id, uniqueNameStorage, roomsStorage )
+	constructor( functions, id, clientsStorage )
 	{
 		this.id = id;
-		this.uniqueNameStorage = uniqueNameStorage;
+		this.clientsStorage = clientsStorage;
+		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
+		this.roomsStorage = clientsStorage.getRoomsStorage();
 		this.write = functions.write;
 		this.end = functions.end;
 
@@ -122,7 +124,7 @@ class Client {
 			{
 				if( !this.uniqueNameStorage.removeName( this.name ) )
 				{
-					return false;
+					return Client.fromBool( false );
 				}
 			}
 			this.name = data.name;
@@ -149,15 +151,15 @@ class Client {
 			{
 				this.status = ClientStatus.inLobby;
 				this.room = room;
-				return true;
+				return Client.fromBool( true );
 			}
 		}
-		return false;
+		return Client.fromBool( false );
 	}
 
 	leaveRoom()
 	{
-		if( this.status === ClientStatus.inLobby || this.status === ClientStatus === ClientStatus.inGame )
+		if( this.status === ClientStatus.inLobby || this.status === ClientStatus.inGame )
 		{
 			this.leaveLobby();
 		}
