@@ -21,10 +21,10 @@ class App {
 
 	runTCP()
 	{
-		this.startTCP( this.config.TCP_port, ( address, functions ) =>
+		this.startTCP( this.config.TCP_port, ( address, write ) =>
 		{
 			this.logger.log( `Connection from ${address.remoteAddress}:${address.remotePort}` );
-			return this.clientsStorage.addClient( functions );
+			return this.clientsStorage.addClient( write );
 		}, ( err ) =>
 		{
 			this.logger.error( err.message );

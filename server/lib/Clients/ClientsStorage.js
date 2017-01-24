@@ -33,12 +33,12 @@ class ClientsStorage {
 		return this.clients;
 	}
 
-	addClient( functions )
+	addClient( write )
 	{
 		if( this.clients.length >= this.maxClients )
 		{
 			let error = Buffer.from( 'No empty slots on server' );
-			functions.end( this.packetEncoder.encode( {
+			write( this.packetEncoder.encode( {
 				opcode : 0x0,
 				length : Buffer.from( [ error.length ] ),
 				error : error
@@ -46,7 +46,7 @@ class ClientsStorage {
 			return false;
 		}
 		let id = this.uniqueKeyGenerator.generateKey();
-		let client = new Client( functions, id, this );
+		let client = new Client( write, id, this );
 		let index = this.clients.push( client ) - 1;
 		return this.clients[ index ].getCallbacks();
 	}

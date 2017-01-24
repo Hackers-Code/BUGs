@@ -39,7 +39,6 @@ const MapInterface = {
 			}
 			try
 			{
-				console.log( 'parsing' );
 				let parsedMap = MapParser.parse( data );
 				callback( void 0, parsedMap );
 			}

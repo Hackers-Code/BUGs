@@ -9,13 +9,12 @@ const ClientStatus = {
 	inGame : 3
 };
 class Client {
-	constructor( functions, id, clientsStorage )
+	constructor( write, id, clientsStorage )
 	{
 		this.id = id;
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.roomsStorage = clientsStorage.getRoomsStorage();
-		this.write = functions.write;
-		this.end = functions.end;
+		this.write = write;
 
 		this.streamParser = new StreamParser();
 		this.packetEncoder = new PacketEncoder();

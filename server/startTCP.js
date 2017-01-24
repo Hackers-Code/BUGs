@@ -7,13 +7,14 @@ module.exports = ( port, connectionHandler, errorHandler, listeningHandler ) =>
 		let socketCallbacks = connectionHandler( {
 			remoteAddress : socket.remoteAddress,
 			remotePort : socket.remotePort
-		}, {
-			write : socket.write.bind( socket ),
-			end : socket.end.bind( socket )
-		} );
-		socket.on( 'data', socketCallbacks.onData );
-		socket.on( 'error', () => {} );
-		socket.on( 'close', socketCallbacks.onClose );
+		}, socket.write.bind( socket ) );
+		if( socketCallbacks !== false )
+		{
+			socket.on( 'data', socketCallbacks.onData );
+			socket.on( 'error', () => {} );
+			socket.on( 'close', socketCallbacks.onClose );
+		}
+		socket.end();
 	} ).on( 'error', errorHandler );
 	server.listen( port, () =>
 	{
