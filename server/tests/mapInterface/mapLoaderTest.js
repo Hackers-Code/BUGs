@@ -1,39 +1,90 @@
 'use strict';
 const chai = require( 'chai' );
 const MapLoader = require( './../../lib/MapInterface/MapLoader' );
+const sinon = require( 'sinon' );
+const fs = require( 'fs' );
 
 describe( 'MapLoader', function()
 {
-	it( 'loadMap() should not load not existing map', function( done )
+	describe( '#loadMap()', () =>
 	{
-		MapLoader.loadMap( 1000, function( err )
+		let stub;
+		beforeEach( () =>
 		{
-			if( err )
+			stub = sinon.stub( fs, "readFile", ( dir, callback ) =>
 			{
-				done();
-			}
-			else
-			{
-				done( new Error() );
-			}
+				if( dir === process.cwd() + '/resources/maps/test.map' )
+				{
+					callback( void 0, Buffer.from( '00000000000000000000000000000000000000000000000000', 'hex' ) );
+					return;
+				}
+				callback( new Error() );
+			} );
 		} );
-	} );
-	it( 'loadMap() should load existing map', function( done )
-	{
-		MapLoader.loadMap( 1, function( err, data )
+		afterEach( () =>
 		{
-			if( err )
+			stub.restore();
+		} );
+		it( 'should not load not existing map', ( done ) =>
+		{
+			MapLoader.loadMap( 1000, [
+				{
+					id : 1,
+					map_file : "/maps/test.map"
+				}
+			], ( err ) =>
 			{
-				done( err );
-			}
-			else if( !data instanceof Buffer )
+				if( err )
+				{
+					done();
+				}
+				else
+				{
+					done( new Error( 'Should pass an error' ) );
+				}
+			} );
+		} );
+		it( 'should not load existing map if file not exist', ( done ) =>
+		{
+			MapLoader.loadMap( 1, [
+				{
+					id : 1,
+					map_file : "/maps/test123.map"
+				}
+			], ( err, data ) =>
 			{
-				done( new Error( 'Map must be a buffer' ) );
-			}
-			else
+				if( err )
+				{
+					done();
+				}
+				else
+				{
+					done( new Error( 'Should pass an error' ) );
+				}
+			} );
+		} );
+		it( 'should load existing map', ( done ) =>
+		{
+			MapLoader.loadMap( 1, [
+				{
+					id : 1,
+					map_file : "/maps/test.map"
+				}
+			], ( err, data ) =>
 			{
-				done();
-			}
+				if( err )
+				{
+					done( err );
+				}
+				else if( !data instanceof Buffer )
+				{
+					done( new Error( 'Map must be a buffer' ) );
+				}
+				else
+				{
+					done();
+				}
+			} );
 		} );
 	} );
 } );

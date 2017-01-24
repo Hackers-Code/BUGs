@@ -1,6 +1,6 @@
 'use strict';
 const SearchEngine = {
-	findByUniqueID : ( array, id ) =>
+	findByUniqueID : ( id, array ) =>
 	{
 		if( !(id instanceof Buffer) )
 		{
