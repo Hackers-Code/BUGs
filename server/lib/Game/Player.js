@@ -3,7 +3,7 @@ class Player {
 	constructor( client, playerID )
 	{
 		client.player = this;
-		this.send = client.send;
+		this.send = client.send.bind( client );
 		this.id = client.id;
 		this.playerID = playerID;
 		this.confirmed = false;
