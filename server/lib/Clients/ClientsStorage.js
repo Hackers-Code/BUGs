@@ -48,8 +48,7 @@ class ClientsStorage {
 		}
 		let id = this.uniqueKeyGenerator.generateKey();
 		let client = new Client( socket, id, this );
-		let index = this.clients.push( client ) - 1;
-		return this.clients[ index ].getCallbacks();
+		this.clients.push( client );
 	}
 
 	removeClient( id )
