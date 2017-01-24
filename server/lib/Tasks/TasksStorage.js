@@ -24,7 +24,7 @@ class TasksStorage {
 
 	removeTask( id )
 	{
-		let index = SearchEngine.findByUniqueID( this.tasks, id );
+		let index = SearchEngine.findByUniqueID( id, this.tasks );
 		if( index !== false && index !== -1 )
 		{
 			this.tasks[ index ].stop();
@@ -37,7 +37,7 @@ class TasksStorage {
 
 	runTask( id )
 	{
-		let index = SearchEngine.findByUniqueID( this.tasks, id );
+		let index = SearchEngine.findByUniqueID( id, this.tasks );
 		if( index !== false && index !== -1 )
 		{
 			return this.tasks[ index ].run();
