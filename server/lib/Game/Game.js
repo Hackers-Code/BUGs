@@ -96,7 +96,7 @@ class Game {
 	{
 		let worm_id = Buffer.alloc( 1 );
 		worm_id.writeUInt8( this.players[ this.whoseTurnID ].chooseWorm(), 0 );
-		this.players[ this.whoseTurnID ].response.send( {
+		this.players[ this.whoseTurnID ].send( {
 			opcode : 0x33,
 			worm_id : worm_id
 		} );
