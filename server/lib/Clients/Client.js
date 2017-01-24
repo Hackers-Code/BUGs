@@ -12,6 +12,7 @@ class Client {
 	constructor( write, id, clientsStorage )
 	{
 		this.id = id;
+		this.clientsStorage = clientsStorage;
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.roomsStorage = clientsStorage.getRoomsStorage();
 		this.write = write;
