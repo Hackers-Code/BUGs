@@ -49,7 +49,7 @@ class Room {
 			{
 				this.roomsStorage.removeRoom( this.id );
 				this.game = null;
-				let adminIndex = SearchEngine.findByUniqueID( this.players, id );
+				let adminIndex = SearchEngine.findByUniqueID( id, this.players );
 				if( adminIndex !== false && adminIndex !== -1 )
 				{
 					this.players.splice( adminIndex, 1 );
@@ -66,12 +66,15 @@ class Room {
 			}
 			else
 			{
-				let index = SearchEngine.findByUniqueID( this.players, id );
+				console.log( 'quit' );
+				let index = SearchEngine.findByUniqueID( id, this.players );
 				if( index !== false && index !== -1 )
 				{
+					console.log( 'removing player' );
 					this.players.splice( index, 1 );
 					if( this.status === Status.waitingForConfirming )
 					{
+						console.log( 'changing status' );
 						this.status = Status.waitingForPlayers;
 					}
 				}
