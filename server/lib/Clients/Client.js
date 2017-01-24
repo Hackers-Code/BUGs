@@ -9,17 +9,13 @@ const ClientStatus = {
 	inGame : 3
 };
 class Client {
-	constructor( socket, id, clientsStorage )
+	constructor( functions, id, clientsStorage )
 	{
 		this.id = id;
-		this.clientsStorage = clientsStorage;
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.roomsStorage = clientsStorage.getRoomsStorage();
-		this.socket = socket;
-		this.socket.on( 'data', this.handleData.bind( this ) );
-		this.socket.on( 'close', this.leaveRoom.bind( this ) );
-		this.write = socket.write;
-		this.end = socket.end;
+		this.write = functions.write;
+		this.end = functions.end;
 
 		this.streamParser = new StreamParser();
 		this.packetEncoder = new PacketEncoder();
@@ -46,22 +42,26 @@ class Client {
 		if( encoded === false )
 		{
 			let msg = Buffer.from( 'Server error, could not encode packet' );
-			let encoded = this.packetEncoder.encode( {
+			this.write( this.packetEncoder.encode( {
 				opcode : 0xe2,
 				error : msg,
 				length : Buffer.from( [ msg.length ] )
-			} );
-			console.log( 'Error: ' + encoded.toString( 'hex' ) );
-			this.write( encoded );
+			} ) );
 			return;
 		}
-		console.log( 'Sent by TCP: ' + encoded.toString( 'hex' ) );
 		this.write( encoded );
+	}
+
+	getCallbacks()
+	{
+		return {
+			onData : this.handleData,
+			onClose : this.leaveRoom
+		};
 	}
 
 	handleData( data )
 	{
-		console.log( 'Got by TCP: ' + data.toString( 'hex' ) );
 		if( data !== 'undefined' )
 		{
 			this.streamParser.appendData( data );
@@ -123,7 +123,7 @@ class Client {
 			{
 				if( !this.uniqueNameStorage.removeName( this.name ) )
 				{
-					return Client.fromBool( false );
+					return false;
 				}
 			}
 			this.name = data.name;
@@ -150,15 +150,15 @@ class Client {
 			{
 				this.status = ClientStatus.inLobby;
 				this.room = room;
-				return Client.fromBool( true );
+				return true;
 			}
 		}
-		return Client.fromBool( false );
+		return false;
 	}
 
 	leaveRoom()
 	{
-		if( this.status === ClientStatus.inLobby || this.status === ClientStatus.inGame )
+		if( this.status === ClientStatus.inLobby || this.status === ClientStatus === ClientStatus.inGame )
 		{
 			this.leaveLobby();
 		}

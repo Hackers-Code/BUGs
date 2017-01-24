@@ -7,16 +7,15 @@ const SearchEngine = require( '../Utils/SearchEngine' );
 const PacketEncoder = require( '../Protocol/PacketEncoder' );
 const ServerInstructions = require( '../Protocol/ServerInstructions' );
 class ClientsStorage {
+
 	constructor( maxClients, roomsStorage )
 	{
+		this.packetEncoder = new PacketEncoder( ServerInstructions );
 		this.maxClients = maxClients;
 		this.roomsStorage = roomsStorage;
-
-		this.packetEncoder = new PacketEncoder( ServerInstructions );
+		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
-
-		this.clients = [];
 	}
 
 	getUniqueNameStorage()
@@ -34,12 +33,12 @@ class ClientsStorage {
 		return this.clients;
 	}
 
-	addClient( socket )
+	addClient( functions )
 	{
 		if( this.clients.length >= this.maxClients )
 		{
 			let error = Buffer.from( 'No empty slots on server' );
-			socket.end( this.packetEncoder( {
+			functions.end( this.packetEncoder( {
 				opcode : 0x0,
 				length : Buffer.from( [ error.length ] ),
 				error : error
@@ -47,8 +46,9 @@ class ClientsStorage {
 			return false;
 		}
 		let id = this.uniqueKeyGenerator.generateKey();
-		let client = new Client( socket, id, this );
-		this.clients.push( client );
+		let client = new Client( functions, id, this.uniqueNameStorage );
+		let index = this.clients.push( client ) - 1;
+		return this.clients[ index ].getCallbacks();
 	}
 
 	removeClient( id )
