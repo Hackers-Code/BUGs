@@ -64,6 +64,7 @@ class Client {
 	{
 		if( data !== 'undefined' )
 		{
+			console.log( data );
 			this.streamParser.appendData( data );
 		}
 		try
@@ -171,9 +172,9 @@ class Client {
 			this.room.leave( this.id );
 			this.room = null;
 			this.player = null;
-			return Client.fromBool( true );
+			return true;
 		}
-		return Client.fromBool( false );
+		return false;
 	}
 
 	setRoomConfig( data )
