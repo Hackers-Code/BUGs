@@ -30,9 +30,9 @@ class App {
 		{
 			this.logger.error( err.message );
 		} );
-		server.listen( this.config.TCP_port, () =>
+		this.tcp.listen( this.config.TCP_port, () =>
 		{
-			let address = server.address();
+			let address = this.tcp.address();
 			this.logger.log( `TCP socket listening on ${address.address}:${address.port}` );
 		} );
 	}
