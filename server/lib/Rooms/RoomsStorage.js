@@ -4,9 +4,11 @@ const UniqueNameStorage = require( '../Utils/UniqueNameStorage' );
 const SearchEngine = require( '../Utils/SearchEngine' );
 const Room = require( './Room' );
 class RoomsStorage {
-	constructor( logger )
+	constructor( logger, udpSend, tasksStorage )
 	{
 		this.logger = logger;
+		this.udpSend = udpSend;
+		this.tasksStorage = tasksStorage;
 		this.availableGamesResponse = null;
 		this.rooms = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
@@ -16,6 +18,16 @@ class RoomsStorage {
 	getLogger()
 	{
 		return this.logger;
+	}
+
+	getUDPSend()
+	{
+		return this.udpSend;
+	}
+
+	getTasksStorage()
+	{
+		return this.tasksStorage;
 	}
 
 	getRooms()

@@ -7,6 +7,7 @@ const Status = {
 	inGame : 3
 };
 const SearchEngine = require( '../Utils/SearchEngine' );
+const TasksStorage = require( '../Tasks/TasksStorage' );
 const Game = require( '../Game/Game' );
 const Player = require( '../Game/Player' );
 const MapInterface = require( '../MapInterface/MapInterface' );
@@ -19,6 +20,8 @@ class Room {
 		this.admin = client.id;
 		this.roomsStorage = roomsStorage;
 		this.logger = roomsStorage.getLogger();
+		this.udpSend = roomsStorage.getUDPSend();
+		this.tasksStorage = roomsStorage.getTasksStorage();
 		this.players = [];
 		this.playersID = 0;
 		this.players.push( new Player( client, this.playersID++ ) );
@@ -66,15 +69,12 @@ class Room {
 			}
 			else
 			{
-				console.log( 'quit' );
 				let index = SearchEngine.findByUniqueID( id, this.players );
 				if( index !== false && index !== -1 )
 				{
-					console.log( 'removing player' );
 					this.players.splice( index, 1 );
 					if( this.status === Status.waitingForConfirming )
 					{
-						console.log( 'changing status' );
 						this.status = Status.waitingForPlayers;
 					}
 				}
@@ -256,10 +256,16 @@ class Room {
 				return;
 			}
 		}
-		this.tasks.push(
-			this.roomsStorage.app.udp.socket.addTask( this.players, this.game.getWorms.bind( this.game ) ) );
-		this.tasks.push(
-			this.roomsStorage.app.udp.socket.addTask( this.players, this.game.getTimeLeft.bind( this.game ) ) );
+		this.tasksStorage.addTask( () =>
+		{
+			let data = this.game.getWorms();
+			console.log( data );
+		} );
+		this.tasksStorage.addTask( () =>
+		{
+			let data = this.game.getTimeLeft();
+			console.log( data );
+		} );
 		setTimeout( this.game.start.bind( this.game ), 3000 );
 	}
 
