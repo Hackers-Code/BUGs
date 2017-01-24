@@ -123,7 +123,7 @@ class Client {
 			{
 				if( !this.uniqueNameStorage.removeName( this.name ) )
 				{
-					return false;
+					return Client.fromBool( false );
 				}
 			}
 			this.name = data.name;
@@ -150,10 +150,10 @@ class Client {
 			{
 				this.status = ClientStatus.inLobby;
 				this.room = room;
-				return true;
+				return Client.fromBool( true );
 			}
 		}
-		return false;
+		return Client.fromBool( false );
 	}
 
 	leaveRoom()
@@ -171,9 +171,9 @@ class Client {
 			this.room.leave( this.id );
 			this.room = null;
 			this.player = null;
-			return true;
+			return Client.fromBool( true );
 		}
-		return false;
+		return Client.fromBool( false );
 	}
 
 	setRoomConfig( data )
@@ -185,10 +185,10 @@ class Client {
 					maxPlayers : data.players
 				} ) )
 			{
-				return true;
+				return Client.fromBool( true );
 			}
 		}
-		return false;
+		return Client.fromBool( false );
 	}
 
 	joinRoom( data )
@@ -200,10 +200,10 @@ class Client {
 			{
 				this.room = room;
 				this.status = ClientStatus.inLobby;
-				return true;
+				return Client.fromBool( true );
 			}
 		}
-		return false
+		return Client.fromBool( false );
 	}
 
 	setGamePhysics( data )
@@ -212,10 +212,10 @@ class Client {
 		{
 			if( this.room.setPhysics( this.id, data ) )
 			{
-				return true;
+				return Client.fromBool( true );
 			}
 		}
-		return false;
+		return Client.fromBool( false );
 	}
 
 	getRoomConfig()
@@ -229,7 +229,7 @@ class Client {
 		{
 			return this.player.setProperties( data );
 		}
-		return false;
+		return Client.fromBool( false );
 	}
 
 	switchReady()
@@ -237,9 +237,9 @@ class Client {
 		if( this.player !== null )
 		{
 			this.player.confirm();
-			return true;
+			return Client.fromBool( true );
 		}
-		return false;
+		return Client.fromBool( false );
 	}
 
 	listPlayers()
@@ -256,9 +256,9 @@ class Client {
 		{
 			this.player.setMapLoaded();
 			this.status = ClientStatus.inGame;
-			return true;
+			return Client.fromBool( true );
 		}
-		return false;
+		return Client.fromBool( false );
 	}
 
 	setUDP( rinfo )
