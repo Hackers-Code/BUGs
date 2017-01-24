@@ -15,6 +15,7 @@ class Client {
 		this.clientsStorage = clientsStorage;
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.roomsStorage = clientsStorage.getRoomsStorage();
+		this.socket = socket;
 		this.write = socket.write;
 		this.end = socket.end;
 
