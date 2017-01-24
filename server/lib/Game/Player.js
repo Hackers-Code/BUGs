@@ -41,7 +41,6 @@ class Player {
 		this.colour.G = Buffer.from( [ data.colourG ] );
 		this.colour.B = Buffer.from( [ data.colourB ] );
 		this.mask = Buffer.from( [ data.mask ] );
-		return true;
 	}
 
 	confirm()

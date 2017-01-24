@@ -227,7 +227,8 @@ class Client {
 	{
 		if( this.player !== null )
 		{
-			return Client.fromBool( this.player.setProperties( data ) );
+			this.player.setProperties( data );
+			return Client.fromBool( true );
 		}
 		return Client.fromBool( false );
 	}
