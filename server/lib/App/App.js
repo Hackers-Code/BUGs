@@ -38,8 +38,7 @@ class App {
 	{
 		this.startUDP( this.config.UDP_port, ( msg, rinfo ) =>
 		{
-			console.log( rinfo );
-			console.log( msg );
+			this.clientsStorage.parseUDP( msg, rinfo );
 		}, ( err ) =>
 		{
 			this.logger.error( err.message );

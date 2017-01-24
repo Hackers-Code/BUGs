@@ -62,7 +62,7 @@ class ClientsStorage {
 			}
 			if( this.clients[ client ].status >= ClientStatus.inLobby )
 			{
-				this.clients[ client ].leaveLobby();
+				this.clients[ client ].leaveRoom();
 			}
 			if( this.clients[ client ].status >= ClientStatus.named )
 			{
@@ -73,6 +73,11 @@ class ClientsStorage {
 			return true;
 		}
 		return false;
+	}
+
+	parseUDP()
+	{
+
 	}
 }
 

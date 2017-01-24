@@ -48,8 +48,6 @@ class Client {
 			} ) );
 			return;
 		}
-		console.log( this.write );
-		console.log( encoded );
 		this.write( encoded );
 	}
 
@@ -57,7 +55,7 @@ class Client {
 	{
 		return {
 			onData : this.handleData.bind( this ),
-			onClose : this.leaveRoom.bind( this )
+			onClose : this.disconnect.bind( this )
 		};
 	}
 
@@ -65,7 +63,6 @@ class Client {
 	{
 		if( typeof data !== 'undefined' )
 		{
-			console.log( data );
 			this.streamParser.appendData( data );
 		}
 		try
@@ -162,20 +159,20 @@ class Client {
 	{
 		if( this.status === ClientStatus.inLobby || this.status === ClientStatus === ClientStatus.inGame )
 		{
-			this.leaveLobby();
+			if( this.room !== null )
+			{
+				this.room.leave( this.id );
+				this.room = null;
+				this.player = null;
+				return true;
+			}
+			return false;
 		}
 	}
 
-	leaveLobby()
+	disconnect()
 	{
-		if( this.room !== null )
-		{
-			this.room.leave( this.id );
-			this.room = null;
-			this.player = null;
-			return true;
-		}
-		return false;
+		this.clientsStorage.removeClient( this.id );
 	}
 
 	setRoomConfig( data )
