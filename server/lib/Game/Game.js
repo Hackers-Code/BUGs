@@ -39,9 +39,9 @@ class Game {
 		};
 	}
 
-	loadMap( id )
+	loadMap( id, mapsList )
 	{
-		MapInterface.getParsedMap( id, this.initWorld.bind( this ) );
+		MapInterface.getParsedMap( id, mapsList, this.initWorld.bind( this ) );
 	}
 
 	initWorld( err, data )

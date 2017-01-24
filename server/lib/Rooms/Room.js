@@ -192,7 +192,7 @@ class Room {
 			return;
 		}
 		this.status = Status.inGame;
-		this.game.loadMap( this.mapID );
+		this.game.loadMap( this.mapID, this.mapsList );
 		for( let i = 0 ; i < this.players.length ; i++ )
 		{
 			this.players[ i ].response.send( { opcode : 0x30 } );
