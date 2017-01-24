@@ -48,6 +48,7 @@ class ClientsStorage {
 		let id = this.uniqueKeyGenerator.generateKey();
 		let client = new Client( write, id, this );
 		let index = this.clients.push( client ) - 1;
+		this.clients[ index ].sendID();
 		return this.clients[ index ].getCallbacks();
 	}
 
