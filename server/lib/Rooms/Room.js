@@ -149,8 +149,8 @@ class Room {
 				this.checkIfAllConfirmed();
 				return true;
 			}
+			return false;
 		}
-		return false;
 	}
 
 	setPhysics( id, physics )
@@ -266,4 +266,5 @@ class Room {
 		return this.roomConfigResponse;
 	}
 }
+
 module.exports = Room;
