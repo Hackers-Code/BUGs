@@ -66,7 +66,7 @@ class RoomsStorage {
 
 	removeRoom( id )
 	{
-		let room = SearchEngine.findByUniqueID( this.rooms, id );
+		let room = SearchEngine.findByUniqueID( id, this.rooms );
 		if( room !== false && room !== -1 )
 		{
 			this.rooms[ room ].tasks.forEach( ( element ) =>
@@ -86,7 +86,7 @@ class RoomsStorage {
 	{
 		if( typeof params.room !== 'undefined' && typeof params.password !== 'undefined' )
 		{
-			let room = SearchEngine.findByUniqueID( this.rooms, params.room );
+			let room = SearchEngine.findByUniqueID( params.room, this.rooms );
 			if( room !== false && room !== -1 )
 			{
 				if( this.rooms[ room ].joinRoom( params.password, client ) )

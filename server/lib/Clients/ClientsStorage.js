@@ -53,7 +53,7 @@ class ClientsStorage {
 
 	removeClient( id )
 	{
-		let client = SearchEngine.findByUniqueID( this.clients, id );
+		let client = SearchEngine.findByUniqueID( id, this.clients );
 		if( client !== false && client !== -1 )
 		{
 			if( this.clients[ client ].status >= ClientStatus.inGame )
