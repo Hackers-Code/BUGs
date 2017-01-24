@@ -54,11 +54,10 @@ class Room {
 				{
 					this.players.splice( adminIndex, 1 );
 				}
-				let reason = Buffer.alloc( 30 );
-				reason.write( 'Admin left lobby!' );
+				let reason = Buffer.from( 'Admin left lobby!' );
 				this.players.forEach( ( element ) =>
 				{
-					element.response.send( {
+					element.send( {
 						opcode : 0x04,
 						length : Buffer.from( [ reason.length ] ),
 						reason : reason

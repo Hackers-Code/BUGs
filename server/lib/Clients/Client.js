@@ -62,7 +62,7 @@ class Client {
 
 	handleData( data )
 	{
-		if( data !== 'undefined' )
+		if( typeof data !== 'undefined' )
 		{
 			console.log( data );
 			this.streamParser.appendData( data );
