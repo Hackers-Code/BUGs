@@ -34,7 +34,7 @@ class ClientsStorage {
 		return this.clients;
 	}
 
-	addClient( functions )
+	addClient( socket )
 	{
 		if( this.clients.length >= this.maxClients )
 		{
@@ -47,7 +47,7 @@ class ClientsStorage {
 			return false;
 		}
 		let id = this.uniqueKeyGenerator.generateKey();
-		let client = new Client( functions, id, this );
+		let client = new Client( socket, id, this );
 		let index = this.clients.push( client ) - 1;
 		return this.clients[ index ].getCallbacks();
 	}

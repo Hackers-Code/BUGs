@@ -7,10 +7,7 @@ module.exports = ( port, connectionHandler, errorHandler, listeningHandler ) =>
 		let socketCallbacks = connectionHandler( {
 			remoteAddress : socket.remoteAddress,
 			remotePort : socket.remotePort
-		}, {
-			write : socket.write,
-			end : socket.end
-		} );
+		}, socket );
 		socket.on( 'data', socketCallbacks.onData );
 		socket.on( 'close', socketCallbacks.onClose );
 	} ).on( 'error', errorHandler );

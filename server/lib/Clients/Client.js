@@ -9,14 +9,14 @@ const ClientStatus = {
 	inGame : 3
 };
 class Client {
-	constructor( functions, id, clientsStorage )
+	constructor( socket, id, clientsStorage )
 	{
 		this.id = id;
 		this.clientsStorage = clientsStorage;
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.roomsStorage = clientsStorage.getRoomsStorage();
-		this.write = functions.write;
-		this.end = functions.end;
+		this.write = socket.write;
+		this.end = socket.end;
 
 		this.streamParser = new StreamParser();
 		this.packetEncoder = new PacketEncoder();
@@ -48,11 +48,11 @@ class Client {
 				error : msg,
 				length : Buffer.from( [ msg.length ] )
 			} );
-			console.log( encoded.toString( 'hex' ) );
+			console.log( 'Error: ' + encoded.toString( 'hex' ) );
 			this.write( encoded );
 			return;
 		}
-		console.log( encoded.toString( 'hex' ) );
+		console.log( 'Sent by TCP: ' + encoded.toString( 'hex' ) );
 		this.write( encoded );
 	}
 
@@ -66,6 +66,7 @@ class Client {
 
 	handleData( data )
 	{
+		console.log( 'Got by TCP: ' + data.toString( 'hex' ) );
 		if( data !== 'undefined' )
 		{
 			this.streamParser.appendData( data );
