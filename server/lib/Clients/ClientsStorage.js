@@ -86,8 +86,18 @@ class ClientsStorage {
 
 	parseUDP( msg, rinfo )
 	{
-		console.log( this.packetDecoder.decode( msg ) );
-		let index = SearchEngine.findByPortAndIP( rinfo, this.clients );
+		let decoded = this.packetDecoder.decode( msg );
+		if( decoded.callback === 'setUDP' )
+		{
+			let index = SearchEngine.findByUniqueID( decoded.object.id, this.clients );
+			this.clients[ index ].setUDP( rinfo );
+			this.udpSend( this.packetEncoder( { opcode : 0x07 } ), rinfo.port, rinfo.address );
+		}
+		else
+		{
+			//let index = SearchEngine.findByRinfo( rinfo, this.clients );
+			//this.clients[ index ][ decoded.callback ]();
+		}
 	}
 }
 

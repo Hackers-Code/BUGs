@@ -11,7 +11,8 @@ module.exports = {
 	},
 	0x06 : {
 		params : { id : 4 },
-		callback : 'setUDP'
+		callback : 'setUDP',
+		response : 0x07
 	},
 	0x10 : {
 		params : {},
