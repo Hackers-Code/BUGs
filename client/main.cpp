@@ -1785,6 +1785,7 @@ int main(){
                         backgrounds.setTexture(backgroundt, 1);
                         backgrounds.setScale(0.2,0.2);
                         mode=ingame;
+                        started=1;
                         protocol31();
                         break;
                     }
@@ -2440,7 +2441,7 @@ int main(){
                             for(int k=0; k<=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.y; k++){
                                 for(int j=(*wormpointers[i]).position.x; j<=(*wormpointers[i]).position.x+(*wormpointers[i]).sprite.getLocalBounds().width; j++){
                                     if(colide(sf::Vector2f(j, ((*wormpointers[i]).position.y+(*wormpointers[i]).sprite.getLocalBounds().height+k)), backgroundi)){
-                                        fcolided=1;cout<<'B';
+                                        fcolided=1;
                                         colisionpos=sf::Vector2f(j, ((*wormpointers[i]).position.y+k));
                                         break;
                                     }
