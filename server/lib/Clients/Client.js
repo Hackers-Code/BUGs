@@ -76,7 +76,9 @@ class Client {
 		}
 		try
 		{
-			let decoded = this.packetDecoder.decode( this.streamParser.getBuffer() );
+			let buffer = this.streamParser.getBuffer();
+			console.log( buffer );
+			let decoded = this.packetDecoder.decode( buffer );
 			if( decoded === false )
 			{
 				return;

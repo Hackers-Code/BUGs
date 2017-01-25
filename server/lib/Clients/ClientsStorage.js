@@ -90,8 +90,8 @@ class ClientsStorage {
 		}
 		else
 		{
-			//let index = SearchEngine.findByRinfo( rinfo, this.clients );
-			//this.clients[ index ][ decoded.instruction.callback ]();
+			let index = SearchEngine.findByRinfo( rinfo, this.clients );
+			this.clients[ index ][ decoded.instruction.callback ]( decoded.object );
 		}
 	}
 }
