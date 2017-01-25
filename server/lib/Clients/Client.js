@@ -176,7 +176,7 @@ class Client {
 
 	leaveRoom()
 	{
-		if( this.status === ClientStatus.inLobby || this.status === ClientStatus === ClientStatus.inGame )
+		if( this.status === ClientStatus.inLobby || this.status === ClientStatus.inGame )
 		{
 			if( this.room !== null )
 			{
