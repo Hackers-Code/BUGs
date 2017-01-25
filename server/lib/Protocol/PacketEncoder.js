@@ -8,7 +8,6 @@ class PacketEncoder {
 
 	encode( object )
 	{
-		console.log( object );
 		if( typeof object.opcode !== 'number' )
 		{
 			return false;

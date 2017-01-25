@@ -254,23 +254,26 @@ class Room {
 				return;
 			}
 		}
-		this.tasks.push( this.tasksStorage.addTask( () =>
+		let wormsTaskId = this.tasksStorage.addTask( () =>
 		{
 			let data = this.game.getWorms();
 			this.players.forEach( ( element ) =>
 			{
 				element.send( data, 'UDP' );
 			} );
-		} ) );
-
-		this.tasks.push( this.tasksStorage.addTask( () =>
+		} );
+		this.tasks.push( wormsTaskId );
+		this.tasksStorage.runTask( wormsTaskId );
+		let timeTaskId = this.tasksStorage.addTask( () =>
 		{
 			let data = this.game.getTimeLeft();
 			this.players.forEach( ( element ) =>
 			{
 				element.send( data, 'UDP' );
 			} );
-		} ) );
+		} );
+		this.tasks.push( timeTaskId );
+		this.tasksStorage.runTask( timeTaskId );
 		setTimeout( this.game.start.bind( this.game ), 3000 );
 	}
 

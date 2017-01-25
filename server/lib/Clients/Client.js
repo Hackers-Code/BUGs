@@ -51,7 +51,10 @@ class Client {
 		}
 		if( type === 'TCP' )
 		{
-			console.log( encoded );
+			if( encoded.readUInt8( 0 ) === 0x29 )
+			{
+				console.log( encoded );
+			}
 			this.write( encoded );
 		}
 		else
@@ -74,13 +77,15 @@ class Client {
 	{
 		if( typeof data !== 'undefined' )
 		{
-			console.log( data );
+			if( data.readUInt8( 0 ) === 0x24 )
+			{
+				console.log( data );
+			}
 			this.streamParser.appendData( data );
 		}
 		try
 		{
 			let buffer = this.streamParser.getBuffer();
-			console.log( buffer );
 			let decoded = this.packetDecoder.decode( buffer );
 			if( decoded === false )
 			{
