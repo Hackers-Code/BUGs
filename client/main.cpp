@@ -547,7 +547,7 @@ void protocol31(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x31;
-        if(clientsocket.send(to_send, 3)==sf::Socket::Done){
+        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
         }else cout<<"sending error 0x31\n";
     }else cout<<"not connected, cannot get turn time\n";
 }
@@ -1423,12 +1423,12 @@ int main(){
                     if((event.mouseButton.x>=maprs.getPosition().x)&&(event.mouseButton.x<=maprs.getPosition().x+maprs.getLocalBounds().width)&&(event.mouseButton.y>=maprs.getPosition().y)&&(event.mouseButton.y<=maprs.getPosition().y+maprs.getLocalBounds().height)){
                         choosedmap++;
                         if(choosedmap>=metamaps.size())choosedmap=0;
-                        maskchoose.setTexture(maskchooset[choosedmask], 1);
+                        mapthumb.setTexture(metamaps[choosedmap].thumbnailt, 1);
                     }else
                     if((event.mouseButton.x>=mapls.getPosition().x)&&(event.mouseButton.x<=mapls.getPosition().x+mapls.getLocalBounds().width)&&(event.mouseButton.y>=mapls.getPosition().y)&&(event.mouseButton.y<=mapls.getPosition().y+mapls.getLocalBounds().height)){
                         if(!choosedmap) choosedmap=metamaps.size()-1;
                         else choosedmap--;
-                        maskchoose.setTexture(maskchooset[choosedmask], 1);
+                        mapthumb.setTexture(metamaps[choosedmap].thumbnailt, 1);
                     }else
                     if((event.mouseButton.x>=okrgbm.getPosition().x)&&(event.mouseButton.x<=okrgbm.getPosition().x+okrgbm.getLocalBounds().width)&&(event.mouseButton.y>=okrgbm.getPosition().y)&&(event.mouseButton.y<=okrgbm.getPosition().y+okrgbm.getLocalBounds().height)){
                         protocol2a(yourcolordisplay.getFillColor(), choosedmask);
@@ -1959,7 +1959,6 @@ int main(){
                         if(data[i]){
                             cout<<"joined\n"<<char(7);
                             mode=lobby;
-                            protocol28();
                         }else{
                             cout<<"not joined\n";
                             to_receive=0;
@@ -1968,6 +1967,7 @@ int main(){
                     }
                     else{
                         protbufferi[2]=data[i];
+                        protocol28();
                     }
 
                     to_receive--;
@@ -1975,7 +1975,7 @@ int main(){
                 deltareceive=0;
                 if(!to_receive){
                     myid=protbufferi[2];
-                    cout<<"your id="<<myid;
+                    cout<<"your id="<<myid<<"\n";
                     receiving=0;
                 }
             }else
