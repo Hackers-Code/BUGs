@@ -8,10 +8,13 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 #include <SFML/Audio.hpp>
+#include <unordered_map>
+#include "json.hpp"
 
-#define INFO_AMOUNT 12
+#define INFO_AMOUNT 11
 
 using namespace std;
+using json=nlohmann::json;
 
 bool copyToClipboard(string input){
     HGLOBAL hglbCopy;
@@ -102,17 +105,17 @@ modes mode=connectroom;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol, protbuffers[3];
 size_t received=0;
-unsigned int myid=0, to_receive=0, udpto_receive=0, to_ignore=0, udpto_ignore=0, lastgamelistelement=0, frame=0, protbufferi[8], colorpointerpressed=3, choosedmask=0;
+unsigned int myid=0, to_receive=0, udpto_receive=0, to_ignore=0, udpto_ignore=0, lastgamelistelement=0, frame=0, FPSframe=0, protbufferi[8], colorpointerpressed=3, choosedmask=0;
 short protbuffersh[2];
 float deltagamelist=120;
 
 
 //zmienne do lobby
 string lobbyname;
-sf::Text lobbynamet, ainfo[4], seedinput, vxmaxtext, vymaxtext, aytext, vjumptext;
+sf::Text lobbynamet, ainfo[4], vxmaxtext, vymaxtext, aytext, vjumptext;
 sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2, advancedt, plreadyt[2];
-sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys, advanceds, plreadys[2];
-int playersamount=2, playersready=0;
+sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys, advanceds, plreadys[2], mapthumb;
+int playersamount=2, playersready=0, choosedmap=0;
 bool ready=0, changingsettings=0, advancedb=0;
 list<sf::Vector2u> spawnpoints;
 
@@ -130,82 +133,8 @@ unsigned int turntime=0, clockframe=0, no18delta=0;
 //fizyka
 int vxmax=2, vymax=875, ay=437, vjump=-300;
 sf::Clock clocker;
-sf::Time lastittime, currentittime, starttime;
+sf::Time lastittime, currentittime, starttime, FPStime;
 bool started=0;
-
-sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
-    spawnpoints.clear();
-    fstream plik;
-    sf::Image output;
-    if(!track.length()){
-        cout<<"loadMap("") called\n";
-        return output;
-    }
-    plik.open(track, ios::in | ios::binary);
-    if(plik.good()){
-        unsigned char ch, structure=0, to_load=0;
-        int width=0, height=0, uintbuffer[8];
-        sf::Color solid(80, 100, 0);
-        for(int i=0; i<4; i++){
-            if(!(plik>>noskipws>>ch)){
-                cout<<track<<"`s metadata broken\n";
-                return output;
-            }
-            width=width<<8;
-            width+=ch;
-        }
-        for(int i=0; i<4; i++){
-            if(!(plik>>noskipws>>ch)){
-                cout<<track<<"`s metadata broken\n";
-                return output;
-            }
-            height=height<<8;
-            height+=ch;
-        }
-        output.create(width, height, sf::Color(0,0,0,0));
-        while(plik>>noskipws>>ch){
-            if(structure==1){
-                uintbuffer[(to_load)/4]=uintbuffer[(to_load)/4]<<8;
-                uintbuffer[(to_load)/4]+=ch;
-                if(!to_load){
-                    spawnpoints.push_back(sf::Vector2u(uintbuffer[1], uintbuffer[0]));
-                    structure=0;
-                }
-            }else
-            if(structure==2){
-                uintbuffer[(to_load)/4]=uintbuffer[(to_load)/4]<<8;
-                uintbuffer[(to_load)/4]+=ch;
-                if(!to_load){
-                    for(int i=0; i<uintbuffer[1]; i++)
-                        if(i+uintbuffer[3]<width){
-                            for(int j=0; j<uintbuffer[0]; j++)
-                                if(j+uintbuffer[2]<height){
-                                    output.setPixel(i+uintbuffer[3], j+uintbuffer[2], solid);
-                                }else break;
-                        }else break;
-                    structure=0;
-                }
-            }
-
-            if(!structure){
-                if(ch==1){
-                    structure=1;
-                    to_load=8;
-                }else
-                if(ch==2){
-                    structure=2;
-                    to_load=16;
-                }
-            }
-            to_load--;
-        }
-        plik.close();
-    }else{
-        cout<<"plik "<<track<<" is not good\n";
-    }
-
-    return output;
-}
 
 class gamelistelements{public:
     unsigned int id, pos;
@@ -349,7 +278,7 @@ class player{public:
         namet.setString(namein);
         namet.setCharacterSize(12);
         namet.setColor(color);
-        namet.setPosition(0,60+id*40);
+        namet.setPosition(0,90+id*40);
         namet.setFont(mainfont);
 
         sf::Image image;
@@ -357,7 +286,7 @@ class player{public:
         hpbart.loadFromImage(image);
         hpbars.setTexture(hpbart,1);
         hpbars.setScale(hp, 10);
-        hpbars.setPosition(0, 90+40*id);
+        hpbars.setPosition(0, 120+40*id);
     }
 
     bool addworm(worm newworm){
@@ -434,43 +363,6 @@ void placek(sf::Image &image, int x, int y,unsigned int r){
             }
         }
     }cout<<"\n";
-}
-
-void createmap(unsigned int seed){
-    if(seed==1){
-        backgroundt.loadFromImage(loadMap("1.map", spawnpoints));
-        backgrounds.setTexture(backgroundt);
-    }else{
-        srand(seed);
-        backgroundi.create(6000, 3600, sf::Color(0,0,0,0));
-        for(int i=0; i<6000; i++){
-            for(int j=3580; j<3600; j++){
-                backgroundi.setPixel(i,j, sf::Color(255,0,0));
-            }
-        }
-        {
-            int j=3600, j2=3600;
-            for(int i=1000; i<=6000; i+=5){
-                if(!(rand()%300)){
-                    if((rand()%2)&&(j<3100))j+=400;
-                    else        j-=400;
-                }
-                if(i<rand()%2000+2000)j2=-fabs(rand()%8-3)+1;
-                else                  j2=fabs(rand()%8-3)-1;
-                for(int k=i; k<i+5; k++){
-                    for(int n=j+j2/-(k-i-5); ((n<3600)&&(n>=0)); n++){
-                        backgroundi.setPixel(k, n, sf::Color(80, 100, 0));
-                    }
-                }
-                j+=j2;
-            }
-        }
-        for(int i=0; i<rand()%100+20; i++){
-            placek(backgroundi,(rand()%6000), (rand()%3600), (rand()%200+40));
-        }
-        backgroundt.loadFromImage(backgroundi);
-        backgrounds.setTexture(backgroundt);
-    }
 }
 
 bool colide(sf::Vector2f pixelin, sf::Image &imagein){
@@ -696,6 +588,186 @@ bool protocol39(){return 1;
     }else cout<<"not connected, can not move\n";
     return 0;
 }
+
+class metamap{public:
+    string id, author, name, thumbnail, map_file, version, last_update, created;
+    sf::Texture thumbnailt;
+
+    bool loadFromHTTP(string ipin, unsigned short portin){
+        if(!thumbnail.length()){
+            cout<<"track to map thumbnail is empty\n";
+            return 0;
+        }
+        sf::Http http;
+        http.setHost(ipin, portin+1);
+        sf::Http::Request request(thumbnail);
+        sf::Http::Response response=http.sendRequest(request);
+        sf::Http::Response::Status httpstatus=response.getStatus();
+        if(httpstatus==sf::Http::Response::Ok){
+            buffer=response.getBody();
+            if(!thumbnailt.loadFromMemory(&buffer[0], buffer.length())){
+                cout<<"\nthumbnail:\n"<<buffer<<"\n";
+                return 0;
+            }
+        }else{
+            cout<<"map HTTP Error\n";
+            return 0;
+        }
+        return 1;
+    }
+
+};
+vector<metamap> metamaps;
+
+bool getMapsFromServer(string ipin, unsigned short portin){
+    sf::Http http;
+    http.setHost(ipin, portin+1);
+    sf::Http::Request request("maps/list.json");
+    sf::Http::Response response=http.sendRequest(request);
+    sf::Http::Response::Status httpstatus=response.getStatus();
+    if(httpstatus==sf::Http::Response::Ok){
+        cout<<response.getBody()<<"\n";
+        cout<<"parsing maps...\n";
+        buffer=response.getBody();
+        json jslist=json::parse(buffer);
+        vector<json> mapvector=jslist["list"].get<vector<json>>();
+        for(int i=0; i<mapvector.size(); i++){
+            metamaps.push_back(metamap());
+            metamaps[i].id=mapvector[i]["id"].get<string>();
+            metamaps[i].author=mapvector[i]["author"].get<string>();
+            metamaps[i].name=mapvector[i]["name"].get<string>();
+            metamaps[i].thumbnail=mapvector[i]["thumbnail"].get<string>();
+            metamaps[i].map_file=mapvector[i]["map_file"].get<string>();
+            metamaps[i].version=mapvector[i]["version"].get<string>();
+            metamaps[i].last_update=mapvector[i]["last_update"].get<string>();
+            metamaps[i].created=mapvector[i]["created"].get<string>();
+            metamaps[i].loadFromHTTP(ipin, portin);
+        }
+        return 1;
+    }else{
+        std::cout<<"HTTP Error: "<<httpstatus<<"\n";
+        return 0;
+    }
+}
+
+sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints, string ipin, unsigned short portin){
+    spawnpoints.clear();
+    fstream plik;
+    sf::Image output;
+    if(!track.length()){
+        cout<<"loadMap("") called\n";
+        return output;
+    }
+    sf::Http http;
+    http.setHost(ipin, portin+1);
+    sf::Http::Request request(track);
+    sf::Http::Response response=http.sendRequest(request);
+    sf::Http::Response::Status httpstatus=response.getStatus();
+    if(httpstatus==sf::Http::Response::Ok){
+        buffer=response.getBody();
+        unsigned char ch, structure=0, to_load=0;
+        int width=0, height=0, uintbuffer[8];
+        sf::Color solid(80, 100, 0);
+        for(int i=0; i<4; i++){
+            if(!buffer[i]){
+                cout<<track<<"`s metadata broken\n";
+                return output;
+            }
+            width=width<<8;
+            width+=(unsigned char)buffer[i];
+        }
+        for(int i=4; i<8; i++){
+            if(!buffer[i]){
+                cout<<track<<"`s metadata broken\n";
+                return output;
+            }
+            height=height<<8;
+            height+=buffer[i];
+        }
+        output.create(width, height, sf::Color(0,0,0,0));
+        while(plik>>noskipws>>ch){
+            if(structure==1){
+                uintbuffer[(to_load)/4]=uintbuffer[(to_load)/4]<<8;
+                uintbuffer[(to_load)/4]+=ch;
+                if(!to_load){
+                    spawnpoints.push_back(sf::Vector2u(uintbuffer[1], uintbuffer[0]));
+                    structure=0;
+                }
+            }else
+            if(structure==2){
+                uintbuffer[(to_load)/4]=uintbuffer[(to_load)/4]<<8;
+                uintbuffer[(to_load)/4]+=ch;
+                if(!to_load){
+                    for(int i=0; i<uintbuffer[1]; i++)
+                        if(i+uintbuffer[3]<width){
+                            for(int j=0; j<uintbuffer[0]; j++)
+                                if(j+uintbuffer[2]<height){
+                                    output.setPixel(i+uintbuffer[3], j+uintbuffer[2], solid);
+                                }else break;
+                        }else break;
+                    structure=0;
+                }
+            }
+
+            if(!structure){
+                if(ch==1){
+                    structure=1;
+                    to_load=8;
+                }else
+                if(ch==2){
+                    structure=2;
+                    to_load=16;
+                }
+            }
+            to_load--;
+        }
+
+    }else{
+        cout<<"map HTTP Error\n";
+        return output;
+    }
+
+    return output;
+}
+
+void createmap(unsigned int seed){
+    if(seed==1){
+        backgroundt.loadFromImage(loadMap(metamaps[choosedmap].map_file, spawnpoints, ipinput.getString(), atoi(portinput.getString().toAnsiString().c_str())));
+        backgrounds.setTexture(backgroundt);
+    }else{
+        srand(seed);
+        backgroundi.create(6000, 3600, sf::Color(0,0,0,0));
+        for(int i=0; i<6000; i++){
+            for(int j=3580; j<3600; j++){
+                backgroundi.setPixel(i,j, sf::Color(255,0,0));
+            }
+        }
+        {
+            int j=3600, j2=3600;
+            for(int i=1000; i<=6000; i+=5){
+                if(!(rand()%300)){
+                    if((rand()%2)&&(j<3100))j+=400;
+                    else        j-=400;
+                }
+                if(i<rand()%2000+2000)j2=-fabs(rand()%8-3)+1;
+                else                  j2=fabs(rand()%8-3)-1;
+                for(int k=i; k<i+5; k++){
+                    for(int n=j+j2/-(k-i-5); ((n<3600)&&(n>=0)); n++){
+                        backgroundi.setPixel(k, n, sf::Color(80, 100, 0));
+                    }
+                }
+                j+=j2;
+            }
+        }
+        for(int i=0; i<rand()%100+20; i++){
+            placek(backgroundi,(rand()%6000), (rand()%3600), (rand()%200+40));
+        }
+        backgroundt.loadFromImage(backgroundi);
+        backgrounds.setTexture(backgroundt);
+    }
+}
+
+void exitting();
 //}
 
 void save(string track, string input){
@@ -816,11 +888,6 @@ int main(){
         lobbynamet.setCharacterSize(16);
         lobbynamet.setColor(normalclr);
         lobbynamet.setPosition(38,8);
-        seedinput.setFont(mainfont);
-        seedinput.setString("1");
-        seedinput.setCharacterSize(12);
-        seedinput.setColor(normalclr);
-        seedinput.setPosition(8,38);
         turntimet.setFont(mainfont);
         turntimet.setString("0s");
         turntimet.setCharacterSize(25);
@@ -872,16 +939,14 @@ int main(){
         info[5].setPosition(8, 98);
         info[6].setString("game name");
         info[6].setPosition(158, 98);
-        info[7].setString("seed");
-        info[7].setPosition(150,38);
-        info[8].setString("players");
-        info[8].setPosition(0,68);
-        info[9].setString("2");
-        info[9].setPosition(20,98);
-        info[10].setString("3");
-        info[10].setPosition(20,128);
-        info[11].setString("4");
-        info[11].setPosition(20,158);
+        info[7].setString("players");
+        info[7].setPosition(0,68);
+        info[8].setString("2");
+        info[8].setPosition(20,98);
+        info[9].setString("3");
+        info[9].setPosition(20,128);
+        info[10].setString("4");
+        info[10].setPosition(20,158);
         fstream plik;
         plik.open("physic.cfg", ios::in | ios::binary);
         if(plik.good()){
@@ -942,11 +1007,15 @@ int main(){
         ainfo[2].setString("a(y)");
         ainfo[2].setPosition(278+inputbart.getSize().x, 128);
         ainfo[3].setString("jump");
-        ainfo[3].setPosition(278+inputbart.getSize().x, 158);/*
+        ainfo[3].setPosition(278+inputbart.getSize().x, 158);
+        if(atexit(exitting))
+            cout<<"could not register exitting function\n";
+        if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE) exitting, 1))
+            cout<<"could not set handler to exitting function\n";/*
+        mode=ingame;
         backgroundt.loadFromImage(backgroundi=loadMap("1.map", spawnpoints));
         backgrounds.setTexture(backgroundt, 1);
         backgrounds.setScale(0.2,0.2);
-        mode=ingame;
         playersamount=1;
         players.push_back(player());
         players[0].addworm(worm());
@@ -958,9 +1027,8 @@ int main(){
     while(window.isOpen()){
         while(window.pollEvent(event)){
             if(event.type==sf::Event::Closed){
-                if(connected)
-                    clientsocket.disconnect();
                 window.close();
+                exit(0);
             }else
             if(event.type==sf::Event::Resized){
                 window.setSize(sf::Vector2u(1200, 720));
@@ -1094,6 +1162,7 @@ int main(){
                         if((event.mouseButton.x>=okconnects.getPosition().x)&&(event.mouseButton.x<=okconnects.getPosition().x+okconnects.getLocalBounds().width)&&(event.mouseButton.y>=okconnects.getPosition().y)&&(event.mouseButton.y<=okconnects.getPosition().y+okconnects.getLocalBounds().height)){
                             if(connect(ipinput.getString(), portinput.getString())){
                                 cout<<"connected\n";
+                                getMapsFromServer(ipinput.getString(), atoi(portinput.getString().toAnsiString().c_str()));
                             }
                         }else
                         if((event.mouseButton.x>=oknicks.getPosition().x)&&(event.mouseButton.x<=oknicks.getPosition().x+oknicks.getLocalBounds().width)&&(event.mouseButton.y>=oknicks.getPosition().y)&&(event.mouseButton.y<=oknicks.getPosition().y+oknicks.getLocalBounds().height)){
@@ -1150,7 +1219,10 @@ int main(){
                             ipinput.setColor(checkedclr);
                         }else
                         if(event.text.unicode==13){
-                            if(connect(ipinput.getString(), portinput.getString())) cout<<"connected\n";
+                            if(connect(ipinput.getString(), portinput.getString())){
+                                cout<<"connected\n";
+                                getMapsFromServer(ipinput.getString(), atoi(portinput.getString().toAnsiString().c_str()));
+                            }
                         }
                     }else
                     if(textbox==nickbox){inputpointer=&nickinput;
@@ -1244,9 +1316,6 @@ int main(){
             }else
             if(mode==lobby){
                 if(event.type==sf::Event::MouseButtonPressed){
-                    if(textbox==seedbox){
-                        seedinput.setColor(normalclr);
-                    }else
                     if(textbox==vxmaxbox){
                         vxmaxtext.setColor(normalclr);
                         vxmax=atof(vxmaxtext.getString().toAnsiString().c_str());
@@ -1307,8 +1376,7 @@ int main(){
                         playersamount=4;
                     }else
                     if((changingsettings)&&(event.mouseButton.x>=oksettings.getPosition().x)&&(event.mouseButton.x<=oksettings.getPosition().x+oksettings.getLocalBounds().width)&&(event.mouseButton.y>=oksettings.getPosition().y)&&(event.mouseButton.y<=oksettings.getPosition().y+oksettings.getLocalBounds().height)){
-                        if(seedinput.getString().getSize()<10) protocol22();
-                        else cout<<"seed is too big\n";
+                        protocol22();
                     }else
                     if((event.mouseButton.x>=readys.getPosition().x)&&(event.mouseButton.x<=readys.getPosition().x+readys.getLocalBounds().width)&&(event.mouseButton.y>=readys.getPosition().y)&&(event.mouseButton.y<=readys.getPosition().y+readys.getLocalBounds().height)){
                         protocol2c();
@@ -1318,10 +1386,6 @@ int main(){
                     }else
                     if((event.mouseButton.x>=soundicons.getPosition().x)&&(event.mouseButton.x<=soundicons.getPosition().x+soundicons.getLocalBounds().width)&&(event.mouseButton.y>=soundicons.getPosition().y)&&(event.mouseButton.y<=soundicons.getPosition().y+soundicons.getLocalBounds().height)){
                         soundbarexchanged=!soundbarexchanged;
-                    }else
-                    if((changingsettings)&&(event.mouseButton.x>=seedinput.getPosition().x-8)&&(event.mouseButton.x<=seedinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=seedinput.getPosition().y-8)&&(event.mouseButton.y<=seedinput.getPosition().y-8+inputbars.getLocalBounds().height)){
-                        seedinput.setColor(checkedclr);
-                        textbox=seedbox;
                     }else
                     if((changingsettings)&&(event.mouseButton.x>=vxmaxtext.getPosition().x-8)&&(event.mouseButton.x<=vxmaxtext.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=vxmaxtext.getPosition().y-8)&&(event.mouseButton.y<=vxmaxtext.getPosition().y-8+inputbars.getLocalBounds().height)){
                         vxmaxtext.setColor(checkedclr);
@@ -1361,16 +1425,6 @@ int main(){
                         }
                 }else
                 if(event.type==sf::Event::TextEntered){sf::Text* inputpointer=0;
-                    if(textbox==seedbox){
-                        if(event.text.unicode==13){
-                            seedinput.setColor(normalclr);
-                            inputpointer=0;
-                        }else
-                        if((event.text.unicode>='0')&&(event.text.unicode<='9')&&(seedinput.getString().getSize()<10)){
-                            seedinput.setString(seedinput.getString()+event.text.unicode);
-                        }else
-                        if(event.text.unicode==8) inputpointer=&seedinput;
-                    }else
                     if(textbox==vxmaxbox){
                         if(event.text.unicode==13){
                             vxmaxtext.setColor(normalclr);
@@ -1549,6 +1603,16 @@ int main(){
                         cout<<"\ndisconnected\n";
                         connectionS.setTexture(offt);
                         connected=0;
+                        receiving=1;
+                        i++;
+                        if(i<received){
+                            to_receive=data[i];
+                        }else{
+                            cout<<"lost rest of 0x0\n";
+                            break;
+                        }
+                        deltareceive=i+1;
+                        protbuffers[0]="";
                         break;
                     }
                     if(data[i]==2){
@@ -1611,7 +1675,7 @@ int main(){
                         if(i<received){
                             if(data[i]){
                                 cout<<"physic accepted\n"<<char(7);
-                                protocol24(atoi(seedinput.getString().toAnsiString().c_str()), playersamount);
+                                protocol24(atoi(metamaps[choosedmap].id.c_str()), playersamount);
                             }else{
                                 cout<<"physic denied\n";
                             }
@@ -1692,8 +1756,8 @@ int main(){
                     }
                     if(data[i]==0x30){
                         soundtrack.stop();
+                        backgroundt.loadFromImage(backgroundi=loadMap(metamaps[choosedmap].map_file, spawnpoints, ipinput.getString(), atoi(portinput.getString().toAnsiString().c_str())));
                         protocol2e();
-                        backgroundt.loadFromImage(backgroundi=loadMap(seedinput.getString()+".map", spawnpoints));
                         backgrounds.setTexture(backgroundt, 1);
                         backgrounds.setScale(0.2,0.2);
                         mode=ingame;
@@ -1786,6 +1850,19 @@ int main(){
                     cout<<"received unknown protocol: "<<int(data[i])<<"\n";
                 }else to_ignore--;
             }
+            if(receiving==1){
+                for(int i=deltareceive; i<received; i++){
+                    to_receive--;
+                    if(!to_receive){
+                        protbuffers[0]+=data[i];
+                        cout<<protbuffers[0]<<"\n";
+                        MessageBox(0, protbuffers[0].c_str(), "0x0: you were kicked from the server", MB_OK);
+                        receiving=0;
+                        break;
+                    }
+                    protbuffers[0]+=data[i];
+                }
+            }else
             if(receiving==4){
                 for(int i=deltareceive; i<received; i++){
                     to_receive--;
@@ -1884,7 +1961,7 @@ int main(){
                 }
                 deltareceive=0;
                 if(!to_receive){
-                    seedinput.setString(to_string(protbufferi[2]));
+                    choosedmap=protbufferi[2];
                     receiving=0;
                 }
             }else
@@ -1911,7 +1988,7 @@ int main(){
                         protbufferi[4]+=data[i];
                     }else
                     if(to_receive==1){
-                        seedinput.setString(to_string(protbufferi[0]));
+                        choosedmap=protbufferi[0];
                         ay=protbufferi[1];
                         vjump=-protbufferi[2];
                         vymax=protbufferi[3];
@@ -2197,7 +2274,8 @@ int main(){
         }
         udpport=udpsocket.getLocalPort();
         serverip=clientsocket.getRemoteAddress();
-        frame++;
+        frame++; FPSframe++;
+        if(!(frame%6000)) frame=0;
         if(!(frame%120)){
             if(clientsocket.getRemoteAddress()==sf::IpAddress::None){
                 if(connected){
@@ -2229,6 +2307,15 @@ int main(){
 
         lastittime=currentittime;
         currentittime=clocker.getElapsedTime();
+        FPStime+=currentittime-lastittime;
+        if(FPStime.asSeconds()>=1){
+            buffer="title ";
+            buffer+=to_string(int(FPSframe/FPStime.asSeconds()));
+            buffer+=" FPS";
+            system(buffer.c_str());
+            FPStime=sf::seconds(0);
+            FPSframe=0;
+        }
         if(started){
             if((!backgroundi.getSize().x)||(!backgroundi.getSize().y)){
                 cout<<"fatal error, map invalid, closing game\n";
@@ -2676,9 +2763,6 @@ int main(){
             window.draw(connectionS);
             window.draw(lobbynamet);
             window.draw(lobbyouts);
-            inputbars.setPosition(seedinput.getPosition()+sf::Vector2f(-8,-8));
-            window.draw(inputbars);
-            window.draw(seedinput);
             window.draw(info[7]);
             if(changingsettings){
                 for(int i=8; i<INFO_AMOUNT; i++)
@@ -2727,6 +2811,12 @@ int main(){
         }window.display();
     }
     return 0;
+}
+
+void exitting(){
+    if(connected){
+        clientsocket.disconnect();
+    }
 }
 
 //"Mo¿liwe, ¿e bêdzie dzia³aæ, ale prawdopodobnie nie." Micha³ Marczewski
