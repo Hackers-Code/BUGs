@@ -51,6 +51,7 @@ class Client {
 		}
 		if( type === 'TCP' )
 		{
+			console.log( encoded );
 			this.write( encoded );
 		}
 		else
@@ -72,11 +73,13 @@ class Client {
 	{
 		if( typeof data !== 'undefined' )
 		{
+			console.log( data );
 			this.streamParser.appendData( data );
 		}
 		try
 		{
 			let buffer = this.streamParser.getBuffer();
+			console.log( buffer );
 			let decoded = this.packetDecoder.decode( buffer );
 			if( decoded === false )
 			{
@@ -128,7 +131,7 @@ class Client {
 	{
 		if( this.uniqueNameStorage.addName( data.name ) )
 		{
-			if( this.status === ClientStatus.named )
+			if( this.status >= ClientStatus.named )
 			{
 				if( !this.uniqueNameStorage.removeName( this.name ) )
 				{

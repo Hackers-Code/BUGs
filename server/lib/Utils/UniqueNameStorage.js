@@ -38,9 +38,10 @@ class UniqueNameStorage {
 			if( name.compare( this.storedNames[ i ] ) === 0 )
 			{
 				this.storedNames.splice( i, 1 );
-				break;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	isUnique( name )
