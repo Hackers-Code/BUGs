@@ -15,7 +15,6 @@ class Client {
 		this.clientsStorage = clientsStorage;
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.roomsStorage = clientsStorage.getRoomsStorage();
-		this.udpSend = clientsStorage.getUDPsend();
 		this.write = write;
 
 		this.streamParser = new StreamParser();
@@ -271,9 +270,10 @@ class Client {
 		return Client.fromBool( false );
 	}
 
-	setUDP( rinfo )
+	setUDP( rinfo, send )
 	{
 		this.rinfo = rinfo;
+		this.udpSend = send;
 	}
 
 	jump()

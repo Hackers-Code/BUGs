@@ -10,21 +10,15 @@ const ServerInstructions = require( '../Protocol/ServerInstructions' );
 const ClientInstructions = require( '../Protocol/ClientInstructions' );
 class ClientsStorage {
 
-	constructor( maxClients, udpSend, roomsStorage )
+	constructor( maxClients, roomsStorage )
 	{
 		this.packetEncoder = new PacketEncoder( ServerInstructions );
 		this.packetDecoder = new PacketDecoder( ClientInstructions );
 		this.maxClients = maxClients;
 		this.roomsStorage = roomsStorage;
-		this.udpSend = udpSend;
 		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
-	}
-
-	getUDPsend()
-	{
-		return this.udpSend;
 	}
 
 	getUniqueNameStorage()
@@ -84,19 +78,20 @@ class ClientsStorage {
 		return false;
 	}
 
-	parseUDP( msg, rinfo )
+	parseUDP( msg, rinfo, send )
 	{
 		let decoded = this.packetDecoder.decode( msg );
-		if( decoded.callback === 'setUDP' )
+		if( decoded.instruction.callback === 'setUDP' )
 		{
 			let index = SearchEngine.findByUniqueID( decoded.object.id, this.clients );
-			this.clients[ index ].setUDP( rinfo );
-			this.udpSend( this.packetEncoder( { opcode : 0x07 } ), rinfo.port, rinfo.address );
+			this.clients[ index ].setUDP( rinfo, send );
+			let encoded = this.packetEncoder.encode( { opcode : decoded.instruction.response } );
+			send( encoded, rinfo.port, rinfo.address );
 		}
 		else
 		{
 			//let index = SearchEngine.findByRinfo( rinfo, this.clients );
-			//this.clients[ index ][ decoded.callback ]();
+			//this.clients[ index ][ decoded.instruction.callback ]();
 		}
 	}
 }

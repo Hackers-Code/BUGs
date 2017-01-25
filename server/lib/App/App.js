@@ -9,14 +9,13 @@ class App {
 		this.startTCP = options.tcpStart;
 		this.startUDP = options.udpStart;
 		this.startHTTP = options.httpStart;
-		this.logger = new Logger( this.config.logFile, this.config.errorFile );
-		this.tasksStorage = new TasksStorage( this.config.tickrate );
-		this.roomsStorage = new RoomsStorage( this.logger, this.udpSend, this.tasksStorage );
-		this.clientsStorage = new ClientsStorage( this.config.maxClients, this.udpSend, this.roomsStorage );
 		this.runTCP();
 		this.runUDP();
+		this.logger = new Logger( this.config.logFile, this.config.errorFile );
+		this.tasksStorage = new TasksStorage( this.config.tickrate );
+		this.roomsStorage = new RoomsStorage( this.logger, this.tasksStorage );
+		this.clientsStorage = new ClientsStorage( this.config.maxClients, this.roomsStorage );
 		this.startHTTP();
-		this.udpSend = () => {};
 	}
 
 	runTCP()
@@ -36,9 +35,9 @@ class App {
 
 	runUDP()
 	{
-		this.startUDP( this.config.UDP_port, ( msg, rinfo ) =>
+		this.startUDP( this.config.UDP_port, ( msg, rinfo, send ) =>
 		{
-			this.clientsStorage.parseUDP( msg, rinfo );
+			this.clientsStorage.parseUDP( msg, rinfo, send );
 		}, ( err ) =>
 		{
 			this.logger.error( err.message );

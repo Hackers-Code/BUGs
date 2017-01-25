@@ -4,10 +4,9 @@ const UniqueNameStorage = require( '../Utils/UniqueNameStorage' );
 const SearchEngine = require( '../Utils/SearchEngine' );
 const Room = require( './Room' );
 class RoomsStorage {
-	constructor( logger, udpSend, tasksStorage )
+	constructor( logger, tasksStorage )
 	{
 		this.logger = logger;
-		this.udpSend = udpSend;
 		this.tasksStorage = tasksStorage;
 		this.availableGamesResponse = null;
 		this.rooms = [];
@@ -86,7 +85,7 @@ class RoomsStorage {
 				this.tasksStorage.removeTask( element );
 			} );
 			this.uniqueKeyGenerator.freeKey( this.rooms[ room ].id );
-			this.uniqueNameStorage.removeName( this.rooms[ room ].name );;;
+			this.uniqueNameStorage.removeName( this.rooms[ room ].name );
 			this.rooms.splice( room, 1 );
 			return true;
 		}
