@@ -42,6 +42,11 @@ class Room {
 		} );
 	}
 
+	getGame()
+	{
+		return this.game;
+	}
+
 	getTasksStorage()
 	{
 		return this.tasksStorage;
@@ -59,7 +64,6 @@ class Room {
 			if( this.admin.compare( id ) === 0 )
 			{
 				this.roomsStorage.removeRoom( this.id );
-				this.game = null;
 				let adminIndex = SearchEngine.findByUniqueID( id, this.players );
 				if( adminIndex !== false && adminIndex !== -1 )
 				{
@@ -96,7 +100,6 @@ class Room {
 				this.players.splice( index, 1 );
 				if( this.players.length === 0 )
 				{
-					this.game = null;
 					this.roomsStorage.removeRoom( this.id );
 				}
 			}

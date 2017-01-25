@@ -22,6 +22,11 @@ class Game {
 		this.updateWormsList();
 	}
 
+	stop()
+	{
+		this.running = false;
+	}
+
 	setPhysics( physics )
 	{
 		this.gravity = physics.gravity;
@@ -78,10 +83,6 @@ class Game {
 
 	updateTurn()
 	{
-		if( !this.running )
-		{
-			return;
-		}
 		this.timeleft -= ((new Date().getTime() - this.lastClockTime) / 1000);
 		this.lastClockTime = new Date().getTime();
 		if( this.timeleft <= 0 )
@@ -94,7 +95,10 @@ class Game {
 			this.whoseTurn();
 			return;
 		}
-		this.updateTurnTimer = setTimeout( this.updateTurn.bind( this ), 500 );
+		if( this.running )
+		{
+			setTimeout( this.updateTurn.bind( this ), 500 );
+		}
 	}
 
 	whoseTurn()
@@ -129,10 +133,6 @@ class Game {
 
 	update()
 	{
-		if( !this.running )
-		{
-			return;
-		}
 		let diffTime = new Date().getTime() - this.lastFrameTime;
 		if( diffTime >= 1000 / this.maxFramesPerSecond )
 		{
@@ -140,11 +140,14 @@ class Game {
 			{
 				element.update( diffTime );
 			} );
-			this.frames++;
+			this.frame++;
 			this.updateWormsList();
 			this.lastFrameTime = new Date().getTime();
 		}
-		setImmediate( this.update.bind( this ) );
+		if( this.running )
+		{
+			setImmediate( this.update.bind( this ) );
+		}
 	}
 
 	updateWormsList()

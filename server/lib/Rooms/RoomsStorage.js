@@ -75,6 +75,8 @@ class RoomsStorage {
 		let room = SearchEngine.findByUniqueID( id, this.rooms );
 		if( room !== false && room !== -1 )
 		{
+			let game = this.rooms[ room ].getGame();
+			game.stop();
 			this.rooms[ room ].tasks.forEach( ( element ) =>
 			{
 				this.tasksStorage.removeTask( element );

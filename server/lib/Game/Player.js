@@ -63,7 +63,6 @@ class Player {
 		for( let i = 0 ; i < this.worms.length ; i++ )
 		{
 			let worm = this.worms[ i ];
-			console.log( worm );
 			if( worm.speedY < 0 )
 			{
 			}
