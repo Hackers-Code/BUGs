@@ -112,7 +112,7 @@ float deltagamelist=120;
 
 //zmienne do lobby
 string lobbyname;
-sf::Text lobbynamet, ainfo[4], vxmaxtext, vymaxtext, aytext, vjumptext;
+sf::Text lobbynamet, ainfo[4], vxmaxtext, vymaxtext, aytext, vjumptext, mapnamet;
 sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2, advancedt, plreadyt[2], maskrt, masklt;
 sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys, advanceds, plreadys[2], mapthumb, maskchoose, maskrs, maskls, mapls, maprs;
 int playersamount=2, playersready=0, choosedmap=0;
@@ -588,7 +588,8 @@ bool protocol39(){return 1;
 }
 
 class metamap{public:
-    string id, author, name, thumbnail, map_file, version, last_update, created;
+    string ids, author, name, thumbnail, map_file, version, last_update, created;
+    int id;
     sf::Texture thumbnailt;
 
     bool loadFromHTTP(string ipin, unsigned short portin){
@@ -631,7 +632,8 @@ bool getMapsFromServer(string ipin, unsigned short portin){
         vector<json> mapvector=jslist["list"].get<vector<json>>();
         for(int i=0; i<mapvector.size(); i++){
             metamaps.push_back(metamap());
-            metamaps[i].id=mapvector[i]["id"].get<string>();
+            metamaps[i].ids=mapvector[i]["id"].get<string>();
+            metamaps[i].id=atoi(metamaps[i].ids.c_str());
             metamaps[i].author=mapvector[i]["author"].get<string>();
             metamaps[i].name=mapvector[i]["name"].get<string>();
             metamaps[i].thumbnail=mapvector[i]["thumbnail"].get<string>();
@@ -640,7 +642,10 @@ bool getMapsFromServer(string ipin, unsigned short portin){
             metamaps[i].last_update=mapvector[i]["last_update"].get<string>();
             metamaps[i].created=mapvector[i]["created"].get<string>();
             metamaps[i].loadFromHTTP(ipin, portin);
-            if(!i) mapthumb.setTexture(metamaps[0].thumbnailt, 1);
+            if(!i){
+                mapthumb.setTexture(metamaps[0].thumbnailt, 1);
+                mapnamet.setString(metamaps[0].name);
+            }
         }
         return 1;
     }else{
@@ -651,7 +656,6 @@ bool getMapsFromServer(string ipin, unsigned short portin){
 
 sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints, string ipin, unsigned short portin){
     spawnpoints.clear();
-    fstream plik;
     sf::Image output;
     if(!track.length()){
         cout<<"loadMap("") called\n";
@@ -668,23 +672,24 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints, string ipin, un
         int width=0, height=0, uintbuffer[8];
         sf::Color solid(80, 100, 0);
         for(int i=0; i<4; i++){
-            if(!buffer[i]){
-                cout<<track<<"`s metadata broken\n";
+            if(i>=buffer.size()){
+                cout<<track<<"'s metadata broken\n";
                 return output;
             }
             width=width<<8;
             width+=(unsigned char)buffer[i];
         }
         for(int i=4; i<8; i++){
-            if(!buffer[i]){
-                cout<<track<<"`s metadata broken\n";
+            if(i>=buffer.size()){
+                cout<<track<<"'s metadata broken\n";
                 return output;
             }
             height=height<<8;
             height+=buffer[i];
         }
         output.create(width, height, sf::Color(0,0,0,0));
-        while(plik>>noskipws>>ch){
+        for(int i=8; i<buffer.size(); i++){
+            ch=buffer[i];
             if(structure==1){
                 uintbuffer[(to_load)/4]=uintbuffer[(to_load)/4]<<8;
                 uintbuffer[(to_load)/4]+=ch;
@@ -922,13 +927,16 @@ int main(){
         for(int i=0; i<10; i++){
             maskt[i].loadFromFile("img/mask_ingame/"+to_string(i)+".png");
         }
-        maskchoose.setTexture(maskchooset[choosedmask]);
         maskchoose.setPosition(990, 10);
         mapthumb.setPosition(270, 210);
         mapls.setTexture(masklt);
         maprs.setTexture(maskrt);
         mapls.setPosition(270, 180);
         maprs.setPosition(300, 180);
+        mapnamet.setFont(mainfont);
+        mapnamet.setColor(normalclr);
+        mapnamet.setCharacterSize(12);
+        mapnamet.setPosition(330, 180);
         info[0].setString("ip");
         info[0].setPosition(150,8);
         info[1].setString("port");
@@ -1420,15 +1428,17 @@ int main(){
                         else choosedmask--;
                         maskchoose.setTexture(maskchooset[choosedmask], 1);
                     }else
-                    if((event.mouseButton.x>=maprs.getPosition().x)&&(event.mouseButton.x<=maprs.getPosition().x+maprs.getLocalBounds().width)&&(event.mouseButton.y>=maprs.getPosition().y)&&(event.mouseButton.y<=maprs.getPosition().y+maprs.getLocalBounds().height)){
+                    if((changingsettings)&&(event.mouseButton.x>=maprs.getPosition().x)&&(event.mouseButton.x<=maprs.getPosition().x+maprs.getLocalBounds().width)&&(event.mouseButton.y>=maprs.getPosition().y)&&(event.mouseButton.y<=maprs.getPosition().y+maprs.getLocalBounds().height)){
                         choosedmap++;
                         if(choosedmap>=metamaps.size())choosedmap=0;
                         mapthumb.setTexture(metamaps[choosedmap].thumbnailt, 1);
+                        mapnamet.setString(metamaps[choosedmap].name);
                     }else
-                    if((event.mouseButton.x>=mapls.getPosition().x)&&(event.mouseButton.x<=mapls.getPosition().x+mapls.getLocalBounds().width)&&(event.mouseButton.y>=mapls.getPosition().y)&&(event.mouseButton.y<=mapls.getPosition().y+mapls.getLocalBounds().height)){
+                    if((changingsettings)&&(event.mouseButton.x>=mapls.getPosition().x)&&(event.mouseButton.x<=mapls.getPosition().x+mapls.getLocalBounds().width)&&(event.mouseButton.y>=mapls.getPosition().y)&&(event.mouseButton.y<=mapls.getPosition().y+mapls.getLocalBounds().height)){
                         if(!choosedmap) choosedmap=metamaps.size()-1;
                         else choosedmap--;
                         mapthumb.setTexture(metamaps[choosedmap].thumbnailt, 1);
+                        mapnamet.setString(metamaps[choosedmap].name);
                     }else
                     if((event.mouseButton.x>=okrgbm.getPosition().x)&&(event.mouseButton.x<=okrgbm.getPosition().x+okrgbm.getLocalBounds().width)&&(event.mouseButton.y>=okrgbm.getPosition().y)&&(event.mouseButton.y<=okrgbm.getPosition().y+okrgbm.getLocalBounds().height)){
                         protocol2a(yourcolordisplay.getFillColor(), choosedmask);
@@ -1689,7 +1699,7 @@ int main(){
                         if(i<received){
                             if(data[i]){
                                 cout<<"physic accepted\n"<<char(7);
-                                protocol24(atoi(metamaps[choosedmap].id.c_str()), playersamount);
+                                protocol24(metamaps[choosedmap].id, playersamount);
                             }else{
                                 cout<<"physic denied\n";
                             }
@@ -1779,13 +1789,20 @@ int main(){
                         break;
                     }
                     if(data[i]==0x33){
-                        cout<<"your turn\n";
                         i++;
                         if(i<received){
                             if(data[i]<wormpointers.size()){
                                 currentworm=wormpointers[data[i]];
-                            }else cout<<"wrong worm id: "+to_string(int(data[i]))+"\n";
-                        }else cout<<"lost response 0x19\n";
+                                i++;
+                                if(i<received){
+                                    if(data[i]<playersamount){
+                                        for(int j=0; j<playersamount; j++)
+                                            if(players[j].id==data[i]) cout<<players[j].name<<"'s turn\n";
+                                        if((*currentworm).team!=data[i-1]) cout<<"current worm doesn't belong to current player\n";
+                                    }else cout<<"there is no player with id="<<int(data[i])<<"\n";
+                                }else cout<<"lost worm id\n";
+                            }else cout<<"wrong worm id: "<<int(data[i])<<"\n";
+                        }else cout<<"lost response 0x33\n";
                         continue;
                     }
                     if(data[i]==0x35){
@@ -2002,7 +2019,19 @@ int main(){
                         protbufferi[4]+=data[i];
                     }else
                     if(to_receive==1){
-                        choosedmap=protbufferi[0];
+                        bool mapexistsf=0;
+                        for(int i=0; i<metamaps.size(); i++){
+                            if(metamaps[i].id==protbufferi[0]){
+                                choosedmap=i;
+                                mapexistsf=1;
+                                break;
+                            }
+                        }
+                        if(!mapexistsf){
+                            cout<<"there is no map with id "<<protbufferi[0]<<"\n";
+                        }
+                        mapthumb.setTexture(metamaps[choosedmap].thumbnailt, 1);
+                        mapnamet.setString(metamaps[choosedmap].name);
                         ay=protbufferi[1];
                         vjump=-protbufferi[2];
                         vymax=protbufferi[3];
@@ -2768,6 +2797,7 @@ int main(){
             window.draw(mapthumb);
             window.draw(mapls);
             window.draw(maprs);
+            window.draw(mapnamet);
             window.draw(maskrs);
             window.draw(maskls);
             window.draw(maskchoose);
