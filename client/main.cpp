@@ -9,7 +9,7 @@
 #include <SFML/Network.hpp>
 #include <SFML/Audio.hpp>
 #include <unordered_map>
-#include "json.hpp"
+#include "lib/json.hpp"
 
 #define INFO_AMOUNT 11
 
@@ -90,8 +90,8 @@ bool connect(string ip, string port){
 sf::RenderWindow window(sf::VideoMode(1200, 720), "worms");
 sf::Event event;
 sf::Color bgcolor(40,40,40), checkedclr(0,255,255), normalclr(0,255,0), yourcolor(0,0,0);
-sf::Texture inputbart, binputbart, okt, bgplanet, reloadgamelistt, soundicont, soundbart, soundpointert, colorpointert, colorbart[3], maskt[10], maskchooset[10], maskrt, masklt;
-sf::Sprite  inputbars, binputbars, okconnects, oknicks, okcreaterooms, okrgbm, bgplanes, reloadgamelists, soundicons, soundbars, soundpointers, colorpointers[3], colorbars[3], maskchoose, maskrs, maskls;
+sf::Texture inputbart, binputbart, okt, bgplanet, reloadgamelistt, soundicont, soundbart, soundpointert, colorpointert, colorbart[3], maskt[10], maskchooset[10];
+sf::Sprite  inputbars, binputbars, okconnects, oknicks, okcreaterooms, okrgbm, bgplanes, reloadgamelists, soundicons, soundbars, soundpointers, colorpointers[3], colorbars[3];
 sf::Image bgplanei;
 sf::Font mainfont;
 sf::Text info[INFO_AMOUNT], ipinput, portinput, nickinput, roomnameinput, passwordinput;
@@ -113,8 +113,8 @@ float deltagamelist=120;
 //zmienne do lobby
 string lobbyname;
 sf::Text lobbynamet, ainfo[4], vxmaxtext, vymaxtext, aytext, vjumptext;
-sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2, advancedt, plreadyt[2];
-sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys, advanceds, plreadys[2], mapthumb;
+sf::Texture lobbyoutt, checkboxon, checkboxoff, ready1, ready2, advancedt, plreadyt[2], maskrt, masklt;
+sf::Sprite  lobbyouts, cb2players, cb3players, cb4players, oksettings, readys, advanceds, plreadys[2], mapthumb, maskchoose, maskrs, maskls, mapls, maprs;
 int playersamount=2, playersready=0, choosedmap=0;
 bool ready=0, changingsettings=0, advancedb=0;
 list<sf::Vector2u> spawnpoints;
@@ -278,7 +278,7 @@ class player{public:
         namet.setString(namein);
         namet.setCharacterSize(12);
         namet.setColor(color);
-        namet.setPosition(0,90+id*40);
+        namet.setPosition(0,60+id*40);
         namet.setFont(mainfont);
 
         sf::Image image;
@@ -286,7 +286,7 @@ class player{public:
         hpbart.loadFromImage(image);
         hpbars.setTexture(hpbart,1);
         hpbars.setScale(hp, 10);
-        hpbars.setPosition(0, 120+40*id);
+        hpbars.setPosition(0, 90+40*id);
     }
 
     bool addworm(worm newworm){
@@ -545,10 +545,8 @@ void protocol2e(){
 
 void protocol31(){
     if(connected){
-        unsigned char to_send[3];
+        unsigned char to_send[1];
         to_send[0]=0x31;
-        to_send[1]=(udpport>>8)%256;
-        to_send[2]=udpport%256;
         if(clientsocket.send(to_send, 3)==sf::Socket::Done){
         }else cout<<"sending error 0x31\n";
     }else cout<<"not connected, cannot get turn time\n";
@@ -642,6 +640,7 @@ bool getMapsFromServer(string ipin, unsigned short portin){
             metamaps[i].last_update=mapvector[i]["last_update"].get<string>();
             metamaps[i].created=mapvector[i]["created"].get<string>();
             metamaps[i].loadFromHTTP(ipin, portin);
+            if(!i) mapthumb.setTexture(metamaps[0].thumbnailt, 1);
         }
         return 1;
     }else{
@@ -925,6 +924,11 @@ int main(){
         }
         maskchoose.setTexture(maskchooset[choosedmask]);
         maskchoose.setPosition(990, 10);
+        mapthumb.setPosition(270, 210);
+        mapls.setTexture(masklt);
+        maprs.setTexture(maskrt);
+        mapls.setPosition(270, 180);
+        maprs.setPosition(300, 180);
         info[0].setString("ip");
         info[0].setPosition(150,8);
         info[1].setString("port");
@@ -940,7 +944,7 @@ int main(){
         info[6].setString("game name");
         info[6].setPosition(158, 98);
         info[7].setString("players");
-        info[7].setPosition(0,68);
+        info[7].setPosition(0,38);
         info[8].setString("2");
         info[8].setPosition(20,98);
         info[9].setString("3");
@@ -1416,6 +1420,16 @@ int main(){
                         else choosedmask--;
                         maskchoose.setTexture(maskchooset[choosedmask], 1);
                     }else
+                    if((event.mouseButton.x>=maprs.getPosition().x)&&(event.mouseButton.x<=maprs.getPosition().x+maprs.getLocalBounds().width)&&(event.mouseButton.y>=maprs.getPosition().y)&&(event.mouseButton.y<=maprs.getPosition().y+maprs.getLocalBounds().height)){
+                        choosedmap++;
+                        if(choosedmap>=metamaps.size())choosedmap=0;
+                        maskchoose.setTexture(maskchooset[choosedmask], 1);
+                    }else
+                    if((event.mouseButton.x>=mapls.getPosition().x)&&(event.mouseButton.x<=mapls.getPosition().x+mapls.getLocalBounds().width)&&(event.mouseButton.y>=mapls.getPosition().y)&&(event.mouseButton.y<=mapls.getPosition().y+mapls.getLocalBounds().height)){
+                        if(!choosedmap) choosedmap=metamaps.size()-1;
+                        else choosedmap--;
+                        maskchoose.setTexture(maskchooset[choosedmask], 1);
+                    }else
                     if((event.mouseButton.x>=okrgbm.getPosition().x)&&(event.mouseButton.x<=okrgbm.getPosition().x+okrgbm.getLocalBounds().width)&&(event.mouseButton.y>=okrgbm.getPosition().y)&&(event.mouseButton.y<=okrgbm.getPosition().y+okrgbm.getLocalBounds().height)){
                         protocol2a(yourcolordisplay.getFillColor(), choosedmask);
                     }
@@ -1700,7 +1714,7 @@ int main(){
                     if(data[i]==0x27){
                         receiving=0x27;
                         deltareceive=i+1;
-                        to_receive=5;
+                        to_receive=2;
                         protbufferi[2]=0;
                         passwordinput.setString(protbuffers[0]);
                         for(list<gamelistelements>::iterator i=gamelist.begin(); i!=gamelist.end(); ++i){
@@ -1941,7 +1955,7 @@ int main(){
             }else
             if(receiving==0x27){
                 for(int i=deltareceive; ((i<received)||(to_receive>0)); i++){
-                    if(to_receive==5){
+                    if(to_receive==2){
                         if(data[i]){
                             cout<<"joined\n"<<char(7);
                             mode=lobby;
@@ -1953,15 +1967,15 @@ int main(){
                         }
                     }
                     else{
-                        protbufferi[2]=protbufferi[2]<<8;
-                        protbufferi[2]+=data[i];
+                        protbufferi[2]=data[i];
                     }
 
                     to_receive--;
                 }
                 deltareceive=0;
                 if(!to_receive){
-                    choosedmap=protbufferi[2];
+                    myid=protbufferi[2];
+                    cout<<"your id="<<myid;
                     receiving=0;
                 }
             }else
@@ -2751,6 +2765,9 @@ int main(){
             }
         }else
         if(mode==lobby){
+            window.draw(mapthumb);
+            window.draw(mapls);
+            window.draw(maprs);
             window.draw(maskrs);
             window.draw(maskls);
             window.draw(maskchoose);
