@@ -7,7 +7,6 @@ const Status = {
 	inGame : 3
 };
 const SearchEngine = require( '../Utils/SearchEngine' );
-const TasksStorage = require( '../Tasks/TasksStorage' );
 const Game = require( '../Game/Game' );
 const Player = require( '../Game/Player' );
 const MapInterface = require( '../MapInterface/MapInterface' );
@@ -20,7 +19,6 @@ class Room {
 		this.admin = client.id;
 		this.roomsStorage = roomsStorage;
 		this.logger = roomsStorage.getLogger();
-		this.udpSend = roomsStorage.getUDPSend();
 		this.tasksStorage = roomsStorage.getTasksStorage();
 		this.players = [];
 		this.playersID = 0;
@@ -259,13 +257,19 @@ class Room {
 		this.tasks.push( this.tasksStorage.addTask( () =>
 		{
 			let data = this.game.getWorms();
-			console.log( data );
+			this.players.forEach( ( element ) =>
+			{
+				element.send( data, 'UDP' );
+			} );
 		} ) );
 
 		this.tasks.push( this.tasksStorage.addTask( () =>
 		{
 			let data = this.game.getTimeLeft();
-			console.log( data );
+			this.players.forEach( ( element ) =>
+			{
+				element.send( data, 'UDP' );
+			} );
 		} ) );
 		setTimeout( this.game.start.bind( this.game ), 3000 );
 	}

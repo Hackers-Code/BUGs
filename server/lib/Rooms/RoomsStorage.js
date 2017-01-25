@@ -19,11 +19,6 @@ class RoomsStorage {
 		return this.logger;
 	}
 
-	getUDPSend()
-	{
-		return this.udpSend;
-	}
-
 	getTasksStorage()
 	{
 		return this.tasksStorage;

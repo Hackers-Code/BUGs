@@ -56,6 +56,7 @@ class Client {
 		}
 		else
 		{
+			console.log( encoded );
 			this.udpSend( encoded, this.rinfo.port, this.rinfo.address );
 		}
 

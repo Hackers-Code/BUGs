@@ -111,7 +111,7 @@ class Game {
 		let tick = Buffer.alloc( 4 );
 		tick.writeUInt32BE( this.frame, 0 );
 		return {
-			opcode : Buffer.from( [ 0x35 ] ),
+			opcode : 0x35,
 			seconds : Buffer.from( [ parseInt( this.timeleft ) ] ),
 			tick
 		};
@@ -154,7 +154,7 @@ class Game {
 		let count = Buffer.alloc( 4 );
 		count.writeUInt32BE( worms.length, 0 );
 		this.wormsList = {
-			opcode : Buffer.from( [ 0x32 ] ),
+			opcode : 0x32,
 			tick,
 			count,
 			worms

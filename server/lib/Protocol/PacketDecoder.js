@@ -39,6 +39,7 @@ class PacketDecoder {
 			}
 			else
 			{
+				console.log( buffer );
 				throw new Error( 0xe0 );
 			}
 		}
