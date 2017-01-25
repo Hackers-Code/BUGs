@@ -46,7 +46,10 @@ module.exports = {
 
 	},
 	0x27 : {
-		params : { status : 1 }
+		params : {
+			status : 1,
+			player_id : 1
+		}
 
 	},
 	0x29 : {

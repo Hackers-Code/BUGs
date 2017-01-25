@@ -77,7 +77,6 @@ class Client {
 		try
 		{
 			let buffer = this.streamParser.getBuffer();
-			console.log( buffer );
 			let decoded = this.packetDecoder.decode( buffer );
 			if( decoded === false )
 			{
@@ -210,7 +209,9 @@ class Client {
 			{
 				this.room = room;
 				this.status = ClientStatus.inLobby;
-				return Client.fromBool( true );
+				let retval = Client.fromBool( true );
+				retval.player_id = Buffer.from( [ this.player.playerID ] );
+				return retval;
 			}
 		}
 		return Client.fromBool( false );
