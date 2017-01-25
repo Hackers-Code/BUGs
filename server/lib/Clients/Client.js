@@ -15,6 +15,7 @@ class Client {
 		this.clientsStorage = clientsStorage;
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.roomsStorage = clientsStorage.getRoomsStorage();
+		this.udpSend = clientsStorage.getUDPsend();
 		this.write = write;
 
 		this.streamParser = new StreamParser();
@@ -23,7 +24,7 @@ class Client {
 
 		this.status = ClientStatus.connected;
 		this.name = this.uniqueNameStorage.getDefault();
-		this.udp = null;
+		this.rinfo = null;
 		this.room = null;
 		this.player = null;
 	}
@@ -36,7 +37,7 @@ class Client {
 		} );
 	}
 
-	send( data )
+	send( data, type = 'TCP' )
 	{
 		let encoded = this.packetEncoder.encode( data );
 		if( encoded === false )
@@ -49,7 +50,15 @@ class Client {
 			} ) );
 			return;
 		}
-		this.write( encoded );
+		if( type === 'TCP' )
+		{
+			this.write( encoded );
+		}
+		else
+		{
+			this.udpSend( encoded, this.rinfo.port, this.rinfo.address );
+		}
+
 	}
 
 	getCallbacks()
@@ -264,7 +273,7 @@ class Client {
 
 	setUDP( rinfo )
 	{
-		this.udp = rinfo;
+		this.rinfo = rinfo;
 	}
 
 	jump()

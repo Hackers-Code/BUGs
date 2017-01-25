@@ -26,11 +26,11 @@ const SearchEngine = {
 		}
 		return -1;
 	},
-	findByPortAndIP : ( address, array ) =>
+	findByRinfo : ( rinfo, array ) =>
 	{
 		for( let i = 0 ; i < array.length ; i++ )
 		{
-			if( address.port === array[ i ].port && address.address === array[ i ].address )
+			if( rinfo.port === array[ i ].rinfo.port && rinfo.address === array[ i ].rinfo.address )
 			{
 				return i;
 			}

@@ -10,15 +10,21 @@ const ServerInstructions = require( '../Protocol/ServerInstructions' );
 const ClientInstructions = require( '../Protocol/ClientInstructions' );
 class ClientsStorage {
 
-	constructor( maxClients, roomsStorage )
+	constructor( maxClients, udpSend, roomsStorage )
 	{
 		this.packetEncoder = new PacketEncoder( ServerInstructions );
 		this.packetDecoder = new PacketDecoder( ClientInstructions );
 		this.maxClients = maxClients;
 		this.roomsStorage = roomsStorage;
+		this.udpSend = udpSend;
 		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
+	}
+
+	getUDPsend()
+	{
+		return this.udpSend;
 	}
 
 	getUniqueNameStorage()
@@ -80,7 +86,6 @@ class ClientsStorage {
 
 	parseUDP( msg, rinfo )
 	{
-		console.log( this );
 		console.log( this.packetDecoder.decode( msg ) );
 		let index = SearchEngine.findByPortAndIP( rinfo, this.clients );
 	}
