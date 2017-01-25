@@ -82,7 +82,7 @@ class Room {
 		}
 		else
 		{
-			let index = SearchEngine.findByUniqueID( this.players, id );
+			let index = SearchEngine.findByUniqueID( id, this.players );
 			if( index !== false && index !== -1 )
 			{
 				this.players.splice( index, 1 );

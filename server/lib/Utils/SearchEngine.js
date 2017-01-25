@@ -25,6 +25,17 @@ const SearchEngine = {
 			}
 		}
 		return -1;
+	},
+	findByPortAndIP : ( address, array ) =>
+	{
+		for( let i = 0 ; i < array.length ; i++ )
+		{
+			if( address.port === array[ i ].port && address.address === array[ i ].address )
+			{
+				return i;
+			}
+		}
+		return -1;
 	}
 };
 module.exports = SearchEngine;

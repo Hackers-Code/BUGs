@@ -5,12 +5,15 @@ const Client = require( './Client' ).Client;
 const ClientStatus = require( './Client' ).ClientStatus;
 const SearchEngine = require( '../Utils/SearchEngine' );
 const PacketEncoder = require( '../Protocol/PacketEncoder' );
+const PacketDecoder = require( '../Protocol/PacketDecoder' );
 const ServerInstructions = require( '../Protocol/ServerInstructions' );
+const ClientInstructions = require( '../Protocol/ClientInstructions' );
 class ClientsStorage {
 
 	constructor( maxClients, roomsStorage )
 	{
 		this.packetEncoder = new PacketEncoder( ServerInstructions );
+		this.packetDecoder = new PacketDecoder( ClientInstructions );
 		this.maxClients = maxClients;
 		this.roomsStorage = roomsStorage;
 		this.clients = [];
@@ -75,9 +78,11 @@ class ClientsStorage {
 		return false;
 	}
 
-	parseUDP()
+	parseUDP( msg, rinfo )
 	{
-
+		console.log( this );
+		console.log( this.packetDecoder.decode( msg ) );
+		let index = SearchEngine.findByPortAndIP( rinfo, this.clients );
 	}
 }
 

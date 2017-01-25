@@ -81,7 +81,7 @@ class Game {
 		this.lastClockTime = new Date().getTime();
 		if( this.timeleft <= 0 )
 		{
-			this.players[ this.whoseTurnID ].response.send( {
+			this.players[ this.whoseTurnID ].send( {
 				opcode : 0x36
 			} );
 			this.players[ this.whoseTurnID ].isYourTurn = false;
