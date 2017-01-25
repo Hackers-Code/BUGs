@@ -7,10 +7,10 @@ class Worm {
 		this.hp = 200;
 		this.speedX = 0;
 		this.speedY = 0;
-		this.accelerationY = physics.gravity;
-		this.maxSpeedX = physics.maxSpeedX;
-		this.maxSpeedY = physics.maxSpeedY;
-		this.jumpHeight = physics.jumpHeight;
+		this.accelerationY = physics.gravity.readUInt16BE( 0 );
+		this.maxSpeedX = physics.maxSpeedX.readUInt16BE( 0 );
+		this.maxSpeedY = physics.maxSpeedY.readUInt16BE( 0 );
+		this.jumpHeight = physics.jumpHeight.readInt16BE( 0 );
 		this.owner = owner;
 		this.id = id;
 		this.width = 40;

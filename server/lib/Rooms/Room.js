@@ -42,6 +42,16 @@ class Room {
 		} );
 	}
 
+	getTasksStorage()
+	{
+		return this.tasksStorage;
+	}
+
+	getTasks()
+	{
+		return this.tasks;
+	}
+
 	leave( id )
 	{
 		if( this.status < Status.inGame )
@@ -86,6 +96,7 @@ class Room {
 				this.players.splice( index, 1 );
 				if( this.players.length === 0 )
 				{
+					this.game = null;
 					this.roomsStorage.removeRoom( this.id );
 				}
 			}
@@ -236,6 +247,7 @@ class Room {
 			count,
 			players
 		};
+
 		setTimeout( this.preparePlayersList.bind( this ), 1000 );
 	}
 

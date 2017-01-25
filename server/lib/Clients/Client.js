@@ -53,13 +53,13 @@ class Client {
 		{
 			if( encoded.readUInt8( 0 ) === 0x29 )
 			{
-				console.log( encoded );
+				//console.log( encoded );
 			}
 			this.write( encoded );
 		}
 		else
 		{
-			console.log( encoded );
+			//console.log( encoded );
 			this.udpSend( encoded, this.rinfo.port, this.rinfo.address );
 		}
 
@@ -79,7 +79,7 @@ class Client {
 		{
 			if( data.readUInt8( 0 ) === 0x24 )
 			{
-				console.log( data );
+				//console.log( data );
 			}
 			this.streamParser.appendData( data );
 		}

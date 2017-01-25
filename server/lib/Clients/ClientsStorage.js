@@ -80,7 +80,7 @@ class ClientsStorage {
 
 	parseUDP( msg, rinfo, send )
 	{
-		console.log( msg );
+		//console.log( msg );
 		let decoded = this.packetDecoder.decode( msg );
 		if( decoded.instruction.callback === 'setUDP' )
 		{

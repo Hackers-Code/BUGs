@@ -3,6 +3,7 @@ const World = require( '../World/World' );
 class Game {
 	constructor( players )
 	{
+		this.running = true;
 		this.players = players;
 		this.world = null;
 		this.timeleft = 60;
@@ -77,6 +78,10 @@ class Game {
 
 	updateTurn()
 	{
+		if( !this.running )
+		{
+			return;
+		}
 		this.timeleft -= ((new Date().getTime() - this.lastClockTime) / 1000);
 		this.lastClockTime = new Date().getTime();
 		if( this.timeleft <= 0 )
@@ -89,7 +94,7 @@ class Game {
 			this.whoseTurn();
 			return;
 		}
-		setTimeout( this.updateTurn.bind( this ), 500 );
+		this.updateTurnTimer = setTimeout( this.updateTurn.bind( this ), 500 );
 	}
 
 	whoseTurn()
@@ -107,6 +112,7 @@ class Game {
 		this.players[ this.whoseTurnID ].isYourMove = true;
 		this.timeleft = 60;
 		this.lastClockTime = new Date().getTime();
+
 		this.updateTurn();
 	}
 
@@ -123,6 +129,10 @@ class Game {
 
 	update()
 	{
+		if( !this.running )
+		{
+			return;
+		}
 		let diffTime = new Date().getTime() - this.lastFrameTime;
 		if( diffTime >= 1000 / this.maxFramesPerSecond )
 		{
