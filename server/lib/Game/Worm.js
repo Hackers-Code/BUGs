@@ -25,6 +25,30 @@ class Worm {
 		}
 	}
 
+	moveRight()
+	{
+		if( this.speedX === 0 )
+		{
+			this.speedX = this.maxSpeedX;
+		}
+		else
+		{
+			this.speedX = 0;
+		}
+	}
+
+	moveLeft()
+	{
+		if( this.speedX === 0 )
+		{
+			this.speedX = -this.maxSpeedX;
+		}
+		else
+		{
+			this.speedX = 0;
+		}
+	}
+
 	getWormState()
 	{
 		let owner = Buffer.alloc( 1 );

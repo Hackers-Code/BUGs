@@ -83,5 +83,17 @@ module.exports = {
 	0x31 : {
 		params : {},
 		callback : 'mapLoaded'
+	},
+	0x37 : {
+		params : {},
+		callback : 'jump'
+	},
+	0x38 : {
+		params : {},
+		callback : 'switchMoveLeft'
+	},
+	0x39 : {
+		params : {},
+		callback : 'switchMoveRight'
 	}
 };

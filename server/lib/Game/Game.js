@@ -113,7 +113,7 @@ class Game {
 				player_id : Buffer.from( [ this.whoseTurnID ] )
 			} );
 		} );
-		this.players[ this.whoseTurnID ].isYourMove = true;
+		this.players[ this.whoseTurnID ].isYourTurn = true;
 		this.timeleft = 60;
 		this.lastClockTime = new Date().getTime();
 

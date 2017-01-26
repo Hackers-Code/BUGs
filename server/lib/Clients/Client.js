@@ -290,25 +290,25 @@ class Client {
 
 	jump()
 	{
-		if( this.room !== null && this.isYourMove === true )
+		if( this.player !== null )
 		{
-			this.room.jump();
+			this.player.jump();
 		}
 	}
 
 	switchMoveLeft()
 	{
-		if( this.room !== null && this.isYourMove === true )
+		if( this.player !== null )
 		{
-			this.room.switchMoveLeft();
+			this.player.moveLeft();
 		}
 	}
 
 	switchMoveRight()
 	{
-		if( this.room !== null && this.isYourMove === true )
+		if( this.player !== null )
 		{
-			this.room.switchMoveRight();
+			this.player.moveRight();
 		}
 	}
 }
