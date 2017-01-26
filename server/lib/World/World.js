@@ -48,14 +48,14 @@ class World {
 	{
 		if( x < 0 )
 		{
-			return true;
+			return 0;
 		}
 		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let block = this.blocks[ i ];
 			if( (y >= block.y) && (y <= block.y + block.height) && ( x <= block.x ) && ( x >= block.x + block.width) )
 			{
-				return true;
+				return block.x + block.width;
 			}
 		}
 		return false;
@@ -65,14 +65,14 @@ class World {
 	{//(((block.y>=y)&&(block.y<=y+worm.height))||((block.y<y)&&(block.y+block.width>y)))
 		if( x + width > this.width )
 		{
-			return true;
+			return this.width;
 		}
 		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let block = this.blocks[ i ];
 			if( (y >= block.y) && (y <= block.y + block.height) && (x + width >= block.x ) && ( x + width <= block.x + block.width) )
 			{
-				return true;
+				return block.x;
 			}
 		}
 		return false;
@@ -82,14 +82,14 @@ class World {
 	{
 		if( y < 0 )
 		{
-			return true;
+			return 0;
 		}
 		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let block = this.blocks[ i ];
 			if( (y >= block.y) && (y <= block.y + block.height) && ( x >= block.x ) && ( x <= block.x + block.width) )
 			{
-				return true;
+				return block.y + block.height;
 			}
 		}
 		return false;
@@ -99,14 +99,14 @@ class World {
 	{
 		if( y + height > this.height )
 		{
-			return true;
+			return this.height;
 		}
 		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let block = this.blocks[ i ];
 			if( (y + height <= block.y + block.height) && (y + height >= block.y) && ( x >= block.x ) && ( x <= block.x + block.width) )
 			{
-				return true;
+				return block.y;
 			}
 		}
 		return false;

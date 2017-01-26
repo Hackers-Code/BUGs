@@ -1,4 +1,5 @@
 const Worm = require( './Worm' );
+const SearchEngine = require( '../Utils/SearchEngine' );
 class Player {
 	constructor( client, playerID )
 	{
@@ -31,7 +32,7 @@ class Player {
 	chooseWorm()
 	{
 		let retval = this.actualWorm;
-		this.actualWorm = this.actualWorm + 1 % this.worms.length;
+		this.actualWorm = ( this.actualWorm + 1 ) % this.worms.length;
 		return retval;
 	}
 
@@ -65,33 +66,33 @@ class Player {
 			let worm = this.worms[ i ];
 			if( worm.speedX > 0 )
 			{
-				console.log( 'moving right' );
-				console.log( worm.x );
-				console.log( worm.speedX );
-				if( this.world.checkCollisionLeft( worm.y, worm.x ) )
+				let collision = this.world.checkCollisionLeft( worm.y, worm.x );
+				if( collision !== false )
 				{
+					worm.x = collision;
 					worm.speedX = 0;
 				}
 			}
 			else if( worm.speedX < 0 )
 			{
-				console.log( 'moving left' );
-				console.log( worm.x );
-				console.log( worm.speedX );
-				if( this.world.checkCollisionRight( worm.y, worm.x, worm.width ) )
+				let collision = this.world.checkCollisionRight( worm.y, worm.x, worm.width );
+				if( collision !== false )
 				{
+					worm.x = collision;
 					worm.speedX = 0;
 				}
 			}
 			worm.x += worm.speedX * (diffTime / 1000);
 			if( worm.speedY < 0 )
 			{
-				if( this.world.checkCollisionTop( worm.y, worm.x ) )
+				let collision = this.world.checkCollisionTop( worm.y, worm.x );
+				if( collision !== false )
 				{
+					worm.y = collision;
 					worm.speedY = 0;
 				}
 			}
-			if( !this.world.checkCollisionBottom( worm.y, worm.height, worm.x ) )
+			if( this.world.checkCollisionBottom( worm.y, worm.height, worm.x ) === false )
 			{
 				worm.speedY += worm.accelerationY * (diffTime / 1000);
 				if( worm.speedY > worm.maxSpeedY )
@@ -117,7 +118,8 @@ class Player {
 	{
 		if( this.isYourTurn )
 		{
-			this.worms[ this.actualWorm ].jump();
+			let index = SearchEngine.findByNumericId( this.actualWorm, this.worms );
+			this.worms[ index ].jump();
 		}
 	}
 
@@ -125,7 +127,8 @@ class Player {
 	{
 		if( this.isYourTurn )
 		{
-			this.worms[ this.actualWorm ].moveLeft();
+			let index = SearchEngine.findByNumericId( this.actualWorm, this.worms );
+			this.worms[ index ].moveLeft();
 		}
 	}
 
@@ -133,7 +136,8 @@ class Player {
 	{
 		if( this.isYourTurn )
 		{
-			this.worms[ this.actualWorm ].moveRight();
+			let index = SearchEngine.findByNumericId( this.actualWorm, this.worms );
+			this.worms[ index ].moveRight();
 		}
 	}
 }
