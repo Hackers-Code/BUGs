@@ -556,14 +556,9 @@ bool protocol37(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x37;
-        if(udpsocket.send(to_send, 1, serverip, udpport)==sf::Socket::Done){
-            udpport=udpsocket.getLocalPort();
-            serverip=clientsocket.getRemoteAddress();
-            return 1;
-        }else cout<<"sending error 0x37\n";
+        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x37\n";
+        else return 1;
     }else cout<<"not connected, can not jump\n";
-        udpport=udpsocket.getLocalPort();
-        serverip=clientsocket.getRemoteAddress();
     return 0;
 }
 
@@ -571,14 +566,9 @@ bool protocol38(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x38;
-        if(udpsocket.send(to_send, 1, serverip, udpport)==sf::Socket::Done){
-            udpport=udpsocket.getLocalPort();
-            serverip=clientsocket.getRemoteAddress();
-            return 1;
-        }else cout<<"sending error 0x38\n";
+        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x38\n";
+        else return 1;
     }else cout<<"not connected, can not move\n";
-        udpport=udpsocket.getLocalPort();
-        serverip=clientsocket.getRemoteAddress();
     return 0;
 }
 
@@ -586,13 +576,9 @@ bool protocol39(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x39;
-        if(udpsocket.send(to_send, 1, serverip, udpport)==sf::Socket::Done){
-            udpport=udpsocket.getLocalPort();
-            serverip=clientsocket.getRemoteAddress();return 1;
-        }else cout<<"sending error 0x39\n";
+        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x39\n";
+        else return 1;
     }else cout<<"not connected, can not move\n";
-        udpport=udpsocket.getLocalPort();
-        serverip=clientsocket.getRemoteAddress();
     return 0;
 }
 
