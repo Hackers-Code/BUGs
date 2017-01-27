@@ -1,5 +1,4 @@
 const Worm = require( './Worm' );
-const SearchEngine = require( '../Utils/SearchEngine' );
 class Player {
 	constructor( client, playerID )
 	{
@@ -18,7 +17,6 @@ class Player {
 			B : Buffer.from( [ 0 ] )
 		};
 		this.mask = Buffer.from( [ 0 ] );
-		this.udp = client.udp;
 		this.isYourTurn = false;
 		this.world = null;
 	}
@@ -37,10 +35,10 @@ class Player {
 
 	setProperties( data )
 	{
-		this.colour.R = Buffer.from( [ data.colourR ] );
-		this.colour.G = Buffer.from( [ data.colourG ] );
-		this.colour.B = Buffer.from( [ data.colourB ] );
-		this.mask = Buffer.from( [ data.mask ] );
+		this.colour.R = data.colourR;
+		this.colour.G = data.colourG;
+		this.colour.B = data.colourB;
+		this.mask = data.mask;
 	}
 
 	confirm()

@@ -51,15 +51,16 @@ class Client {
 		}
 		if( type === 'TCP' )
 		{
-			if( encoded.readUInt8( 0 ) === 0x29 )
+			if( encoded.readUInt8( 0 ) === 0x2f )
 			{
-				//console.log( encoded );
+				console.log( encoded );
 			}
 			this.write( encoded );
 		}
 		else
 		{
 			//console.log( encoded );
+			console.log( this.rinfo );
 			this.udpSend( encoded, this.rinfo.port, this.rinfo.address );
 		}
 
@@ -77,9 +78,9 @@ class Client {
 	{
 		if( typeof data !== 'undefined' )
 		{
-			if( data.readUInt8( 0 ) === 0x24 )
+			if( data.readUInt8( 0 ) === 0x2a )
 			{
-				//console.log( data );
+				console.log( data );
 			}
 			this.streamParser.appendData( data );
 		}
