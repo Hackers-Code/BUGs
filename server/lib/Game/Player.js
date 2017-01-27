@@ -31,9 +31,8 @@ class Player {
 
 	chooseWorm()
 	{
-		let retval = this.actualWorm;
 		this.actualWorm = ( this.actualWorm + 1 ) % this.worms.length;
-		return retval;
+		return this.worms[ this.actualWorm ].getID();
 	}
 
 	setProperties( data )
@@ -118,8 +117,7 @@ class Player {
 	{
 		if( this.isYourTurn )
 		{
-			let index = SearchEngine.findByNumericId( this.actualWorm, this.worms );
-			this.worms[ index ].jump();
+			this.worms[ this.actualWorm ].jump();
 		}
 	}
 
@@ -127,8 +125,7 @@ class Player {
 	{
 		if( this.isYourTurn )
 		{
-			let index = SearchEngine.findByNumericId( this.actualWorm, this.worms );
-			this.worms[ index ].moveLeft();
+			this.worms[ this.actualWorm ].moveLeft();
 		}
 	}
 
@@ -136,8 +133,7 @@ class Player {
 	{
 		if( this.isYourTurn )
 		{
-			let index = SearchEngine.findByNumericId( this.actualWorm, this.worms );
-			this.worms[ index ].moveRight();
+			this.worms[ this.actualWorm ].moveRight();
 		}
 	}
 }

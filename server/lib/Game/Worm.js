@@ -17,6 +17,11 @@ class Worm {
 		this.height = 45;
 	}
 
+	getID()
+	{
+		return this.id;
+	}
+
 	jump()
 	{
 		if( this.speedY === 0 )
