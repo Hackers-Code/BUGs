@@ -15,15 +15,30 @@ class Worm {
 		this.id = id;
 		this.width = 40;
 		this.height = 45;
-		this.isMovingRight = false;
-		this.isMovingLeft = false;
+		this._isMovingRight = false;
+		this._isMovingLeft = false;
+	}
+
+	get isMovingLeft()
+	{
+		return this._isMovingLeft;
+	}
+
+	get isMovingRight()
+	{
+		return this._isMovingRight;
 	}
 
 	stop()
 	{
-		this.isMovingRight = false;
-		this.isMovingLeft = false;
+		this._isMovingRight = false;
+		this._isMovingLeft = false;
 		this.speedX = 0;
+	}
+
+	isMoving()
+	{
+		return this._isMovingLeft || this._isMovingRight;
 	}
 
 	getID()
@@ -41,8 +56,9 @@ class Worm {
 
 	moveRight()
 	{
-		this.isMovingRight = !this.isMovingRight;
-		if( this.speedX === 0 && this.isMovingRight )
+		this._isMovingLeft = false;
+		this._isMovingRight = !this._isMovingRight;
+		if( this.speedX === 0 && this._isMovingRight )
 		{
 			this.speedX = this.maxSpeedX;
 		}
@@ -54,8 +70,9 @@ class Worm {
 
 	moveLeft()
 	{
-		this.isMovingLeft = !this.isMovingLeft;
-		if( this.speedX === 0 && this.isMovingLeft )
+		this._isMovingRight = false;
+		this._isMovingLeft = !this._isMovingLeft;
+		if( this.speedX === 0 && this._isMovingLeft )
 		{
 			this.speedX = -this.maxSpeedX;
 		}

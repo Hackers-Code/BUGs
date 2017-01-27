@@ -77,28 +77,35 @@ class Player {
 		for( let i = 0 ; i < this.worms.length ; i++ )
 		{
 			let worm = this.worms[ i ];
-			if( worm.isMoving )
+			if( worm.isMoving() )
 			{
-				if( worm.speedX > 0 )
+				let nextX = worm.x + worm.speedX * (diffTime / 1000);
+				if( worm.isMovingLeft )
 				{
-					let collision = this.world.checkCollisionLeft( worm.y, worm.x + worm.speedX * (diffTime / 1000) );
+					let collision = this.world.checkCollisionLeft( worm.y, nextX );
 					if( collision !== false )
 					{
 						worm.x = collision;
 						worm.speedX = 0;
 					}
+					else
+					{
+						worm.x = nextX;
+					}
 				}
-				else if( worm.speedX < 0 )
+				else if( worm.isMovingRight )
 				{
-					let collision = this.world.checkCollisionRight( worm.y, worm.x + worm.speedX * (diffTime / 1000),
-						worm.width );
+					let collision = this.world.checkCollisionRight( worm.y, nextX, worm.width );
 					if( collision !== false )
 					{
 						worm.x = collision;
 						worm.speedX = 0;
 					}
+					else
+					{
+						worm.x = nextX;
+					}
 				}
-				worm.x += worm.speedX * (diffTime / 1000);
 			}
 			if( worm.speedY < 0 )
 			{
