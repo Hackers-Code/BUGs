@@ -24,6 +24,9 @@ module.exports = {
 	0x07 : {
 		params : {}
 	},
+	0x08 : {
+		params : {}
+	},
 	0x11 : {
 		params : {
 			count : 4,

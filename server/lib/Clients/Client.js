@@ -26,6 +26,7 @@ class Client {
 		this.rinfo = null;
 		this.room = null;
 		this.player = null;
+		this.keepAliveUDP = null;
 	}
 
 	sendID()
@@ -182,6 +183,10 @@ class Client {
 
 	disconnect()
 	{
+		if( this.keepAliveUDP !== null )
+		{
+			clearInterval( this.keepAliveUDP );
+		}
 		this.clientsStorage.removeClient( this.id );
 	}
 
@@ -277,6 +282,7 @@ class Client {
 	{
 		this.rinfo = rinfo;
 		this.udpSend = send;
+		this.keepAliveUDP = setInterval( this.send.bind( this, { opcode : 0x08 }, 'UDP' ), 10000 );
 	}
 
 	jump()
