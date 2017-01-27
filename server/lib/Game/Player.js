@@ -21,6 +21,22 @@ class Player {
 		this.world = null;
 	}
 
+	getPlayerID()
+	{
+		return this.playerID;
+	}
+
+	endTurn()
+	{
+		this.isYourTurn = false;
+		this.worms[ this.actualWorm ].stop();
+	}
+
+	startTurn()
+	{
+		this.isYourTurn = true;
+	}
+
 	addWorm( spawn, id, physics )
 	{
 		let worm = new Worm( spawn, this.playerID, id, physics );
@@ -61,25 +77,29 @@ class Player {
 		for( let i = 0 ; i < this.worms.length ; i++ )
 		{
 			let worm = this.worms[ i ];
-			if( worm.speedX > 0 )
+			if( worm.isMoving )
 			{
-				let collision = this.world.checkCollisionLeft( worm.y, worm.x );
-				if( collision !== false )
+				if( worm.speedX > 0 )
 				{
-					worm.x = collision;
-					worm.speedX = 0;
+					let collision = this.world.checkCollisionLeft( worm.y, worm.x + worm.speedX * (diffTime / 1000) );
+					if( collision !== false )
+					{
+						worm.x = collision;
+						worm.speedX = 0;
+					}
 				}
-			}
-			else if( worm.speedX < 0 )
-			{
-				let collision = this.world.checkCollisionRight( worm.y, worm.x, worm.width );
-				if( collision !== false )
+				else if( worm.speedX < 0 )
 				{
-					worm.x = collision;
-					worm.speedX = 0;
+					let collision = this.world.checkCollisionRight( worm.y, worm.x + worm.speedX * (diffTime / 1000),
+						worm.width );
+					if( collision !== false )
+					{
+						worm.x = collision;
+						worm.speedX = 0;
+					}
 				}
+				worm.x += worm.speedX * (diffTime / 1000);
 			}
-			worm.x += worm.speedX * (diffTime / 1000);
 			if( worm.speedY < 0 )
 			{
 				let collision = this.world.checkCollisionTop( worm.y, worm.x );
@@ -113,9 +133,10 @@ class Player {
 
 	jump()
 	{
-		if( this.isYourTurn )
+		let worm = this.worms[ this.actualWorm ];
+		if( this.isYourTurn && this.world.checkCollisionBottom( worm.y, worm.height, worm.x ) !== false )
 		{
-			this.worms[ this.actualWorm ].jump();
+			worm.jump();
 		}
 	}
 

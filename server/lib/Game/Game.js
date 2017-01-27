@@ -16,7 +16,7 @@ class Game {
 		this.jumpHeight = -300;
 		this.wormsPerPlayer = 5;
 		this.maxFramesPerSecond = 300;
-		this.whoseTurnID = 0;
+		this.whoseTurnIndex = 0;
 		this.wormID = 0;
 		this.wormsList = null;
 		this.updateWormsList();
@@ -87,11 +87,11 @@ class Game {
 		this.lastClockTime = new Date().getTime();
 		if( this.timeleft <= 0 )
 		{
-			this.players[ this.whoseTurnID ].send( {
+			this.players[ this.whoseTurnIndex ].send( {
 				opcode : 0x36
 			} );
-			this.players[ this.whoseTurnID ].isYourTurn = false;
-			this.whoseTurnID = ++this.whoseTurnID % this.players.length;
+			this.players[ this.whoseTurnIndex ].endTurn();
+			this.whoseTurnIndex = ++this.whoseTurnIndex % this.players.length;
 			this.whoseTurn();
 			return;
 		}
@@ -104,16 +104,18 @@ class Game {
 	whoseTurn()
 	{
 		let worm_id = Buffer.alloc( 1 );
-		worm_id.writeUInt8( this.players[ this.whoseTurnID ].chooseWorm(), 0 );
+		worm_id.writeUInt8( this.players[ this.whoseTurnIndex ].chooseWorm(), 0 );
+		let player_id = Buffer.alloc( 1 );
+		player_id.writeUInt8( this.players[ this.whoseTurnIndex ].getPlayerID(), 0 );
 		this.players.forEach( ( element ) =>
 		{
 			element.send( {
 				opcode : 0x33,
 				worm_id : worm_id,
-				player_id : Buffer.from( [ this.whoseTurnID ] )
+				player_id : player_id
 			} );
 		} );
-		this.players[ this.whoseTurnID ].isYourTurn = true;
+		this.players[ this.whoseTurnIndex ].startTurn();
 		this.timeleft = 60;
 		this.lastClockTime = new Date().getTime();
 
