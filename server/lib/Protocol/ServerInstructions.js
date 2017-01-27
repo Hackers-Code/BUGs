@@ -57,8 +57,8 @@ module.exports = {
 			map : 4,
 			gravity : 2,
 			jumpHeight : 2,
-			maxSpeedX : 2,
 			maxSpeedY : 2,
+			maxSpeedX : 2,
 			maxPlayers : 1
 		}
 	},

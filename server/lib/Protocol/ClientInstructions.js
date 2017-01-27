@@ -32,8 +32,8 @@ module.exports = {
 		params : {
 			gravity : 2,
 			jumpHeight : 2,
-			maxSpeedX : 2,
-			maxSpeedY : 2
+			maxSpeedY : 2,
+			maxSpeedX : 2
 		},
 		callback : 'setGamePhysics',
 		response : 0x23
