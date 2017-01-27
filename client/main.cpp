@@ -300,9 +300,6 @@ class player{public:
     void draw(sf::RenderWindow &window){
         window.draw(hpbars);
         window.draw(namet);
-        for(int i=0; i<5; i++){
-            worms[i].draw(window);
-        }
     }
 
     void lobbydraw(sf::RenderWindow &window){
@@ -339,11 +336,11 @@ vector<player> players;
 worm worm::operator =(worm input){
     position =input.position;
     hp       =input.hp;
-    direction=input.direction;
     id       =input.id;
     sprite   =input.sprite;
     text     =input.text;
     team     =input.team;
+    text.setColor(players[team].color);
     wormmask.setTexture(maskt[players[team].mask], 1);
     return input;
 }
@@ -518,7 +515,7 @@ void protocol2a(sf::Color input, unsigned char maskid){
         to_send[2]=input.g;
         to_send[3]=input.b;
         to_send[4]=maskid;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
+        if(clientsocket.send(to_send, 5)==sf::Socket::Done){
             cout<<"poszlo 0x2a\n";
         }else cout<<"sending error 0x2a\n";
     }else cout<<"not connected, cannot set player settings\n";
@@ -1795,13 +1792,14 @@ int main(){
                         i++;
                         if(i<received){
                             if(data[i]<wormpointers.size()){
+                                if(currentworm)(*currentworm).text.setColor(normalclr);
                                 currentworm=wormpointers[data[i]];
                                 i++;
                                 if(i<received){
                                     if(data[i]<playersamount){
                                         for(int j=0; j<playersamount; j++)
-                                            if(players[j].id==data[i]) cout<<players[j].name<<"'s turn\n";
-                                        if((*currentworm).team!=data[i-1]) cout<<"current worm doesn't belong to current player\n";
+                                            if(players[j].id==data[i]) cout<<players[j].name<<"'s ["<<j<<"] turn\n";
+                                        if((*currentworm).team!=data[i]) cout<<"current worm doesn't belong to current player\n";
                                     }else cout<<"there is no player with id="<<int(data[i])<<"\n";
                                     continue;
                                 }else cout<<"lost worm id\n";
@@ -2088,20 +2086,16 @@ int main(){
                                 protbuffers[0]+=data[i];
                         }else
                         if(to_receive%25>3){
-                            if(data[i])
-                                protbufferi[2]=data[i];
+                            protbufferi[2]=data[i];
                         }else
                         if(to_receive%25>2){
-                            if(data[i])
-                                protbufferi[3]=data[i];
+                            protbufferi[3]=data[i];
                         }else
                         if(to_receive%25>1){
-                            if(data[i])
-                                protbufferi[4]=data[i];
+                            protbufferi[4]=data[i];
                         }else
                         if(to_receive%25>0){
-                            if(data[i])
-                                protbufferi[5]=data[i];
+                            protbufferi[5]=data[i];
                         }
                     }
                     to_receive--;
@@ -2194,6 +2188,9 @@ int main(){
                         cout<<"UDP connection established\n";
                         continue;
                     }
+                    if(data[i]==8){
+                        continue;
+                    }
                     if(data[i]==0x32){
                         receiving=0x32;
                         udpdeltareceive=i+1;
@@ -2231,6 +2228,10 @@ int main(){
                                         if((*wormpointers[j]).id==protbufferi[5]){
                                             (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
                                             (*wormpointers[j]).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
+                                            if(protbuffersh[0]==vxmax){
+                                                (*wormpointers[j]).walking=1;
+                                                (*wormpointers[j]).direction=1;
+                                            }
                                             break;
                                         }
                                     }
@@ -2318,6 +2319,8 @@ int main(){
                 }else
                     cout<<"missed rest of 0x35";
                 receiving=0;
+            }else{
+                if(receiving) cout<<"unknown receiving: "<<int(receiving)<<"\n";
             }
         }
         udpport=udpsocket.getLocalPort();
@@ -2757,6 +2760,9 @@ int main(){
             window.draw(backgrounds);
             for(int i=0; i<wormpointers.size(); i++){
                 (*wormpointers[i]).draw(window);
+            }
+            for(int i=0; i<players.size(); i++){
+                players[i].draw(window);
             }
             window.draw(clocks);
             window.draw(turntimet);
