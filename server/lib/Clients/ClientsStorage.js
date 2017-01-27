@@ -80,7 +80,6 @@ class ClientsStorage {
 
 	parseUDP( msg, rinfo, send )
 	{
-		//console.log( msg );
 		let decoded = this.packetDecoder.decode( msg );
 		if( decoded.instruction.callback === 'setUDP' )
 		{
@@ -88,6 +87,7 @@ class ClientsStorage {
 			this.clients[ index ].setUDP( rinfo, send );
 			let encoded = this.packetEncoder.encode( { opcode : decoded.instruction.response } );
 			send( encoded, rinfo.port, rinfo.address );
+			setInterval( () => {send( Buffer.from( [ 8 ] ), rinfo.port, rinfo.address )}, 10000 );
 		}
 		else
 		{

@@ -51,16 +51,10 @@ class Client {
 		}
 		if( type === 'TCP' )
 		{
-			if( encoded.readUInt8( 0 ) === 0x2f )
-			{
-				console.log( encoded );
-			}
 			this.write( encoded );
 		}
 		else
 		{
-			//console.log( encoded );
-			console.log( this.rinfo );
 			this.udpSend( encoded, this.rinfo.port, this.rinfo.address );
 		}
 
@@ -78,10 +72,6 @@ class Client {
 	{
 		if( typeof data !== 'undefined' )
 		{
-			if( data.readUInt8( 0 ) === 0x2a )
-			{
-				console.log( data );
-			}
 			this.streamParser.appendData( data );
 		}
 		try
