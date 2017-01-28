@@ -549,7 +549,7 @@ void protocol31(){
     }else cout<<"not connected, cannot get turn time\n";
 }
 
-bool protocol37(){
+bool protocol37(){cout<<7;
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x37;
@@ -559,7 +559,7 @@ bool protocol37(){
     return 0;
 }
 
-bool protocol38(){
+bool protocol38(){cout<<8;
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x38;
@@ -569,7 +569,7 @@ bool protocol38(){
     return 0;
 }
 
-bool protocol39(){
+bool protocol39(){cout<<9;
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x39;
@@ -1068,7 +1068,7 @@ int main(){
                 }else
                 if(event.type==sf::Event::TextEntered){
                     if(event.text.unicode==32){//space
-                        if(currentworm){
+                        if((currentworm)&&((*currentworm).team==userid)){
                             bool fhasfloor=0;
                             for(int i=0; i<wormt[0].getSize().x; i++){
                                 if(colide(sf::Vector2f(i+(*currentworm).position.x, (*currentworm).position.y+wormt[0].getSize().y), backgroundi)){
@@ -1086,11 +1086,11 @@ int main(){
                 }else
                 if((event.type==sf::Event::KeyPressed)||(event.type==sf::Event::KeyReleased)){
                     if(event.key.code==sf::Keyboard::A){
-                        if((currentworm)&&((*currentworm).V.x<=0)&&(((event.type==sf::Event::KeyPressed)&&(!(*currentworm).walking))||((event.type==sf::Event::KeyReleased)&&((*currentworm).walking)))){
+                        if((currentworm)&&((*currentworm).team==userid)&&((*currentworm).V.x<=0)&&(((event.type==sf::Event::KeyPressed)&&((*currentworm).V.x!=-vxmax))||((event.type==sf::Event::KeyReleased)&&((*currentworm).V.x==-vxmax)))){
                             if(protocol38()){
-                                if(!(*currentworm).walking){
-                                    (*currentworm).V.x=-vxmax;
+                                if((*currentworm).V.x!=-vxmax){
                                     (*currentworm).walking=1;
+                                    (*currentworm).V.x=-vxmax;
                                     (*currentworm).direction=-1;
                                 }else{
                                     (*currentworm).walking=0;
@@ -1102,9 +1102,9 @@ int main(){
                         }
                     }else
                     if(event.key.code==sf::Keyboard::D){
-                        if((currentworm)&&((*currentworm).V.x>=0)&&(((event.type==sf::Event::KeyPressed)&&(!(*currentworm).walking))||((event.type==sf::Event::KeyReleased)&&((*currentworm).walking)))){
+                        if((currentworm)&&((*currentworm).team==userid)&&((*currentworm).V.x>=0)&&(((event.type==sf::Event::KeyPressed)&&((*currentworm).V.x!=vxmax))||((event.type==sf::Event::KeyReleased)&&((*currentworm).V.x==vxmax)))){
                             if(protocol39()){
-                                if(!(*currentworm).walking){
+                                if((*currentworm).V.x!=vxmax){
                                     (*currentworm).V.x=vxmax;
                                     (*currentworm).walking=1;
                                     (*currentworm).direction=1;
