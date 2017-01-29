@@ -84,23 +84,17 @@ class Player {
 			if( worm.isMoving() )
 			{
 				let nextX = worm.x + worm.speedX * (diffTime / 1000);
-				if( worm.isMovingLeft )
+				if( worm.isMovingLeft || worm.isMovingRight )
 				{
-					let collision = this.world.checkCollisionLeft( worm.y, nextX );
-					if( collision !== false )
+					let collision;
+					if( worm.isMovingLeft )
 					{
-						worm.x = collision;
-						worm.speedX = 0;
+						collision = this.world.checkCollisionLeft( worm.y, nextX );
 					}
-					else
+					else if( worm.isMovingRight )
 					{
-						worm.x = nextX;
+						collision = this.world.checkCollisionRight( worm.y, nextX, worm.width );
 					}
-				}
-
-				else if( worm.isMovingRight )
-				{
-					let collision = this.world.checkCollisionRight( worm.y, nextX, worm.width );
 					if( collision !== false )
 					{
 						worm.x = collision;

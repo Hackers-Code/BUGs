@@ -26,9 +26,19 @@ class Worm {
 		return this._isMovingLeft;
 	}
 
+	set isMovingLeft( value )
+	{
+		this._isMovingLeft = value;
+	}
+
 	get isMovingRight()
 	{
 		return this._isMovingRight;
+	}
+
+	set isMovingRight( value )
+	{
+		this._isMovingRight = value;
 	}
 
 	get isFalling()
@@ -53,13 +63,13 @@ class Worm {
 
 	isMoving()
 	{
-		return this._isMovingLeft || this._isMovingRight || this._isFalling || this._isJumping;
+		return this.isMovingLeft || this.isMovingRight || this.isFalling || this.isJumping;
 	}
 
 	stop()
 	{
-		this._isMovingRight = false;
-		this._isMovingLeft = false;
+		this.isMovingRight = false;
+		this.isMovingLeft = false;
 		this.speedX = 0;
 	}
 
@@ -71,13 +81,13 @@ class Worm {
 	jump()
 	{
 		this.speedY = this.jumpHeight;
-		this._isJumping = true;
+		this.isJumping = true;
 	}
 
 	moveRight()
 	{
-		this._isMovingLeft = false;
-		this._isMovingRight = !this._isMovingRight;
+		this.isMovingLeft = false;
+		this.isMovingRight = !this.isMovingRight;
 		if( this.speedX === 0 && this._isMovingRight )
 		{
 			this.speedX = this.maxSpeedX;
@@ -90,9 +100,9 @@ class Worm {
 
 	moveLeft()
 	{
-		this._isMovingRight = false;
-		this._isMovingLeft = !this._isMovingLeft;
-		if( this.speedX === 0 && this._isMovingLeft )
+		this.isMovingRight = false;
+		this.isMovingLeft = !this.isMovingLeft;
+		if( this.speedX === 0 && this.isMovingLeft )
 		{
 			this.speedX = -this.maxSpeedX;
 		}
