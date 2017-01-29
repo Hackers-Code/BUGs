@@ -131,7 +131,7 @@ float mapscale=0.2;
 unsigned int turntime=0, clockframe=0, no18delta=0;
 
 //fizyka
-int vxmax=2, vymax=875, ay=437, vjump=-300;
+short vjump=-300, ay=43, vxmax=27, vymax=875;
 sf::Clock clocker;
 sf::Time lastittime, currentittime, starttime, FPStime;
 bool started=0;
@@ -342,6 +342,7 @@ worm worm::operator =(worm input){
     team     =input.team;
     text.setColor(players[team].color);
     wormmask.setTexture(maskt[players[team].mask], 1);
+    update();
     return input;
 }
 
@@ -449,8 +450,8 @@ void protocol22(){
         to_send[0]=0x22;
         to_send[1]=(ay>>8)%256;
         to_send[2]=ay%256;
-        to_send[3]=((-vjump)>>8)%256;
-        to_send[4]=(-vjump)%256;
+        to_send[3]=(vjump)>>8;
+        to_send[4]=vjump;
         to_send[5]=(vymax>>8)%256;
         to_send[6]=(vymax)%256;
         to_send[7]=(vxmax>>8)%256;
@@ -2231,6 +2232,17 @@ int main(){
                                             if(protbuffersh[0]==vxmax){
                                                 (*wormpointers[j]).walking=1;
                                                 (*wormpointers[j]).direction=1;
+                                                if((currentworm)&&(currentworm!=wormpointers[j]))
+                                                    cout<<protbufferi[5]<<" moved right("<<protbuffersh[0]<<") on "<<(*currentworm).id<<" turn\n";
+                                            }else
+                                            if(protbuffersh[0]==-vxmax){
+                                                (*wormpointers[j]).walking=1;
+                                                (*wormpointers[j]).direction=-1;
+                                                if((currentworm)&&(currentworm!=wormpointers[j]))
+                                                    cout<<protbufferi[5]<<" moved left on "<<(*currentworm).id<<" turn\n";
+                                            }else{
+                                                (*wormpointers[j]).walking=1;
+                                                (*wormpointers[j]).direction=(protbuffersh[0]>=0)*2-1;
                                             }
                                             break;
                                         }
@@ -2292,6 +2304,21 @@ int main(){
                                         if((*wormpointers[j]).id==protbufferi[5]){
                                             (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
                                             (*wormpointers[j]).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
+                                            if(protbuffersh[0]==vxmax){
+                                                (*wormpointers[j]).walking=1;
+                                                (*wormpointers[j]).direction=1;
+                                                if((currentworm)&&(currentworm!=wormpointers[j]))
+                                                    cout<<protbufferi[5]<<" moved right on "<<(*currentworm).id<<" turn\n";
+                                            }else
+                                            if(protbuffersh[0]==-vxmax){
+                                                (*wormpointers[j]).walking=1;
+                                                (*wormpointers[j]).direction=-1;
+                                                if((currentworm)&&(currentworm!=wormpointers[j]))
+                                                    cout<<protbufferi[5]<<" moved left on "<<(*currentworm).id<<" turn\n";
+                                            }else{
+                                                (*wormpointers[j]).walking=1;
+                                                (*wormpointers[j]).direction=(protbuffersh[0]>=0)*2-1;
+                                            }
                                             break;
                                         }
                                     }
