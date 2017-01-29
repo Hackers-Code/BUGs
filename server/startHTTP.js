@@ -12,6 +12,14 @@ module.exports = () =>
 		} );
 	} );
 
+	expressApp.get( '/weapons/list.json', function( req, res )
+	{
+		fs.readFile( process.cwd() + '/resources/weapons/list.json', ( err, data ) =>
+		{
+			res.send( data );
+		} );
+	} );
+
 	expressApp.get( '/maps/:file', function( req, res )
 	{
 		let filename = req.params.file;
@@ -34,6 +42,30 @@ module.exports = () =>
 			res.send( 'Invalid filename' );
 		}
 	} );
+
+	expressApp.get( '/weapons/:file', function( req, res )
+	{
+		let filename = req.params.file;
+		if( /^[A-Za-z0-9]*\.(png)$/.test( filename ) )
+		{
+			fs.readFile( process.cwd() + '/resources/weapons/' + filename, ( err, data ) =>
+			{
+				if( err )
+				{
+					res.send( 'File not found' );
+				}
+				else
+				{
+					res.send( data );
+				}
+			} );
+		}
+		else
+		{
+			res.send( 'Invalid filename' );
+		}
+	} );
+
 	expressApp.get( '*', function( req, res )
 	{
 		fs.readFile( process.cwd() + '/resources/resources.json', ( err, data ) =>
