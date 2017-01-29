@@ -1826,6 +1826,13 @@ int main(){
                         cout<<"end of your turn\n";
                         continue;
                     }
+                    if(data[i]==0x3a){
+                        receiving=0x3a;
+                        deltareceive=i+1;
+                        to_receive=3;
+                        protbufferi[0]=1;
+                        break;
+                    }
                     if(data[i]==0xe0){
                         cout<<"unknown opcode\n";
                         receiving=0xe0;
@@ -2043,6 +2050,7 @@ int main(){
                         cb2players.setTexture(checkboxoff);
                         cb3players.setTexture(checkboxoff);
                         cb4players.setTexture(checkboxoff);
+                        playersamount=data[i];
                         switch(data[i]){
                             case 2:{
                                 cb2players.setTexture(checkboxon);
@@ -2118,6 +2126,31 @@ int main(){
                             players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
                             protbufferi[1]=0;
                             protbuffers[0]="";
+                            break;
+                        }
+                    }
+                }
+            }else
+            if(receiving==0x3a){
+                for(int i=deltareceive; i<received; i++){
+                    if(protbufferi[0]){
+                        protbufferi[1]=protbufferi[1]<<8;
+                        protbufferi[1]+=data[i];
+                    }else{
+                        protbufferi[i+1]=data[i];
+                    }
+                    to_receive--;
+                    if(!to_receive){
+                        if(protbufferi[0]){//end of metadata
+                            to_receive=protbufferi[1];
+                            if(to_receive>4){
+                                cout<<"too many participants ("<<protbufferi[1]<<")\n";
+                                to_receive=4;
+                            }
+                        }else
+                        {//end of protocol
+                            receiving=0;
+                            cout<<players[protbufferi[1]].name<<" won\n";
                             break;
                         }
                     }
