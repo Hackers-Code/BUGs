@@ -77,6 +77,10 @@ class Player {
 		for( let i = 0 ; i < this.worms.length ; i++ )
 		{
 			let worm = this.worms[ i ];
+			if( this.world.checkCollisionBottom( worm.y, worm.height, worm.x ) === false )
+			{
+				worm.isFalling = true;
+			}
 			if( worm.isMoving() )
 			{
 				let nextX = worm.x + worm.speedX * (diffTime / 1000);
@@ -93,6 +97,7 @@ class Player {
 						worm.x = nextX;
 					}
 				}
+
 				else if( worm.isMovingRight )
 				{
 					let collision = this.world.checkCollisionRight( worm.y, nextX, worm.width );
@@ -106,30 +111,49 @@ class Player {
 						worm.x = nextX;
 					}
 				}
-			}
-			if( worm.speedY < 0 )
-			{
-				let collision = this.world.checkCollisionTop( worm.y, worm.x );
-				if( collision !== false )
+
+				if( worm.isJumping )
 				{
-					worm.y = collision;
-					worm.speedY = 0;
+					let nextY = worm.y + worm.speedY * (diffTime / 1000);
+					let collision = this.world.checkCollisionTop( nextY, worm.x );
+					if( collision !== false )
+					{
+						worm.y = collision;
+						worm.speedY = 0;
+					}
+					else
+					{
+						worm.speedY += worm.accelerationY * (diffTime / 1000);
+						worm.y = nextY;
+					}
+					if( worm.speedY >= 0 )
+					{
+						worm.isJumping = false;
+						worm.isFalling = true;
+					}
+				}
+
+				else if( worm.isFalling )
+				{
+					if( worm.speedY > worm.maxSpeedY )
+					{
+						worm.speedY = worm.maxSpeedY;
+					}
+					let nextY = worm.y + worm.speedY * (diffTime / 1000);
+					let collision = this.world.checkCollisionBottom( nextY, worm.height, worm.x );
+					if( collision !== false )
+					{
+						worm.y = collision;
+						worm.speedY = 0;
+						worm.isFalling = false;
+					}
+					else
+					{
+						worm.speedY += worm.accelerationY * (diffTime / 1000);
+						worm.y = nextY;
+					}
 				}
 			}
-			if( this.world.checkCollisionBottom( worm.y, worm.height, worm.x ) === false )
-			{
-				worm.speedY += worm.accelerationY * (diffTime / 1000);
-				if( worm.speedY > worm.maxSpeedY )
-				{
-					worm.speedY = worm.maxSpeedY;
-				}
-				if( this.world.checkCollisionBottom( worm.y + worm.speedY * (diffTime / 1000), worm.height, worm.x ) )
-				{
-					worm.speedY = 0;
-					continue;
-				}
-			}
-			worm.y += worm.speedY * (diffTime / 1000);
 		}
 	}
 

@@ -65,14 +65,14 @@ class World {
 	{//(((block.y>=y)&&(block.y<=y+worm.height))||((block.y<y)&&(block.y+block.width>y)))
 		if( x + width > this.width )
 		{
-			return this.width;
+			return this.width - width;
 		}
 		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let block = this.blocks[ i ];
 			if( (y >= block.y) && (y <= block.y + block.height) && (x + width >= block.x ) && ( x + width <= block.x + block.width) )
 			{
-				return block.x;
+				return block.x - width;
 			}
 		}
 		return false;
@@ -99,14 +99,14 @@ class World {
 	{
 		if( y + height > this.height )
 		{
-			return this.height;
+			return this.height - height;
 		}
 		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let block = this.blocks[ i ];
 			if( (y + height <= block.y + block.height) && (y + height >= block.y) && ( x >= block.x ) && ( x <= block.x + block.width) )
 			{
-				return block.y;
+				return block.y - height;
 			}
 		}
 		return false;

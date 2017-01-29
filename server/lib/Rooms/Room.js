@@ -142,14 +142,10 @@ class Room {
 				let map = Buffer.alloc( 4 );
 				map.writeUInt32BE( this.mapID, 0 );
 				let physics = this.game.getPhysics();
-				let gravity = Buffer.alloc( 2 );
-				gravity.writeUInt16BE( physics.gravity, 0 );
-				let jumpHeight = Buffer.alloc( 2 );
-				jumpHeight.writeInt16BE( physics.jumpHeight, 0 );
-				let maxSpeedX = Buffer.alloc( 2 );
-				maxSpeedX.writeUInt16BE( physics.maxSpeedX, 0 );
-				let maxSpeedY = Buffer.alloc( 2 );
-				maxSpeedY.writeUInt16BE( physics.maxSpeedY, 0 );
+				let gravity = physics.gravity;
+				let jumpHeight = physics.jumpHeight;
+				let maxSpeedX = physics.maxSpeedX;
+				let maxSpeedY = physics.maxSpeedY;
 				let maxPlayers = Buffer.alloc( 1 );
 				maxPlayers.writeUInt8( this.maxPlayers, 0 );
 				this.roomConfigResponse = {
@@ -272,6 +268,7 @@ class Room {
 		let wormsTaskId = this.tasksStorage.addTask( () =>
 		{
 			let data = this.game.getWorms();
+			console.log( data );
 			this.players.forEach( ( element ) =>
 			{
 				element.send( data, 'UDP' );
