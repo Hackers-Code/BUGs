@@ -30,6 +30,7 @@ class Room {
 		this.playersList = null;
 		this.game = new Game( this.players );
 		this.tasks = [];
+		this.leaderboard = [];
 		this.preparePlayersList();
 		MapInterface.loadAndParseMapsList( process.cwd() + '/resources/maps/list.json', ( err, data ) =>
 		{
@@ -97,7 +98,19 @@ class Room {
 			let index = SearchEngine.findByUniqueID( id, this.players );
 			if( index !== false && index !== -1 )
 			{
+				this.leaderboard.unshift( { id : Buffer.from( [ this.players[ index ].getPlayerID() ] ) } );
 				this.players.splice( index, 1 );
+				if( this.players.length === 1 )
+				{
+					this.leaderboard.unshift( { id : Buffer.from( [ this.players[ 0 ].getPlayerID() ] ) } );
+					let count = Buffer.alloc( 4 );
+					count.writeUInt32BE( this.leaderboard.length, 0 );
+					this.players[ 0 ].send( {
+						opcode : 0x3a,
+						count,
+						players : this.leaderboard
+					} );
+				}
 				if( this.players.length === 0 )
 				{
 					this.roomsStorage.removeRoom( this.id );
@@ -268,7 +281,6 @@ class Room {
 		let wormsTaskId = this.tasksStorage.addTask( () =>
 		{
 			let data = this.game.getWorms();
-			console.log( data );
 			this.players.forEach( ( element ) =>
 			{
 				element.send( data, 'UDP' );

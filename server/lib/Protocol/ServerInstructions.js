@@ -124,6 +124,14 @@ module.exports = {
 	0x36 : {
 		params : {}
 	},
+	0x3a : {
+		params : {
+			count : 4,
+			players : {
+				id : 1
+			}
+		}
+	},
 	0xe0 : {
 		params : {
 			length : 1,
