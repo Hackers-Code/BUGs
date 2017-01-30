@@ -204,14 +204,16 @@ class worm{public:
     sf::Sprite sprite, wormmask;
     sf::Text text;
     bool walking;
+    unsigned short angle;
 
-    worm(sf::Vector2f positionin=sf::Vector2f(0,0), unsigned int teamin=0, unsigned int hpin=200, unsigned int idin=0){
+    worm(sf::Vector2f positionin=sf::Vector2f(0,0), unsigned int teamin=0, unsigned int hpin=200, unsigned int idin=0, unsigned short anglein=90){
         position=positionin;
         team=teamin;
         hp=hpin;
         id=idin;
         direction=1;
         animcount=0;
+        angle=anglein;
         sprite.setTexture(wormt[0]);
         sprite.setPosition((deltabg+position)*mapscale);
         sprite.setScale(mapscale, mapscale);
@@ -1829,7 +1831,7 @@ int main(){
                     if(data[i]==0x3a){
                         receiving=0x3a;
                         deltareceive=i+1;
-                        to_receive=3;
+                        to_receive=4;
                         protbufferi[0]=1;
                         break;
                     }
@@ -2136,21 +2138,27 @@ int main(){
                     if(protbufferi[0]){
                         protbufferi[1]=protbufferi[1]<<8;
                         protbufferi[1]+=data[i];
+                        cout<<int(data[i]);
                     }else{
-                        protbufferi[i+1]=data[i];
+                        protbufferi[protbufferi[1]-to_receive+2]=data[i];
                     }
                     to_receive--;
                     if(!to_receive){
                         if(protbufferi[0]){//end of metadata
                             to_receive=protbufferi[1];
+                            if(!to_receive){
+                                receiving=0;
+                                break;
+                            }
                             if(to_receive>4){
                                 cout<<"too many participants ("<<protbufferi[1]<<")\n";
                                 to_receive=4;
                             }
+                            protbufferi[0]=0;
                         }else
                         {//end of protocol
                             receiving=0;
-                            cout<<players[protbufferi[1]].name<<" won\n";
+                            cout<<players[protbufferi[2]].name<<" won\n";
                             break;
                         }
                     }
@@ -2251,17 +2259,18 @@ int main(){
                         protbufferi[1]=protbufferi[1]<<8;
                         protbufferi[1]+=data[i];
                     }else{
-                        if(!(udpto_receive%15)){
+                        if(!(udpto_receive%16)){
                             if(players.size()>protbufferi[1]){
-                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]))){
+                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5], protbufferi[6]))){
                                     worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
                                     (*wpbuf).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
                                     wormpointers.push_back(wpbuf);
                                 }else{
                                     for(int j=0; j<wormpointers.size(); j++){
                                         if((*wormpointers[j]).id==protbufferi[5]){
-                                            (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
+                                            (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5], protbufferi[6]);
                                             (*wormpointers[j]).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
+                                            players[protbufferi[1]].hp+=protbufferi[4];
                                             if(protbuffersh[0]==vxmax){
                                                 (*wormpointers[j]).walking=1;
                                                 (*wormpointers[j]).direction=1;
@@ -2274,8 +2283,8 @@ int main(){
                                                 if((currentworm)&&(currentworm!=wormpointers[j]))
                                                     cout<<protbufferi[5]<<" moved left on "<<(*currentworm).id<<" turn\n";
                                             }else{
-                                                (*wormpointers[j]).walking=1;
-                                                (*wormpointers[j]).direction=(protbuffersh[0]>=0)*2-1;
+                                                (*wormpointers[j]).walking=0;
+                                                (*wormpointers[j]).direction=((*wormpointers[j]).angle<=180)*2-1;
                                             }
                                             break;
                                         }
@@ -2290,25 +2299,28 @@ int main(){
                             }
                             protbufferi[1]=data[i];
                         }else
-                        if((udpto_receive%15)>=11){
+                        if((udpto_receive%16)==15){
+                            protbufferi[6]=(data[i]*2)%360;//angle
+                        }else
+                        if((udpto_receive%16)>=11){
                             protbufferi[2]=protbufferi[2]<<8;
                             protbufferi[2]+=data[i];
                         }else
-                        if((udpto_receive%15)>=7){
+                        if((udpto_receive%16)>=7){
                             protbufferi[3]=protbufferi[3]<<8;
                             protbufferi[3]+=data[i];
                         }else
-                        if((udpto_receive%15)==6){
+                        if((udpto_receive%16)==6){
                             protbufferi[4]=data[i];
                         }else
-                        if((udpto_receive%15)==5){
+                        if((udpto_receive%16)==5){
                             protbufferi[5]=data[i];
                         }else
-                        if((udpto_receive%15)>=3){
+                        if((udpto_receive%16)>=3){
                             protbuffersh[0]=protbuffersh[0]<<8;
                             protbuffersh[0]+=data[i];
                         }else
-                        if((udpto_receive%15)>=1){
+                        if((udpto_receive%16)>=1){
                             protbuffersh[1]=protbuffersh[1]<<8;
                             protbuffersh[1]+=data[i];
                         }
@@ -2317,16 +2329,22 @@ int main(){
                     if(!udpto_receive){
                         if(protbufferi[0]){//end of metadata
                             protbufferi[0]=0;
-                            udpto_receive=15*protbufferi[1];
+                            udpto_receive=16*protbufferi[1];
                             if(protbufferi[1]==0){
                                 break;
                             }
                             protbufferi[1]=40;
+                            for(int j=0; j<players.size(); j++){
+                                players[j].hp=0;
+                            }
+                            for(int j=0; j<wormpointers.size(); j++){
+                                (*wormpointers[j]).hp=0;
+                            }
                         }else
                         {//end of protocol
                             receiving=0;
                             if(players.size()>protbufferi[1]){
-                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]))){
+                                if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5], protbufferi[6]))){
                                     worm *wpbuf=&players[protbufferi[1]].worms[players[protbufferi[1]].emptyworm-1];
                                     (*wpbuf).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
                                     wormpointers.push_back(wpbuf);
@@ -2335,8 +2353,9 @@ int main(){
                                 else{
                                     for(int j=0; j<wormpointers.size(); j++){
                                         if((*wormpointers[j]).id==protbufferi[5]){
-                                            (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5]);
+                                            (*wormpointers[j])=worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5], protbufferi[6]);
                                             (*wormpointers[j]).V=sf::Vector2f(protbuffersh[0], protbuffersh[1]);
+                                            players[protbufferi[1]].hp+=protbufferi[4];
                                             if(protbuffersh[0]==vxmax){
                                                 (*wormpointers[j]).walking=1;
                                                 (*wormpointers[j]).direction=1;
@@ -2349,8 +2368,8 @@ int main(){
                                                 if((currentworm)&&(currentworm!=wormpointers[j]))
                                                     cout<<protbufferi[5]<<" moved left on "<<(*currentworm).id<<" turn\n";
                                             }else{
-                                                (*wormpointers[j]).walking=1;
-                                                (*wormpointers[j]).direction=(protbuffersh[0]>=0)*2-1;
+                                                (*wormpointers[j]).walking=0;
+                                                (*wormpointers[j]).direction=((*wormpointers[j]).angle<=180)*2-1;
                                             }
                                             break;
                                         }
