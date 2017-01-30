@@ -342,6 +342,7 @@ worm worm::operator =(worm input){
     sprite   =input.sprite;
     text     =input.text;
     team     =input.team;
+    angle    =input.angle;
     text.setColor(players[team].color);
     wormmask.setTexture(maskt[players[team].mask], 1);
     update();
@@ -552,7 +553,7 @@ void protocol31(){
     }else cout<<"not connected, cannot get turn time\n";
 }
 
-bool protocol37(){cout<<7;
+bool protocol37(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x37;
@@ -562,7 +563,7 @@ bool protocol37(){cout<<7;
     return 0;
 }
 
-bool protocol38(){cout<<8;
+bool protocol38(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x38;
@@ -572,7 +573,7 @@ bool protocol38(){cout<<8;
     return 0;
 }
 
-bool protocol39(){cout<<9;
+bool protocol39(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x39;
@@ -2282,7 +2283,7 @@ int main(){
                                                 (*wormpointers[j]).direction=-1;
                                                 if((currentworm)&&(currentworm!=wormpointers[j]))
                                                     cout<<protbufferi[5]<<" moved left on "<<(*currentworm).id<<" turn\n";
-                                            }else{
+                                            }else{if(wormpointers[j]==currentworm)
                                                 (*wormpointers[j]).walking=0;
                                                 (*wormpointers[j]).direction=((*wormpointers[j]).angle<=180)*2-1;
                                             }
@@ -2367,7 +2368,7 @@ int main(){
                                                 (*wormpointers[j]).direction=-1;
                                                 if((currentworm)&&(currentworm!=wormpointers[j]))
                                                     cout<<protbufferi[5]<<" moved left on "<<(*currentworm).id<<" turn\n";
-                                            }else{
+                                            }else{if(wormpointers[j]==currentworm)
                                                 (*wormpointers[j]).walking=0;
                                                 (*wormpointers[j]).direction=((*wormpointers[j]).angle<=180)*2-1;
                                             }
