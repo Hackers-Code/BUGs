@@ -215,11 +215,13 @@ class Client {
 				this.room = room;
 				this.status = ClientStatus.inLobby;
 				let retval = Client.fromBool( true );
-				retval.player_id = Buffer.from( [ this.player.playerID ] );
+				retval.player_id = Buffer.from( [ this.player.getPlayerID() ] );
 				return retval;
 			}
 		}
-		return Client.fromBool( false );
+		let retval = Client.fromBool( false );
+		retval.player_id = Buffer.from( [ 0 ] );
+		return retval;
 	}
 
 	setGamePhysics( data )
