@@ -89,7 +89,10 @@ class Worm {
 	{
 		this.isMovingLeft = false;
 		this.isMovingRight = !this.isMovingRight;
-		this.angle = 360 - this.angle;
+		if( this.angle > 180 )
+		{
+			this.angle -= (this.angle - 180) * 2;
+		}
 		if( this.speedX === 0 && this._isMovingRight )
 		{
 			this.speedX = this.maxSpeedX;
@@ -104,7 +107,10 @@ class Worm {
 	{
 		this.isMovingRight = false;
 		this.isMovingLeft = !this.isMovingLeft;
-		this.angle -= (this.angle - 180) * 2;
+		if( this.angle < 180 )
+		{
+			this.angle = 360 - this.angle;
+		}
 		if( this.speedX === 0 && this.isMovingLeft )
 		{
 			this.speedX = -this.maxSpeedX;
@@ -117,11 +123,12 @@ class Worm {
 
 	setAngle( data )
 	{
-		if( data.angle > 0 )
+		let angle = data.angle.readInt8( 0 );
+		if( angle > 0 )
 		{
 			this.angle = (this.angle + 2) % 360;
 		}
-		else if( data.angle < 0 )
+		else if( angle < 0 )
 		{
 			this.angle = (this.angle - 2) % 360;
 		}
