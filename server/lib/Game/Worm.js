@@ -89,6 +89,7 @@ class Worm {
 	{
 		this.isMovingLeft = false;
 		this.isMovingRight = !this.isMovingRight;
+		this.angle = 360 - this.angle;
 		if( this.speedX === 0 && this._isMovingRight )
 		{
 			this.speedX = this.maxSpeedX;
@@ -103,6 +104,7 @@ class Worm {
 	{
 		this.isMovingRight = false;
 		this.isMovingLeft = !this.isMovingLeft;
+		this.angle -= (this.angle - 180) * 2;
 		if( this.speedX === 0 && this.isMovingLeft )
 		{
 			this.speedX = -this.maxSpeedX;
