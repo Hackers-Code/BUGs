@@ -180,6 +180,14 @@ class Player {
 			this.worms[ this.actualWorm ].moveRight();
 		}
 	}
+
+	setAngle( data )
+	{
+		if( this.isYourTurn )
+		{
+			this.worms[ this.actualWorm ].setAngle( data );
+		}
+	}
 }
 
 module.exports = Player;

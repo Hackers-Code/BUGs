@@ -15,6 +15,7 @@ class Worm {
 		this.id = id;
 		this.width = 40;
 		this.height = 45;
+		this.angle = 90;
 		this._isMovingRight = false;
 		this._isMovingLeft = false;
 		this._isFalling = false;
@@ -112,6 +113,18 @@ class Worm {
 		}
 	}
 
+	setAngle( data )
+	{
+		if( data.angle > 0 )
+		{
+			this.angle = (this.angle + 2) % 360;
+		}
+		else if( data.angle < 0 )
+		{
+			this.angle = (this.angle - 2) % 360;
+		}
+	}
+
 	getWormState()
 	{
 		let owner = Buffer.alloc( 1 );
@@ -128,6 +141,8 @@ class Worm {
 		speedX.writeInt16BE( this.speedX, 0 );
 		let speedY = Buffer.alloc( 2 );
 		speedY.writeInt16BE( this.speedY, 0 );
+		let angle = Buffer.alloc( 1 );
+		angle.writeUInt8( this.angle, 0 );
 		return {
 			owner,
 			id,
@@ -135,7 +150,8 @@ class Worm {
 			y,
 			hp,
 			speedX,
-			speedY
+			speedY,
+			angle
 		};
 	}
 }

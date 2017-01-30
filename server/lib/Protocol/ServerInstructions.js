@@ -97,6 +97,7 @@ module.exports = {
 			count : 4,
 			worms : {
 				owner : 1,
+				angle : 1,
 				x : 4,
 				y : 4,
 				hp : 1,

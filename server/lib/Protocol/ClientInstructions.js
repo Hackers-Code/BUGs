@@ -95,5 +95,11 @@ module.exports = {
 	0x39 : {
 		params : {},
 		callback : 'switchMoveRight'
+	},
+	0x3b : {
+		params : {
+			angle : 1
+		},
+		callback : 'setAngle'
 	}
 };

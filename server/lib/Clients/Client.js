@@ -308,6 +308,14 @@ class Client {
 			this.player.moveRight();
 		}
 	}
+
+	setAngle( data )
+	{
+		if( this.player !== null )
+		{
+			this.player.setAngle( data );
+		}
+	}
 }
 
 module.exports.Client = Client;
