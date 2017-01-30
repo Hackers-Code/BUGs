@@ -142,7 +142,7 @@ class Worm {
 		let speedY = Buffer.alloc( 2 );
 		speedY.writeInt16BE( this.speedY, 0 );
 		let angle = Buffer.alloc( 1 );
-		angle.writeUInt8( this.angle, 0 );
+		angle.writeUInt8( this.angle / 2, 0 );
 		return {
 			owner,
 			id,
