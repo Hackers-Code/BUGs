@@ -122,8 +122,8 @@ list<sf::Vector2u> spawnpoints;
 
 //zmienne do rozgrywki
 sf::Color playercolors[4];
-sf::Texture backgroundt, wormt[9], clockt[8];
-sf::Sprite  backgrounds, clocks;
+sf::Texture backgroundt, wormt[9], clockt[8], aimert;
+sf::Sprite  backgrounds, clocks, aimers;
 sf::Image backgroundi;
 sf::Vector2f deltabg(0,0);
 sf::Text turntimet;
@@ -196,6 +196,8 @@ list<gamelistelements> gamelist;
 gamelistelements *gamelistpointer;
 
 class player;
+class worm;
+worm *currentworm=0;
 
 class worm{public:
     sf::Vector2f position, V;
@@ -234,6 +236,9 @@ class worm{public:
         window.draw(sprite);
         window.draw(wormmask);
         window.draw(text);
+        if((currentworm)&&((*currentworm).id==id)&&(V==sf::Vector2f(0,0))){
+            window.draw(aimers);
+        }
     }
 
     void next_anim(){
@@ -256,10 +261,14 @@ class worm{public:
         text.setPosition((deltabg+position+sf::Vector2f(0,-20))*mapscale);
         text.setScale(mapscale, mapscale);
         text.setString("HP="+to_string(hp));
+        if((currentworm)&&((*currentworm).id==id)){
+            aimers.setRotation((angle+270)%360);
+            aimers.setScale(mapscale, mapscale);
+            aimers.setPosition((position.x+20+(cos((angle-90)*3.14159265/180)*80)+deltabg.x)*mapscale, (position.y+23+(sin((angle-90)*3.14159265/180)*80)+deltabg.y)*mapscale);
+        }
     }
 };
 vector<worm*> wormpointers;
-worm *currentworm=0;
 
 class player{public:
     worm worms[5];
@@ -583,6 +592,17 @@ bool protocol39(){
     return 0;
 }
 
+bool protocol3b(signed char input=0){
+    if(connected){
+        unsigned char to_send[2];
+        to_send[0]=0x3b;
+        to_send[1]=input;
+        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x39\n";
+        else return 1;
+    }else cout<<"not connected, can not aim\n";
+    return 0;
+}
+
 class metamap{public:
     string ids, author, name, thumbnail, map_file, version, last_update, created;
     int id;
@@ -625,7 +645,7 @@ bool getMapsFromServer(string ipin, unsigned short portin){
         cout<<"parsing maps...\n";
         buffer=response.getBody();
         json jslist=json::parse(buffer);
-        vector<json> mapvector=jslist["list"].get<vector<json>>();
+        vector<json> mapvector=jslist.get<vector<json>>();
         for(int i=0; i<mapvector.size(); i++){
             metamaps.push_back(metamap());
             metamaps[i].ids=mapvector[i]["id"].get<string>();
@@ -856,6 +876,9 @@ int main(){
         plreadyt[1].loadFromFile("img/ready1.png");
         plreadys[0].setTexture(plreadyt[0]);
         plreadys[1].setTexture(plreadyt[1]);
+        aimert.loadFromFile("img/aimer.png");
+        aimers.setTexture(aimert);
+        aimers.setOrigin(11,14);
 
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
@@ -1021,11 +1044,11 @@ int main(){
         if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE) exitting, 1))
             cout<<"could not set handler to exitting function\n";/*
         mode=ingame;
-        backgroundt.loadFromImage(backgroundi=loadMap("1.map", spawnpoints));
+        backgroundt.loadFromImage(backgroundi=loadMap("1.map", spawnpoints, "185.84.136.151", 31337));
         backgrounds.setTexture(backgroundt, 1);
         backgrounds.setScale(0.2,0.2);
         playersamount=1;
-        players.push_back(player());
+        players.push_back(player());//                                                  DOES NOT WORK
         players[0].addworm(worm());
         players[0].addworm(worm(sf::Vector2f(200,0), 0, 200, 1));
         wormpointers.push_back(&players[0].worms[0]);
@@ -1086,6 +1109,22 @@ int main(){
                                 }
                             }
                         }
+                    }else
+                    if(event.text.unicode==119){
+                        if((*currentworm).direction==1)
+                            protocol3b(-1);
+                        else
+                        if((*currentworm).direction==-1)
+                            protocol3b(1);
+                        else cout<<"wrong direction\n";
+                    }
+                    if(event.text.unicode==115){
+                        if((*currentworm).direction==1)
+                            protocol3b(1);
+                        else
+                        if((*currentworm).direction==-1)
+                            protocol3b(-1);
+                        else cout<<"wrong direction\n";
                     }
                 }else
                 if((event.type==sf::Event::KeyPressed)||(event.type==sf::Event::KeyReleased)){
@@ -2285,7 +2324,6 @@ int main(){
                                                     cout<<protbufferi[5]<<" moved left on "<<(*currentworm).id<<" turn\n";
                                             }else{if(wormpointers[j]==currentworm)
                                                 (*wormpointers[j]).walking=0;
-                                                (*wormpointers[j]).direction=((*wormpointers[j]).angle<=180)*2-1;
                                             }
                                             break;
                                         }
@@ -2370,7 +2408,6 @@ int main(){
                                                     cout<<protbufferi[5]<<" moved left on "<<(*currentworm).id<<" turn\n";
                                             }else{if(wormpointers[j]==currentworm)
                                                 (*wormpointers[j]).walking=0;
-                                                (*wormpointers[j]).direction=((*wormpointers[j]).angle<=180)*2-1;
                                             }
                                             break;
                                         }
