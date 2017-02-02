@@ -15,12 +15,12 @@ const MapInterface = {
 				return;
 			}
 			let parsedJSON = JSON.parse( data );
-			if( typeof parsedJSON.list === 'undefined' || parsedJSON.list instanceof Array === false )
+			if( typeof parsedJSON === 'undefined' || parsedJSON instanceof Array === false )
 			{
 				callback( new Error( 'JSON does not contain list field' ) );
 				return;
 			}
-			callback( void 0, parsedJSON.list );
+			callback( void 0, parsedJSON );
 		} );
 	},
 
