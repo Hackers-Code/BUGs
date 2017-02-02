@@ -1,4 +1,38 @@
-{
-  "list": [
-  ]
-}
+[
+  {
+    "id": 0,
+    "name": "no weapon",
+    "usages": -1,
+    "image": "/dev/null"
+  },
+  {
+    "id": 1,
+    "name": "worm change",
+    "usages": 3,
+    "image": "/dev/null"
+  },
+  {
+    "id": 2,
+    "name": "bazooka",
+    "usages": -1,
+    "image": "/dev/null"
+  },
+  {
+    "id": 3,
+    "name": "grenade",
+    "usages": -1,
+    "image": "/dev/null"
+  },
+  {
+    "id": 4,
+    "name": "team kill confirmed",
+    "usages": 1,
+    "image": "/dev/null"
+  },
+  {
+    "id": 5,
+    "name": "zbigniew stonoga",
+    "usages": 32,
+    "image": "/dev/null"
+  }
+]
