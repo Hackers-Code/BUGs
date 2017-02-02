@@ -1,3 +1,4 @@
 {
-  "map-list": "/maps/list.json"
+  "map-list": "/maps/list.json",
+  "weapons-list": "/weapons/list.json"
 }
