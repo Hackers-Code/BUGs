@@ -127,10 +127,18 @@ class Worm {
 		if( angle > 0 )
 		{
 			this.angle = (this.angle + 2) % 360;
+			if( this.angle === 360 )
+			{
+				this.angle = 0;
+			}
 		}
 		else if( angle < 0 )
 		{
 			this.angle = (this.angle - 2) % 360;
+			if( this.angle < 0 )
+			{
+				this.angle = 360 + this.angle;
+			}
 		}
 	}
 
