@@ -128,7 +128,8 @@ sf::Image backgroundi;
 sf::Vector2f deltabg(0,0);
 sf::Text turntimet;
 float mapscale=0.2;
-unsigned int turntime=0, clockframe=0, no18delta=0;
+unsigned int turntime=0, clockframe=0, no18delta=0, force=0;
+bool shooting=0;
 
 //fizyka
 short vjump=-300, ay=43, vxmax=27, vymax=875;
@@ -406,7 +407,6 @@ void protocol1(string buffer){
         }else cout<<"not connected, cannot get nick\n";
     }else cout<<"nick must have no more than 20 letters\n";
 }
-
 bool protocol3(){
     if(connected){
         unsigned char to_send[1];
@@ -419,7 +419,6 @@ bool protocol3(){
     }else cout<<"not connected, cannot leave room\n";
     return 0;
 }
-
 void protocol6(){
     unsigned char to_send[7];
     to_send[0]=6;
@@ -435,7 +434,6 @@ void protocol6(){
     }
     protbufferi[0]=0;
 }
-
 void protocol10(){
     if(connected){
         unsigned char to_send[1];
@@ -448,7 +446,6 @@ void protocol10(){
         }else cout<<"sending error 0x10\n";
     }else cout<<"not connected, cannot get room list\n";
 }
-
 void protocol20(string buffer, string buffer2){
     if(connected){
         unsigned char to_send[22+(buffer.length())];
@@ -467,7 +464,6 @@ void protocol20(string buffer, string buffer2){
         else cout<<"sending error\n";
     }else cout<<"not connected, can not create room\n";
 }
-
 void protocol22(){
     if(connected){
         unsigned char to_send[9];
@@ -485,7 +481,6 @@ void protocol22(){
         }else cout<<"sending error 0x22\n";
     }else cout<<"not connected, cannot set physic\n";
 }
-
 void protocol24(unsigned int seed, unsigned char playersamount){
     if(connected){
 		unsigned char to_send[6];
@@ -499,7 +494,6 @@ void protocol24(unsigned int seed, unsigned char playersamount){
 		else cout<<"sending error\n";
     }else cout<<"not connected, cannot change settings\n";
 }
-
 void protocol26(unsigned int gameid, string password){
     if(password.length()<256){
         if(connected){
@@ -521,17 +515,17 @@ void protocol26(unsigned int gameid, string password){
         }else cout<<"not connected, cannot join\n";
     }else cout<<"password too long (255 chars max)\n";
 }
-
-void protocol28(){
+bool protocol28(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x28;
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){
             cout<<"poszlo 0x28\n";
+            return 1;
         }else cout<<"sending error 0x28\n";
     }else cout<<"not connected, cannot get room settings\n";
+    return 0;
 }
-
 void protocol2a(sf::Color input, unsigned char maskid){
     if(connected){
         unsigned char to_send[5];
@@ -545,7 +539,6 @@ void protocol2a(sf::Color input, unsigned char maskid){
         }else cout<<"sending error 0x2a\n";
     }else cout<<"not connected, cannot set player settings\n";
 }
-
 void protocol2c(){
     if(connected){
         unsigned char to_send[1];
@@ -555,7 +548,6 @@ void protocol2c(){
         }else cout<<"sending error 0x2c\n";
     }else cout<<"not connected, cannot get ready\n";
 }
-
 void protocol2e(){
     if(connected){
         unsigned char to_send[1];
@@ -564,7 +556,6 @@ void protocol2e(){
         }else cout<<"sending error 0x2e\n";
     }else cout<<"not connected, cannot get players list\n";
 }
-
 void protocol31(){
     if(connected){
         unsigned char to_send[1];
@@ -573,7 +564,6 @@ void protocol31(){
         }else cout<<"sending error 0x31\n";
     }else cout<<"not connected, cannot get turn time\n";
 }
-
 bool protocol37(){
     if(connected){
         unsigned char to_send[1];
@@ -583,7 +573,6 @@ bool protocol37(){
     }else cout<<"not connected, can not jump\n";
     return 0;
 }
-
 bool protocol38(){
     if(connected){
         unsigned char to_send[1];
@@ -593,7 +582,6 @@ bool protocol38(){
     }else cout<<"not connected, can not move\n";
     return 0;
 }
-
 bool protocol39(){
     if(connected){
         unsigned char to_send[1];
@@ -603,7 +591,6 @@ bool protocol39(){
     }else cout<<"not connected, can not move\n";
     return 0;
 }
-
 bool protocol3b(signed char input=0){
     if(connected){
         unsigned char to_send[2];
@@ -612,6 +599,25 @@ bool protocol3b(signed char input=0){
         if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x39\n";
         else return 1;
     }else cout<<"not connected, can not aim\n";
+    return 0;
+}
+bool protocol40(){
+    if(connected){
+        unsigned char to_send[1];
+        to_send[0]=0x40;
+        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x38\n";
+        else return 1;
+    }else cout<<"not connected, can not move\n";
+    return 0;
+}
+bool protocol42(unsigned char weaponid=0){
+    if(connected){
+        unsigned char to_send[2];
+        to_send[0]=0x42;
+        to_send[1]=weaponid;
+        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x38\n";
+        else return 1;
+    }else cout<<"not connected, can not move\n";
     return 0;
 }
 
@@ -1808,7 +1814,8 @@ int main(){
                         if(i<received){
                             if(data[i]){
                                 cout<<"physic accepted\n"<<char(7);
-                                protocol24(metamaps[choosedmap].id, playersamount);
+                                if(metamaps.size()>choosedmap)
+                                    protocol24(metamaps[choosedmap].id, playersamount);
                             }else{
                                 cout<<"physic denied\n";
                             }
@@ -1831,18 +1838,21 @@ int main(){
                         continue;
                     }
                     if(data[i]==0x27){
-                        receiving=0x27;
-                        deltareceive=i+1;
-                        to_receive=2;
-                        protbufferi[2]=0;
-                        passwordinput.setString(protbuffers[0]);
-                        for(list<gamelistelements>::iterator i=gamelist.begin(); i!=gamelist.end(); ++i){
-                            if(protbufferi[0]==(*i).id){
-                                lobbyname=(*i).name;
+                        bool fnotexist=1;
+                        for(list<gamelistelements>::iterator j=gamelist.begin(); j!=gamelist.end(); ++j){
+                            if(protbufferi[0]==(*j).id){
+                                receiving=0x27;
+                                deltareceive=i+1;
+                                to_receive=2;
+                                protbufferi[2]=0;
+                                lobbyname=(*j).name;
                                 lobbynamet.setString(lobbyname);
+                                passwordinput.setString(protbuffers[0]);
+                                fnotexist=0;
                                 break;
                             }
                         }
+                        if(fnotexist)cout<<"room "<<protbufferi[0]<<"does not exist\n";
                         break;
                     }
                     if(data[i]==0x29){cout<<"0x29\n";
@@ -1932,6 +1942,7 @@ int main(){
                     }
                     if(data[i]==0x36){
                         currentworm=0;
+                        protocol40();
                         cout<<"end of your turn\n";
                         continue;
                     }
@@ -2354,6 +2365,12 @@ int main(){
                         udpto_receive=1;
                         break;
                     }
+                    if(data[i]==0x41){
+                        receiving=0x41;
+                        udpdeltareceive=i+4;
+                        protbufferi[0]=udpto_receive=1;
+                        break;
+                    }
                     cout<<"recieved unknown UDP protocol: "<<int(data[i])<<"\n";
                 }else udpto_ignore--;
             }
@@ -2502,8 +2519,53 @@ int main(){
                 }else
                     cout<<"missed rest of 0x35";
                 receiving=0;
+            }else
+            if(receiving==0x41){
+                for(int i=udpdeltareceive; i<received; i++){
+                    if(protbufferi[0]){
+                        protbufferi[1]=protbufferi[1]<<8;
+                        protbufferi[1]+=data[i];
+                    }else{
+                        if(!(udpto_receive%2)){
+                            protbufferi[2]=data[i];
+                        }else{
+                            protbuffersh[0]=data[i];
+                            if((weapons.size()>protbufferi[2])&&(weapons[protbufferi[2]].id!=protbufferi[2])){
+                                bool fnotexists=1;
+                                for(int j=0; j<weapons.size(); j++){
+                                    if(weapons[j].id==protbufferi[2]){
+                                        weapons[j].usages=protbuffersh[0];
+                                        fnotexists=0;
+                                        break;
+                                    }
+                                }
+                                if(fnotexists){
+                                    cout<<"weapon with id "<<protbufferi[2]<<" does not exist\n";
+                                }
+                            }
+                            else{
+                                weapons[protbufferi[2]].usages=protbuffersh[0];
+                            }
+                        }
+                    }
+                    udpto_receive--;
+                    if(!udpto_receive){
+                        if(protbufferi[0]){//end of metadata
+                            protbufferi[0]=0;
+                            udpto_receive=2*protbufferi[1];
+                            if(protbufferi[1]==0){
+                                break;
+                            }
+                            protbufferi[1]=0;
+                        }else
+                        {//end of protocol
+                            receiving=0;
+                            break;
+                        }
+                    }
+                }
             }else{
-                if(receiving) cout<<"unknown receiving: "<<int(receiving)<<"\n";
+                if(receiving) cout<<"unvg9w3m4q5known receiving: "<<int(receiving)<<"\n";
             }
         }
         udpport=udpsocket.getLocalPort();
