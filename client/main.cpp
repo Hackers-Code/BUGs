@@ -725,7 +725,7 @@ bool getWeaponsFromServer(){
     }
 }
 
-sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints, string ipin, unsigned short portin){
+sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
     spawnpoints.clear();
     sf::Image output;
     if(!track.length()){
@@ -733,7 +733,7 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints, string ipin, un
         return output;
     }
     sf::Http http;
-    http.setHost(ipin, portin+1);
+    http.setHost("creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
     sf::Http::Request request(track);
     sf::Http::Response response=http.sendRequest(request);
     sf::Http::Response::Status httpstatus=response.getStatus();
@@ -807,7 +807,7 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints, string ipin, un
 
 void createmap(unsigned int seed){
     if(seed==1){
-        backgroundt.loadFromImage(loadMap(metamaps[choosedmap].map_file, spawnpoints, ipinput.getString(), atoi(portinput.getString().toAnsiString().c_str())));
+        backgroundt.loadFromImage(loadMap(metamaps[choosedmap].map_file, spawnpoints));
         backgrounds.setTexture(backgroundt);
     }else{
         srand(seed);
