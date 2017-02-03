@@ -3,36 +3,63 @@
     "id": 0,
     "name": "no weapon",
     "usages": -1,
-    "image": "/dev/null"
+    "image": "/dev/null",
+    "dmg": 0
   },
   {
     "id": 1,
     "name": "worm change",
     "usages": 3,
-    "image": "/dev/null"
+    "image": "/dev/null",
+    "dmg": 0
   },
   {
     "id": 2,
-    "name": "bazooka",
+    "name": "pass round",
     "usages": -1,
-    "image": "/dev/null"
+    "image": "/dev/null",
+    "dmg": 0
   },
   {
     "id": 3,
-    "name": "grenade",
+    "name": "bazooka",
     "usages": -1,
-    "image": "/dev/null"
+    "image": "/dev/null",
+    "dmg": 69
   },
   {
     "id": 4,
-    "name": "team kill confirmed",
-    "usages": 1,
-    "image": "/dev/null"
+    "name": "grenade",
+    "usages": -1,
+    "image": "/dev/null",
+    "dmg": 100
   },
   {
     "id": 5,
-    "name": "zbigniew stonoga",
-    "usages": 32,
-    "image": "/dev/null"
+    "name": "shotgun",
+    "usages": 4,
+    "image": "/dev/null",
+    "dmg": 110
+  },
+  {
+    "id": 6,
+    "name": "baseball",
+    "usages": 2,
+    "image": "/dev/null",
+    "dmg": 20
+  },
+  {
+    "id": 7,
+    "name": "dynamite",
+    "usages": 2,
+    "image": "/dev/null",
+    "dmg": 120
+  },
+  {
+    "id": 8,
+    "name": "revolver",
+    "usages": 1,
+    "image": "/dev/null",
+    "dmg": 125
   }
 ]
