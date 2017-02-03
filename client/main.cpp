@@ -195,6 +195,18 @@ class gamelistelements{public:
 list<gamelistelements> gamelist;
 gamelistelements *gamelistpointer;
 
+class weapon{public:
+    int id, usages, dmg;
+    string track, name;
+    sf::Texture thumbt;
+    sf::Sprite thumbs;
+
+    weapon(string namein){
+        name=namein;
+    }
+};
+vector<weapon> weapons;
+
 class player;
 class worm;
 worm *currentworm=0;
@@ -608,13 +620,13 @@ class metamap{public:
     int id;
     sf::Texture thumbnailt;
 
-    bool loadFromHTTP(string ipin, unsigned short portin){
+    bool loadFromHTTP(){
         if(!thumbnail.length()){
             cout<<"track to map thumbnail is empty\n";
             return 0;
         }
         sf::Http http;
-        http.setHost(ipin, portin+1);
+        http.setHost("http://creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
         sf::Http::Request request(thumbnail);
         sf::Http::Response response=http.sendRequest(request);
         sf::Http::Response::Status httpstatus=response.getStatus();
@@ -634,14 +646,13 @@ class metamap{public:
 };
 vector<metamap> metamaps;
 
-bool getMapsFromServer(string ipin, unsigned short portin){
+bool getMapsFromServer(){
     sf::Http http;
-    http.setHost(ipin, portin+1);
+    http.setHost("http://creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
     sf::Http::Request request("maps/list.json");
     sf::Http::Response response=http.sendRequest(request);
     sf::Http::Response::Status httpstatus=response.getStatus();
     if(httpstatus==sf::Http::Response::Ok){
-        cout<<response.getBody()<<"\n";
         cout<<"parsing maps...\n";
         buffer=response.getBody();
         json jslist=json::parse(buffer);
@@ -657,10 +668,54 @@ bool getMapsFromServer(string ipin, unsigned short portin){
             metamaps[i].version=mapvector[i]["version"].get<string>();
             metamaps[i].last_update=mapvector[i]["last_update"].get<string>();
             metamaps[i].created=mapvector[i]["created"].get<string>();
-            metamaps[i].loadFromHTTP(ipin, portin);
+            metamaps[i].loadFromHTTP();
             if(!i){
                 mapthumb.setTexture(metamaps[0].thumbnailt, 1);
                 mapnamet.setString(metamaps[0].name);
+            }
+        }
+        return 1;
+    }else{
+        std::cout<<"HTTP Error: "<<httpstatus<<"\n";
+        return 0;
+    }
+}
+
+bool getWeaponsFromServer(){
+    sf::Http http;
+    http.setHost("http://creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
+    sf::Http::Request request("/weapons/list.json");
+    sf::Http::Response response=http.sendRequest(request);
+    sf::Http::Response::Status httpstatus=response.getStatus();
+    if(httpstatus==sf::Http::Response::Ok){
+        cout<<response.getBody()<<"\n";
+        cout<<"parsing weapons...\n";
+        buffer=response.getBody();
+        json jslist=json::parse(buffer);
+        vector<json> armvector=jslist.get<vector<json>>();
+        for(int i=0; i<armvector.size(); i++){
+            buffer=armvector[i]["name"].get<string>();
+            protbufferi[0]=armvector[i]["id"].get<int>();
+            if((protbufferi[0]<weapons.size())&&(weapons[protbufferi[0]].name==buffer)){
+                weapons[protbufferi[0]].id=protbufferi[0];
+                weapons[protbufferi[0]].usages=armvector[i]["usages"].get<int>();
+                weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
+                weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
+            }else{
+                bool fnotexists=1;
+                for(int j=0; j<weapons.size(); i++){
+                    if(weapons[j].name==buffer){
+                        weapons[j].id=protbufferi[0];
+                        weapons[j].usages=armvector[i]["usages"].get<int>();
+                        weapons[j].dmg=armvector[i]["dmg"].get<int>();
+                        weapons[j].track=armvector[i]["image"].get<string>();
+                        fnotexists=0;
+                        break;
+                    }
+                }
+                if(fnotexists){
+                    cout<<"weapon does not exist: "<<buffer<<"\n";
+                }
             }
         }
         return 1;
@@ -1042,7 +1097,18 @@ int main(){
         if(atexit(exitting))
             cout<<"could not register exitting function\n";
         if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE) exitting, 1))
-            cout<<"could not set handler to exitting function\n";/*
+            cout<<"could not set handler to exitting function\n";
+        weapons.push_back(weapon("no weapon"));
+        weapons.push_back(weapon("worm change"));
+        weapons.push_back(weapon("pass round"));
+        weapons.push_back(weapon("bazooka"));
+        weapons.push_back(weapon("grenade"));
+        weapons.push_back(weapon("shotgun"));
+        weapons.push_back(weapon("baseball"));
+        weapons.push_back(weapon("dynamite"));
+        weapons.push_back(weapon("revolver"));
+
+        /*
         mode=ingame;
         backgroundt.loadFromImage(backgroundi=loadMap("1.map", spawnpoints, "185.84.136.151", 31337));
         backgrounds.setTexture(backgroundt, 1);
@@ -1209,7 +1275,8 @@ int main(){
                         if((event.mouseButton.x>=okconnects.getPosition().x)&&(event.mouseButton.x<=okconnects.getPosition().x+okconnects.getLocalBounds().width)&&(event.mouseButton.y>=okconnects.getPosition().y)&&(event.mouseButton.y<=okconnects.getPosition().y+okconnects.getLocalBounds().height)){
                             if(connect(ipinput.getString(), portinput.getString())){
                                 cout<<"connected\n";
-                                getMapsFromServer(ipinput.getString(), atoi(portinput.getString().toAnsiString().c_str()));
+                                getMapsFromServer();
+                                getWeaponsFromServer();
                             }
                         }else
                         if((event.mouseButton.x>=oknicks.getPosition().x)&&(event.mouseButton.x<=oknicks.getPosition().x+oknicks.getLocalBounds().width)&&(event.mouseButton.y>=oknicks.getPosition().y)&&(event.mouseButton.y<=oknicks.getPosition().y+oknicks.getLocalBounds().height)){
@@ -1268,7 +1335,7 @@ int main(){
                         if(event.text.unicode==13){
                             if(connect(ipinput.getString(), portinput.getString())){
                                 cout<<"connected\n";
-                                getMapsFromServer(ipinput.getString(), atoi(portinput.getString().toAnsiString().c_str()));
+                                getMapsFromServer();
                             }
                         }
                     }else
@@ -2155,9 +2222,8 @@ int main(){
                             players.clear();
                             protbufferi[0]=0;
                             if(protbufferi[1]==0){
-                                cout<<"empty player list?\ndisconnecting\n";
+                                cout<<"empty player list...\n";
                                 receiving=0;
-                                clientsocket.disconnect();
                                 break;
                             }
                             to_receive=25*protbufferi[1];
