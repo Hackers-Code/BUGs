@@ -1889,7 +1889,7 @@ int main(){
                     }
                     if(data[i]==0x30){
                         soundtrack.stop();
-                        backgroundt.loadFromImage(backgroundi=loadMap(metamaps[choosedmap].map_file, spawnpoints, ipinput.getString(), atoi(portinput.getString().toAnsiString().c_str())));
+                        backgroundt.loadFromImage(backgroundi=loadMap(metamaps[choosedmap].map_file, spawnpoints));
                         protocol2e();
                         backgrounds.setTexture(backgroundt, 1);
                         backgrounds.setScale(0.2,0.2);
