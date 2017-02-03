@@ -1,6 +1,6 @@
 const Worm = require( './Worm' );
 class Player {
-	constructor( client, playerID )
+	constructor( client, playerID, weapons )
 	{
 		client.player = this;
 		this.send = client.send.bind( client );
@@ -10,6 +10,7 @@ class Player {
 		this.mapLoaded = false;
 		this.name = client.name;
 		this.worms = [];
+		this.weapons = weapons;
 		this.actualWorm = 0;
 		this.colour = {
 			R : Buffer.from( [ 0 ] ),

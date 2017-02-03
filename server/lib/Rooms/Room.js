@@ -10,6 +10,7 @@ const SearchEngine = require( '../Utils/SearchEngine' );
 const Game = require( '../Game/Game' );
 const Player = require( '../Game/Player' );
 const MapInterface = require( '../MapInterface/MapInterface' );
+const Weapons = require( '../Weapons/Weapons' );
 class Room {
 	constructor( settings, client, id, roomsStorage )
 	{
@@ -22,7 +23,7 @@ class Room {
 		this.tasksStorage = roomsStorage.getTasksStorage();
 		this.players = [];
 		this.playersID = 0;
-		this.players.push( new Player( client, this.playersID++ ) );
+		this.weapons = new Weapons();
 		this.status = Status.uninitialized;
 		this.mapID = 1;
 		this.maxPlayers = 2;
@@ -31,7 +32,11 @@ class Room {
 		this.game = new Game( this.players );
 		this.tasks = [];
 		this.leaderboard = [];
-		this.preparePlayersList();
+		this.weapons.loadWeaponsListFromFile( process.cwd() + '/resources/weapons/list.json', () =>
+		{
+			this.players.push( new Player( client, this.playersID++, this.weapons.getWeaponsList() ) );
+			this.preparePlayersList();
+		} );
 		MapInterface.loadAndParseMapsList( process.cwd() + '/resources/maps/list.json', ( err, data ) =>
 		{
 			if( err )
@@ -195,7 +200,7 @@ class Room {
 		{
 			if( password.compare( this.password ) === 0 )
 			{
-				this.players.push( new Player( client, this.playersID++ ) );
+				this.players.push( new Player( client, this.playersID++, this.weapons.getWeaponsList() ) );
 				if( this.players.length === this.maxPlayers )
 				{
 					this.status = Status.waitingForConfirming;
