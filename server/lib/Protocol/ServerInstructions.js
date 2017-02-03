@@ -133,6 +133,18 @@ module.exports = {
 			}
 		}
 	},
+	0x41 : {
+		params : {
+			count : 4,
+			weapons : {
+				id : 1,
+				usages : 1
+			}
+		}
+	},
+	0x42 : {
+		params : { id : 1 },
+	},
 	0xe0 : {
 		params : {
 			length : 1,

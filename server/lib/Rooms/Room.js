@@ -310,6 +310,17 @@ class Room {
 	{
 		return this.roomConfigResponse;
 	}
+
+	broadcastSelectedWeapon( data )
+	{
+		this.players.forEach( ( element ) =>
+		{
+			element.send( {
+				opcode : 0x44,
+				id : data.id
+			}, 'UDP' );
+		} );
+	}
 }
 
 module.exports = Room;

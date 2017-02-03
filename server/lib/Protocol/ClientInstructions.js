@@ -101,5 +101,14 @@ module.exports = {
 			angle : 1
 		},
 		callback : 'setAngle'
+	},
+	0x40 : {
+		params : {},
+		response : 0x41,
+		callback : 'getWeaponsList'
+	},
+	0x42 : {
+		params : { id : 1 },
+		callback : 'selectWeapons'
 	}
 };

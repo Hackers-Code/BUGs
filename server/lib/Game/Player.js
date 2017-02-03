@@ -1,4 +1,5 @@
 const Worm = require( './Worm' );
+const SearchEngine = require( '../Utils/SearchEngine' );
 class Player {
 	constructor( client, playerID, weapons )
 	{
@@ -20,6 +21,24 @@ class Player {
 		this.mask = Buffer.from( [ 0 ] );
 		this.isYourTurn = false;
 		this.world = null;
+	}
+
+	getWeaponsList()
+	{
+		let count = Buffer.alloc( 4 );
+		count.writeUInt32BE( this.weapons.length, 0 );
+		let weapons = [];
+		this.weapons.forEach( ( element ) =>
+		{
+			weapons.push( {
+				id : Buffer.from( [ element.id ] ),
+				usages : Buffer.from( [ element.usages ] )
+			} );
+		} );
+		return {
+			count,
+			weapons
+		};
 	}
 
 	getPlayerID()
@@ -188,6 +207,20 @@ class Player {
 		{
 			this.worms[ this.actualWorm ].setAngle( data );
 		}
+	}
+
+	selectWeapon( data )
+	{
+		if( this.isYourTurn )
+		{
+			let index = SearchEngine.findByNumericId( this.weapons, data.id );
+			if( index !== -1 )
+			{
+				this.worms[ this.actualWorm ].selectWeapon( this.weapons[ index ] );
+				return true;
+			}
+		}
+		return false;
 	}
 }
 

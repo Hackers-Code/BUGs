@@ -318,6 +318,25 @@ class Client {
 			this.player.setAngle( data );
 		}
 	}
+
+	getWeaponsList()
+	{
+		if( this.player !== null )
+		{
+			return this.players.getWeaponsList();
+		}
+	}
+
+	selectWeapon( data )
+	{
+		if( this.player !== null )
+		{
+			if( this.players.selectWeapon( data ) )
+			{
+				this.room.broadcastSelectedWeapon( data );
+			}
+		}
+	}
 }
 
 module.exports.Client = Client;

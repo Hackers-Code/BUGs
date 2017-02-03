@@ -20,6 +20,7 @@ class Worm {
 		this._isMovingLeft = false;
 		this._isFalling = false;
 		this._isJumping = false;
+		this.weapon = 0;
 	}
 
 	get isMovingLeft()
@@ -71,6 +72,7 @@ class Worm {
 	{
 		this.isMovingRight = false;
 		this.isMovingLeft = false;
+		this.weapon = 0;
 		this.speedX = 0;
 	}
 
@@ -170,6 +172,11 @@ class Worm {
 			speedY,
 			angle
 		};
+	}
+
+	selectWeapon( weapon )
+	{
+		this.weapon = weapon;
 	}
 }
 
