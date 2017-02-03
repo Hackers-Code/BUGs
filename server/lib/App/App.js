@@ -8,14 +8,12 @@ class App {
 		this.config = options.config;
 		this.startTCP = options.tcpStart;
 		this.startUDP = options.udpStart;
-		this.startHTTP = options.httpStart;
 		this.runTCP();
 		this.runUDP();
 		this.logger = new Logger( this.config.logFile, this.config.errorFile );
 		this.tasksStorage = new TasksStorage( this.config.tickrate );
 		this.roomsStorage = new RoomsStorage( this.logger, this.tasksStorage );
 		this.clientsStorage = new ClientsStorage( this.config.maxClients, this.roomsStorage );
-		this.startHTTP();
 	}
 
 	runTCP()
