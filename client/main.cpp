@@ -12,6 +12,7 @@
 #include "lib/json.hpp"
 
 #define INFO_AMOUNT 11
+#define HTTPURL "http://creepy-crawlies.hackers-code.boakgp.hekko24.pl"
 
 using namespace std;
 using json=nlohmann::json;
@@ -209,7 +210,7 @@ class weapon{public:
     bool loadGraphics(){
         if(thumbnail.size()){
             sf::Http http;
-            http.setHost("http://creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
+            http.setHost(HTTPURL, 80);
             sf::Http::Request request(thumbnail);
             sf::Http::Response response=http.sendRequest(request);
             sf::Http::Response::Status httpstatus=response.getStatus();
@@ -648,7 +649,7 @@ class metamap{public:
             return 0;
         }
         sf::Http http;
-        http.setHost("http://creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
+        http.setHost(HTTPURL, 80);
         sf::Http::Request request(thumbnail);
         sf::Http::Response response=http.sendRequest(request);
         sf::Http::Response::Status httpstatus=response.getStatus();
@@ -670,7 +671,7 @@ vector<metamap> metamaps;
 
 bool getMapsFromServer(){
     sf::Http http;
-    http.setHost("http://creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
+    http.setHost(HTTPURL, 80);
     sf::Http::Request request("maps/list.json");
     sf::Http::Response response=http.sendRequest(request);
     sf::Http::Response::Status httpstatus=response.getStatus();
@@ -705,7 +706,7 @@ bool getMapsFromServer(){
 
 bool getWeaponsFromServer(){
     sf::Http http;
-    http.setHost("http://creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
+    http.setHost(HTTPURL, 80);
     sf::Http::Request request("/weapons/list.json");
     sf::Http::Response response=http.sendRequest(request);
     sf::Http::Response::Status httpstatus=response.getStatus();
