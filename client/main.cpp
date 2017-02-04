@@ -12,7 +12,7 @@
 #include "lib/json.hpp"
 
 #define INFO_AMOUNT 11
-#define HTTPURL "http://creepy-crawlies.hackers-code.boakgp.hekko24.pl"
+#define HTTPURL "http://bugs.hackers-code.boakgp.hekko24.pl"
 
 using namespace std;
 using json=nlohmann::json;
@@ -727,7 +727,7 @@ bool getWeaponsFromServer(){
                 auto fghfbdfdvsdw=armvector[i].find("thumbnail");  if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
             }else{
                 bool fnotexists=1;
-                for(int j=0; j<weapons.size(); i++){
+                for(int j=0; j<weapons.size(); j++){
                     if(weapons[j].name==buffer){
                         weapons[j].id=protbufferi[0];
                         auto vdjnadfaskfj=armvector[i].find("usages");     if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=armvector[i]["usages"].get<int>();
