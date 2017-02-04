@@ -1,65 +1,88 @@
 [
   {
     "id": 0,
-    "name": "no weapon",
+    "name": "No weapon",
     "usages": -1,
+    "thumbnail": "/weapons/t_noweapon.png",
     "image": "/dev/null",
     "dmg": 0
   },
   {
     "id": 1,
-    "name": "worm change",
+    "name": "Worm change",
     "usages": 3,
-    "image": "/dev/null",
-    "dmg": 0
+    "notEndRound": true,
+    "thumbnail": "/weapons/t_wormchange.png"
   },
   {
     "id": 2,
-    "name": "pass round",
+    "name": "Pass round",
     "usages": -1,
-    "image": "/dev/null",
-    "dmg": 0
+    "thumbnail": "/weapons/t_passround.png"
   },
   {
     "id": 3,
-    "name": "bazooka",
+    "name": "Bazooka",
     "usages": -1,
+    "thumbnail": "/weapons/t_bazooka.png",
     "image": "/dev/null",
-    "dmg": 69
+    "dmg": 69,
+    "explosive": true
   },
   {
     "id": 4,
-    "name": "grenade",
+    "name": "Grenade",
     "usages": -1,
+    "thumbnail": "/weapons/t_grenade.png",
     "image": "/dev/null",
-    "dmg": 100
+    "dmg": 100,
+    "explosive": true,
+    "delay": 2,
+    "bounces": true
   },
   {
     "id": 5,
-    "name": "shotgun",
+    "name": "Shotgun",
     "usages": 4,
+    "thumbnail": "/weapons/t_shotgun.png",
     "image": "/dev/null",
     "dmg": 110
   },
   {
     "id": 6,
-    "name": "baseball",
+    "name": "Baseball",
     "usages": 2,
+    "thumbnail": "/weapons/t_baseball.png",
     "image": "/dev/null",
     "dmg": 20
   },
   {
     "id": 7,
-    "name": "dynamite",
+    "name": "Dynamite",
     "usages": 2,
+    "thumbnail": "/weapons/t_dynamite.png",
     "image": "/dev/null",
-    "dmg": 120
+    "dmg": 120,
+    "explosive": true,
+    "delay": 5
   },
   {
     "id": 8,
-    "name": "revolver",
+    "name": "Revolver",
     "usages": 1,
+    "thumbnail": "/weapons/t_revolver.png",
     "image": "/dev/null",
     "dmg": 125
+  },
+  {
+    "id": 9,
+    "name": "Holy hand grenade",
+    "usages": 0,
+    "thumbnail": "/weapons/t_holyhandgrenade.png",
+    "image": "/dev/null",
+    "dmg": 210,
+    "explosive": true,
+    "delay": 3,
+    "bounces": true
   }
 ]
