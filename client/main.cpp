@@ -198,12 +198,28 @@ gamelistelements *gamelistpointer;
 
 class weapon{public:
     int id, usages, dmg;
-    string track, name;
+    string track, name, thumbnail;
     sf::Texture thumbt;
     sf::Sprite thumbs;
 
     weapon(string namein){
         name=namein;
+    }
+
+    bool loadGraphics(){
+        if(thumbnail.size()){
+            sf::Http http;
+            http.setHost("http://creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
+            sf::Http::Request request(thumbnail);
+            sf::Http::Response response=http.sendRequest(request);
+            sf::Http::Response::Status httpstatus=response.getStatus();
+            if(httpstatus==sf::Http::Response::Ok){
+
+                return 1;
+            }
+            return 0;
+        }
+        return 0;
     }
 };
 vector<weapon> weapons;
@@ -628,7 +644,7 @@ class metamap{public:
 
     bool loadFromHTTP(){
         if(!thumbnail.length()){
-            cout<<"track to map thumbnail is empty\n";
+            cout<<"track to map's thumbnail is empty\n";
             return 0;
         }
         sf::Http http;
@@ -665,15 +681,15 @@ bool getMapsFromServer(){
         vector<json> mapvector=jslist.get<vector<json>>();
         for(int i=0; i<mapvector.size(); i++){
             metamaps.push_back(metamap());
-            metamaps[i].ids=mapvector[i]["id"].get<string>();
+            auto vdfjnkfdj=mapvector[i].find("id");          if(vdfjnkfdj!=mapvector[i].end()) metamaps[i].ids=        mapvector[i]["id"].get<string>();        else{cout<<"map list invalid, id not set\n"; return 0;}
             metamaps[i].id=atoi(metamaps[i].ids.c_str());
-            metamaps[i].author=mapvector[i]["author"].get<string>();
-            metamaps[i].name=mapvector[i]["name"].get<string>();
-            metamaps[i].thumbnail=mapvector[i]["thumbnail"].get<string>();
-            metamaps[i].map_file=mapvector[i]["map_file"].get<string>();
-            metamaps[i].version=mapvector[i]["version"].get<string>();
-            metamaps[i].last_update=mapvector[i]["last_update"].get<string>();
-            metamaps[i].created=mapvector[i]["created"].get<string>();
+            auto sfhgjftdf=mapvector[i].find("author");      if(sfhgjftdf!=mapvector[i].end()) metamaps[i].author=     mapvector[i]["author"].get<string>();    else cout<<metamaps[i].ids<<"'s map author not set\n";
+            auto bhfdcvbgh=mapvector[i].find("name");        if(bhfdcvbgh!=mapvector[i].end()) metamaps[i].name=       mapvector[i]["name"].get<string>();      else cout<<"map "<<metamaps[i].ids<<" hasn't got a name\n";
+            auto adgfhdgvc=mapvector[i].find("thumbnail");   if(adgfhdgvc!=mapvector[i].end()) metamaps[i].thumbnail=  mapvector[i]["thumbnail"].get<string>(); else cout<<"map "<<metamaps[i].ids<<" hasn't got a thumbnail\n";
+            auto cghdtghvn=mapvector[i].find("map_file");    if(cghdtghvn!=mapvector[i].end()) metamaps[i].map_file=   mapvector[i]["map_file"].get<string>();  else{cout<<"map "<<metamaps[i].ids<<" invalid, filename does not exist\n"; continue;}
+            auto uhdr5rdfc=mapvector[i].find("version");     if(uhdr5rdfc!=mapvector[i].end()) metamaps[i].version=    mapvector[i]["version"].get<string>();   else cout<<"map "<<metamaps[i].ids<<" hasn't got a version\n";
+            auto bfsdcersv=mapvector[i].find("last_update"); if(bfsdcersv!=mapvector[i].end()) metamaps[i].last_update=mapvector[i]["last_update"].get<string>();
+            auto uktrzbnxf=mapvector[i].find("created");     if(uktrzbnxf!=mapvector[i].end()) metamaps[i].created=    mapvector[i]["created"].get<string>();
             metamaps[i].loadFromHTTP();
             if(!i){
                 mapthumb.setTexture(metamaps[0].thumbnailt, 1);
@@ -704,17 +720,19 @@ bool getWeaponsFromServer(){
             protbufferi[0]=armvector[i]["id"].get<int>();
             if((protbufferi[0]<weapons.size())&&(weapons[protbufferi[0]].name==buffer)){
                 weapons[protbufferi[0]].id=protbufferi[0];
-                weapons[protbufferi[0]].usages=armvector[i]["usages"].get<int>();
-                weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
-                weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
+                auto vdjnadfaskfj=armvector[i].find("usages");     if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=armvector[i]["usages"].get<int>();
+                auto fdcasdvsdfvb=armvector[i].find("dmg");        if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
+                auto vbfgdgyutrra=armvector[i].find("image");      if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
+                auto fghfbdfdvsdw=armvector[i].find("thumbnail");  if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
             }else{
                 bool fnotexists=1;
                 for(int j=0; j<weapons.size(); i++){
                     if(weapons[j].name==buffer){
                         weapons[j].id=protbufferi[0];
-                        weapons[j].usages=armvector[i]["usages"].get<int>();
-                        weapons[j].dmg=armvector[i]["dmg"].get<int>();
-                        weapons[j].track=armvector[i]["image"].get<string>();
+                        auto vdjnadfaskfj=armvector[i].find("usages");     if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=armvector[i]["usages"].get<int>();
+                        auto fdcasdvsdfvb=armvector[i].find("dmg");        if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
+                        auto vbfgdgyutrra=armvector[i].find("image");      if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
+                        auto fghfbdfdvsdw=armvector[i].find("thumbnail");  if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
                         fnotexists=0;
                         break;
                     }
