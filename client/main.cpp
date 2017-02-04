@@ -130,7 +130,7 @@ sf::Vector2f deltabg(0,0);
 sf::Text turntimet;
 float mapscale=0.2;
 unsigned int turntime=0, clockframe=0, no18delta=0, force=0, choosedweapon=0;
-bool shooting=0;
+bool shooting=0, choosingweapon=0;
 
 //fizyka
 short vjump=-300, ay=43, vxmax=27, vymax=875;
@@ -207,7 +207,7 @@ class weapon{public:
         name=namein;
     }
 
-    bool loadGraphics(){
+    bool loadGraphics(int input){
         if(thumbnail.size()){
             sf::Http http;
             http.setHost(HTTPURL, 80);
@@ -215,7 +215,11 @@ class weapon{public:
             sf::Http::Response response=http.sendRequest(request);
             sf::Http::Response::Status httpstatus=response.getStatus();
             if(httpstatus==sf::Http::Response::Ok){
-
+                buffer=response.getBody();
+                thumbt.loadFromMemory(&buffer[0], buffer.length());
+                if((thumbt.getSize().x!=30)||(thumbt.getSize().y!=30)) cout<<name<<"'s thumbnail size is("<<thumbt.getSize().x<<", "<<thumbt.getSize().y<<")\n";
+                thumbs.setTexture(thumbt);
+                thumbs.setPosition(986+((input%5)*36), 277+(int(input/5)*35));
                 return 1;
             }
             return 0;
@@ -711,7 +715,6 @@ bool getWeaponsFromServer(){
     sf::Http::Response response=http.sendRequest(request);
     sf::Http::Response::Status httpstatus=response.getStatus();
     if(httpstatus==sf::Http::Response::Ok){
-        cout<<response.getBody()<<"\n";
         cout<<"parsing weapons...\n";
         buffer=response.getBody();
         json jslist=json::parse(buffer);
@@ -725,6 +728,7 @@ bool getWeaponsFromServer(){
                 auto fdcasdvsdfvb=armvector[i].find("dmg");        if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
                 auto vbfgdgyutrra=armvector[i].find("image");      if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
                 auto fghfbdfdvsdw=armvector[i].find("thumbnail");  if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
+                weapons[protbufferi[0]].loadGraphics(protbufferi[0]);
             }else{
                 bool fnotexists=1;
                 for(int j=0; j<weapons.size(); j++){
@@ -734,6 +738,7 @@ bool getWeaponsFromServer(){
                         auto fdcasdvsdfvb=armvector[i].find("dmg");       if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
                         auto vbfgdgyutrra=armvector[i].find("image");     if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
                         auto fghfbdfdvsdw=armvector[i].find("thumbnail"); if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
+                        weapons[j].loadGraphics(j);
                         fnotexists=0;
                         break;
                     }
@@ -758,7 +763,7 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
         return output;
     }
     sf::Http http;
-    http.setHost("creepy-crawlies.hackers-code.boakgp.hekko24.pl", 80);
+    http.setHost(HTTPURL, 80);
     sf::Http::Request request(track);
     sf::Http::Response response=http.sendRequest(request);
     sf::Http::Response::Status httpstatus=response.getStatus();
@@ -1254,6 +1259,10 @@ int main(){
                                 }
                             }
                         }
+                    }
+                    if(event.type==sf::Event::KeyReleased){
+                        if(event.key.code==sf::Keyboard::F)
+                            choosingweapon=!choosingweapon;
                     }
                 }
             }else
@@ -3053,7 +3062,11 @@ int main(){
             }
             window.draw(clocks);
             window.draw(turntimet);
-            window.draw(backpacks);
+            if(choosingweapon){
+                window.draw(backpacks);
+                for(int i=0; i<weapons.size(); i++)
+                    window.draw(weapons[i].thumbs);
+            }
         }else
         if(mode==connectroom){
             if(connected)
