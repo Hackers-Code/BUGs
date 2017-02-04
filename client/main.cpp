@@ -123,13 +123,13 @@ list<sf::Vector2u> spawnpoints;
 
 //zmienne do rozgrywki
 sf::Color playercolors[4];
-sf::Texture backgroundt, wormt[9], clockt[8], aimert;
-sf::Sprite  backgrounds, clocks, aimers;
+sf::Texture backgroundt, wormt[9], clockt[8], aimert, backpackt;
+sf::Sprite  backgrounds, clocks, aimers, backpacks;
 sf::Image backgroundi;
 sf::Vector2f deltabg(0,0);
 sf::Text turntimet;
 float mapscale=0.2;
-unsigned int turntime=0, clockframe=0, no18delta=0, force=0;
+unsigned int turntime=0, clockframe=0, no18delta=0, force=0, choosedweapon=0;
 bool shooting=0;
 
 //fizyka
@@ -730,10 +730,10 @@ bool getWeaponsFromServer(){
                 for(int j=0; j<weapons.size(); j++){
                     if(weapons[j].name==buffer){
                         weapons[j].id=protbufferi[0];
-                        auto vdjnadfaskfj=armvector[i].find("usages");     if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=armvector[i]["usages"].get<int>();
-                        auto fdcasdvsdfvb=armvector[i].find("dmg");        if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
-                        auto vbfgdgyutrra=armvector[i].find("image");      if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
-                        auto fghfbdfdvsdw=armvector[i].find("thumbnail");  if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
+                        auto vdjnadfaskfj=armvector[i].find("usages");    if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=armvector[i]["usages"].get<int>();
+                        auto fdcasdvsdfvb=armvector[i].find("dmg");       if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
+                        auto vbfgdgyutrra=armvector[i].find("image");     if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
+                        auto fghfbdfdvsdw=armvector[i].find("thumbnail"); if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
                         fnotexists=0;
                         break;
                     }
@@ -959,6 +959,9 @@ int main(){
         aimert.loadFromFile("img/aimer.png");
         aimers.setTexture(aimert);
         aimers.setOrigin(11,14);
+        backpackt.loadFromFile("img/backpack.png");
+        backpacks.setTexture(backpackt);
+        backpacks.setPosition(928, 200);
 
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
@@ -1123,15 +1126,16 @@ int main(){
             cout<<"could not register exitting function\n";
         if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE) exitting, 1))
             cout<<"could not set handler to exitting function\n";
-        weapons.push_back(weapon("no weapon"));
-        weapons.push_back(weapon("worm change"));
-        weapons.push_back(weapon("pass round"));
-        weapons.push_back(weapon("bazooka"));
-        weapons.push_back(weapon("grenade"));
-        weapons.push_back(weapon("shotgun"));
-        weapons.push_back(weapon("baseball"));
-        weapons.push_back(weapon("dynamite"));
-        weapons.push_back(weapon("revolver"));
+        weapons.push_back(weapon("No weapon"));
+        weapons.push_back(weapon("Worm change"));
+        weapons.push_back(weapon("Pass round"));
+        weapons.push_back(weapon("Bazooka"));
+        weapons.push_back(weapon("Grenade"));
+        weapons.push_back(weapon("Shotgun"));
+        weapons.push_back(weapon("Baseball"));
+        weapons.push_back(weapon("Dynamite"));
+        weapons.push_back(weapon("Revolver"));
+        weapons.push_back(weapon("Holy hand grenade"));
 
         /*
         mode=ingame;
@@ -2390,6 +2394,25 @@ int main(){
                         protbufferi[0]=udpto_receive=1;
                         break;
                     }
+                    if(data[i]==0x44){
+                        i++;
+                        if(i<received){
+                            if((data[i]<weapons.size())&&(weapons[data[i]].id==data[i])){
+                                choosedweapon=data[i];
+                            }else{
+                                bool fnotexist=1;
+                                for(int j=0; j<weapons.size(); j++){
+                                    if(weapons[j].id==data[i]){
+                                        choosedweapon=weapons[j].id;
+                                        fnotexist=0;
+                                        break;
+                                    }
+                                }
+                                if(fnotexist) cout<<"choosed not existing weapon("<<int(data[i])<<")\n";;
+                            }
+                        }else cout<<"lost selected`s weapon id\n";
+                        break;
+                    }
                     cout<<"recieved unknown UDP protocol: "<<int(data[i])<<"\n";
                 }else udpto_ignore--;
             }
@@ -3030,6 +3053,7 @@ int main(){
             }
             window.draw(clocks);
             window.draw(turntimet);
+            window.draw(backpacks);
         }else
         if(mode==connectroom){
             if(connected)
