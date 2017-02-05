@@ -198,7 +198,7 @@ list<gamelistelements> gamelist;
 gamelistelements *gamelistpointer;
 
 class weapon{public:
-    int id, usages, dmg;
+    int id, usages, dmg, r;
     string track, name, thumbnail;
     sf::Texture thumbt;
     sf::Sprite thumbs;
@@ -724,20 +724,22 @@ bool getWeaponsFromServer(){
             protbufferi[0]=armvector[i]["id"].get<int>();
             if((protbufferi[0]<weapons.size())&&(weapons[protbufferi[0]].name==buffer)){
                 weapons[protbufferi[0]].id=protbufferi[0];
-                auto vdjnadfaskfj=armvector[i].find("usages");     if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=armvector[i]["usages"].get<int>();
-                auto fdcasdvsdfvb=armvector[i].find("dmg");        if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
-                auto vbfgdgyutrra=armvector[i].find("image");      if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
-                auto fghfbdfdvsdw=armvector[i].find("thumbnail");  if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
+                auto vdjnadfaskfj=armvector[i].find("usages");    if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=   armvector[i]["usages"].get<int>();
+                auto fdcasdvsdfvb=armvector[i].find("dmg");       if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=      armvector[i]["dmg"].get<int>();
+                auto vbfgdgyutrra=armvector[i].find("image");     if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=    armvector[i]["image"].get<string>();
+                auto fghfbdfdvsdw=armvector[i].find("thumbnail"); if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
+                auto fgbdvfbrdtbt=armvector[i].find("radius");    if(fgbdvfbrdtbt!=armvector[i].end()) weapons[protbufferi[0]].r=         armvector[i]["radius"].get<int>();
                 weapons[protbufferi[0]].loadGraphics(protbufferi[0]);
             }else{
                 bool fnotexists=1;
                 for(int j=0; j<weapons.size(); j++){
                     if(weapons[j].name==buffer){
                         weapons[j].id=protbufferi[0];
-                        auto vdjnadfaskfj=armvector[i].find("usages");    if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=armvector[i]["usages"].get<int>();
-                        auto fdcasdvsdfvb=armvector[i].find("dmg");       if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=armvector[i]["dmg"].get<int>();
-                        auto vbfgdgyutrra=armvector[i].find("image");     if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=armvector[i]["image"].get<string>();
+                        auto vdjnadfaskfj=armvector[i].find("usages");    if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=   armvector[i]["usages"].get<int>();
+                        auto fdcasdvsdfvb=armvector[i].find("dmg");       if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=      armvector[i]["dmg"].get<int>();
+                        auto vbfgdgyutrra=armvector[i].find("image");     if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=    armvector[i]["image"].get<string>();
                         auto fghfbdfdvsdw=armvector[i].find("thumbnail"); if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
+                        auto fgbdvfbrdtbt=armvector[i].find("radius");    if(fgbdvfbrdtbt!=armvector[i].end()) weapons[protbufferi[0]].r=         armvector[i]["radius"].get<int>();
                         weapons[j].loadGraphics(j);
                         fnotexists=0;
                         break;
