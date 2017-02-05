@@ -37,22 +37,25 @@ class ResourcesDownloader {
 				path : element
 			}, ( response ) =>
 			{
-				let body = '';
+				let body = Buffer.alloc( 0 );
 				response.on( 'data', ( d ) =>
 				{
-					body += d;
+					body = Buffer.concat( [
+						body,
+						d
+					] );
 				} );
 				response.on( 'end', () =>
 				{
 					if( element === '/resources.json' )
 					{
-						uris = ResourcesDownloader.getUrisFromResourcesJson( body );
+						uris = ResourcesDownloader.getUrisFromResourcesJson( body.toString() );
 					}
 					else if( element === '/maps/list.json' )
 					{
-						uris = ResourcesDownloader.getUrisFromMapsJson( body );
+						uris = ResourcesDownloader.getUrisFromMapsJson( body.toString() );
 					}
-					let filename = this.target + element;;;;;;
+					let filename = this.target + element;
 					let dir = path.dirname( filename );
 					mkdirp( dir, ( err ) =>
 					{
