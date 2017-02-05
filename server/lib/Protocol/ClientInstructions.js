@@ -109,7 +109,7 @@ module.exports = {
 	},
 	0x42 : {
 		params : { id : 1 },
-		callback : 'selectWeapons'
+		callback : 'selectWeapon'
 	},
 	0x43 : {
 		params : { param : 1 },
