@@ -222,6 +222,15 @@ class Player {
 		}
 		return false;
 	}
+
+	useWeapon( data )
+	{
+		if( this.isYourTurn )
+		{
+			this.worms[ this.actualWorm ].useWeapon( data.param );
+		}
+		return false;
+	}
 }
 
 module.exports = Player;

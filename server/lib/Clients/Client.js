@@ -337,6 +337,17 @@ class Client {
 			}
 		}
 	}
+
+	useWeapon( data )
+	{
+		if( this.player !== null )
+		{
+			if( this.player.useWeapon( data ) )
+			{
+				this.room.broadcastUseWeapon( data );
+			}
+		}
+	}
 }
 
 module.exports.Client = Client;

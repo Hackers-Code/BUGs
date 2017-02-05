@@ -178,6 +178,12 @@ class Worm {
 	{
 		this.weapon = weapon;
 	}
+
+	useWeapon( param )
+	{
+		console.log( this.weapon );
+		console.log( param );
+	}
 }
 
 module.exports = Worm;

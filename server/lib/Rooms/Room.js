@@ -321,6 +321,17 @@ class Room {
 			}, 'UDP' );
 		} );
 	}
+
+	broadcastUseWeapon( data )
+	{
+		this.players.forEach( ( element ) =>
+		{
+			element.send( {
+				opcode : 0x45,
+				param : data.param
+			}, 'UDP' );
+		} );
+	}
 }
 
 module.exports = Room;
