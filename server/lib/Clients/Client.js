@@ -323,7 +323,7 @@ class Client {
 	{
 		if( this.player !== null )
 		{
-			return this.players.getWeaponsList();
+			return this.player.getWeaponsList();
 		}
 	}
 
