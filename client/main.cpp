@@ -197,12 +197,16 @@ class gamelistelements{public:
 list<gamelistelements> gamelist;
 gamelistelements *gamelistpointer;
 
+class player;
+class worm;
+worm *currentworm=0;
+
 class weapon{public:
     int id, usages, dmg, r;
     string track, name, thumbnail;
     sf::Vector2f origin, position;
-    sf::Texture thumbt;
-    sf::Sprite thumbs;
+    sf::Texture thumbt, mgrapht;
+    sf::Sprite thumbs, mgraphs;
 
     weapon(string namein){
         name=namein;
@@ -215,6 +219,8 @@ class weapon{public:
         return 0;
     }
 
+    void draw(sf::RenderWindow &window);
+
     bool loadGraphics(int input){
         if(thumbnail.size()){
             sf::Http http;
@@ -224,22 +230,27 @@ class weapon{public:
             sf::Http::Response::Status httpstatus=response.getStatus();
             if(httpstatus==sf::Http::Response::Ok){
                 buffer=response.getBody();
-                thumbt.loadFromMemory(&buffer[0], buffer.length());
+                if(!thumbt.loadFromMemory(&buffer[0], buffer.length()))cout<<"("<<name<<" thumbnail)\n";
                 if((thumbt.getSize().x!=30)||(thumbt.getSize().y!=30)) cout<<name<<"'s thumbnail size is("<<thumbt.getSize().x<<", "<<thumbt.getSize().y<<")\n";
-                thumbs.setTexture(thumbt);
+                thumbs.setTexture(thumbt, 1);
                 thumbs.setPosition(986+((input%5)*36), 277+(int(input/5)*35));
-                return 1;
-            }
-            return 0;
-        }
+
+                request=sf::Http::Request(track);
+                response=http.sendRequest(request);
+                httpstatus=response.getStatus();
+                if(httpstatus==sf::Http::Response::Ok){
+                    buffer=response.getBody();
+                    if(!mgrapht.loadFromMemory(&buffer[0], buffer.length())) cout<<"("<<name<<" graphic)\n";
+                    if((!thumbt.getSize().x)||(!thumbt.getSize().y)) cout<<name<<"'s graphic is invalid\n";
+                    mgraphs.setTexture(mgrapht, 1);
+                    return 1;
+                }else cout<<"error while trying to download "<<name<<"'s graphic\n";
+            }else cout<<"error while trying to download "<<name<<"'s thumbnail\n";
+        }else cout<<name<<" has no thumbnail\n";
         return 0;
     }
 };
 vector<weapon> weapons;
-
-class player;
-class worm;
-worm *currentworm=0;
 
 class worm{public:
     sf::Vector2f position, V;
@@ -398,6 +409,14 @@ worm worm::operator =(worm input){
     wormmask.setTexture(maskt[players[team].mask], 1);
     update();
     return input;
+}
+
+void weapon::draw(sf::RenderWindow &window){
+    if(currentworm){
+        mgraphs.setPosition((position+(*currentworm).position+deltabg)*mapscale);
+        mgraphs.setScale(mapscale, mapscale);
+        window.draw(mgraphs);
+    }
 }
 
 void placek(sf::Image &image, int x, int y,unsigned int r){
@@ -736,7 +755,7 @@ bool getWeaponsFromServer(){
                 auto fdcasdvsdfvb=armvector[i].find("dmg");       if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=      armvector[i]["dmg"].get<int>();
                 auto vbfgdgyutrra=armvector[i].find("image");     if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=    armvector[i]["image"].get<string>();
                 auto fghfbdfdvsdw=armvector[i].find("thumbnail"); if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
-                auto fgbdvfbrdtbt=armvector[i].find("radius");    if(fgbdvfbrdtbt!=armvector[i].end()) weapons[protbufferi[0]].r=         armvector[i]["radius"].get<int>();
+                auto fgbdvfbrdtbt=armvector[i].find("radius");    if(fgbdvfbrdtbt!=armvector[i].end()) weapons[protbufferi[0]].r=        armvector[i]["radius"].get<int>();
                 weapons[protbufferi[0]].loadGraphics(protbufferi[0]);
             }else{
                 bool fnotexists=1;
@@ -747,7 +766,7 @@ bool getWeaponsFromServer(){
                         auto fdcasdvsdfvb=armvector[i].find("dmg");       if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=      armvector[i]["dmg"].get<int>();
                         auto vbfgdgyutrra=armvector[i].find("image");     if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=    armvector[i]["image"].get<string>();
                         auto fghfbdfdvsdw=armvector[i].find("thumbnail"); if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
-                        auto fgbdvfbrdtbt=armvector[i].find("radius");    if(fgbdvfbrdtbt!=armvector[i].end()) weapons[protbufferi[0]].r=         armvector[i]["radius"].get<int>();
+                        auto fgbdvfbrdtbt=armvector[i].find("radius");    if(fgbdvfbrdtbt!=armvector[i].end()) weapons[protbufferi[0]].r=        armvector[i]["radius"].get<int>();
                         weapons[j].loadGraphics(j);
                         fnotexists=0;
                         break;
@@ -3083,6 +3102,7 @@ int main(){
             }
             window.draw(clocks);
             window.draw(turntimet);
+            weapons[choosedweapon].draw(window);
             if(choosingweapon){
                 window.draw(backpacks);
                 for(int i=0; i<weapons.size(); i++)
