@@ -331,7 +331,7 @@ class Client {
 	{
 		if( this.player !== null )
 		{
-			if( this.players.selectWeapon( data ) )
+			if( this.player.selectWeapon( data ) )
 			{
 				this.room.broadcastSelectedWeapon( data );
 			}
