@@ -2,18 +2,23 @@ const Logger = require( './Logger' );
 const ClientsStorage = require( '../Clients/ClientsStorage' );
 const RoomsStorage = require( '../Rooms/RoomsStorage' );
 const TasksStorage = require( '../Tasks/TasksStorage' );
+const ResourcesDownloader = require( '../ResourcesDownloader/ResourcesDownloader' );
 class App {
 	constructor( options )
 	{
-		this.config = options.config;
-		this.startTCP = options.tcpStart;
-		this.startUDP = options.udpStart;
-		this.runTCP();
-		this.runUDP();
-		this.logger = new Logger( this.config.logFile, this.config.errorFile );
-		this.tasksStorage = new TasksStorage( this.config.tickrate );
-		this.roomsStorage = new RoomsStorage( this.logger, this.tasksStorage );
-		this.clientsStorage = new ClientsStorage( this.config.maxClients, this.roomsStorage );
+		this.resourcesDownloader = new ResourcesDownloader();
+		this.resourcesDownloader.download( process.cwd() + '/resources', () =>
+		{
+			this.config = options.config;
+			this.startTCP = options.tcpStart;
+			this.startUDP = options.udpStart;
+			this.runTCP();
+			this.runUDP();
+			this.logger = new Logger( this.config.logFile, this.config.errorFile );
+			this.tasksStorage = new TasksStorage( this.config.tickrate );
+			this.roomsStorage = new RoomsStorage( this.logger, this.tasksStorage );
+			this.clientsStorage = new ClientsStorage( this.config.maxClients, this.roomsStorage );
+		} );
 	}
 
 	runTCP()
