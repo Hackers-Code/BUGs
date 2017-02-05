@@ -200,11 +200,19 @@ gamelistelements *gamelistpointer;
 class weapon{public:
     int id, usages, dmg, r;
     string track, name, thumbnail;
+    sf::Vector2f origin, position;
     sf::Texture thumbt;
     sf::Sprite thumbs;
 
     weapon(string namein){
         name=namein;
+    }
+
+    bool clicked(float xin, float yin){
+        float x=thumbs.getPosition().x, y=thumbs.getPosition().y, h=thumbt.getSize().y, w=thumbt.getSize().x;
+        if((xin>x)&&(yin>y)&&(xin<x+w)&&(yin<y+h))
+            return 1;
+        return 0;
     }
 
     bool loadGraphics(int input){
@@ -1266,6 +1274,16 @@ int main(){
                         if(event.key.code==sf::Keyboard::F)
                             choosingweapon=!choosingweapon;
                     }
+                }else
+                if(event.type==sf::Event::MouseButtonPressed){
+                    if((choosingweapon)&&(event.mouseButton.x>backpacks.getPosition().x)&&(event.mouseButton.y>backpacks.getPosition().y)&&(event.mouseButton.x<backpacks.getPosition().x+backpackt.getSize().x)&&(event.mouseButton.y<backpacks.getPosition().y+backpackt.getSize().y)){
+                        for(int i=0; i<weapons.size(); i++){
+                            if(weapons[i].clicked(event.mouseButton.x, event.mouseButton.y)){
+                                protocol42(weapons[i].id);
+                                break;
+                            }
+                        }
+                    }
                 }
             }else
             if(mode==connectroom){
@@ -1976,6 +1994,7 @@ int main(){
                     }
                     if(data[i]==0x36){
                         currentworm=0;
+                        choosedweapon=0;
                         protocol40();
                         cout<<"end of your turn\n";
                         continue;
