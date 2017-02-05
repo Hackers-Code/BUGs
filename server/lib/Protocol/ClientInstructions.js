@@ -110,5 +110,9 @@ module.exports = {
 	0x42 : {
 		params : { id : 1 },
 		callback : 'selectWeapons'
+	},
+	0x43 : {
+		params : { param : 1 },
+		callback : 'useWeapon'
 	}
 };

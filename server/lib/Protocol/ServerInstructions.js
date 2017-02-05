@@ -142,8 +142,11 @@ module.exports = {
 			}
 		}
 	},
-	0x42 : {
-		params : { id : 1 },
+	0x44 : {
+		params : { id : 1 }
+	},
+	0x45 : {
+		params : { param : 1 }
 	},
 	0xe0 : {
 		params : {
