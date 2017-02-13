@@ -13,6 +13,8 @@
 
 #define INFO_AMOUNT 11
 #define HTTPURL "http://bugs.hackers-code.boakgp.hekko24.pl"
+#define ORG_X 54
+#define ORG_Y 68
 
 using namespace std;
 using json=nlohmann::json;
@@ -209,6 +211,9 @@ class weapon{public:
     sf::Sprite thumbs, mgraphs;
 
     weapon(string namein){
+        position.x=ORG_X;
+        position.y=ORG_Y;
+        origin=position;
         name=namein;
     }
 
@@ -222,15 +227,15 @@ class weapon{public:
     void draw(sf::RenderWindow &window);
 
     bool loadGraphics(int input, bool fromFile=0){
+        bool good=1;
         if(thumbnail.size()){
             if(fromFile){
-                if(!thumbt.loadFromFile("img/cache"+thumbnail)) cout<<"("<<name<<" thumbnail)\n";
-                if((thumbt.getSize().x!=30)||(thumbt.getSize().y!=30)) cout<<name<<"'s thumbnail size is("<<thumbt.getSize().x<<", "<<thumbt.getSize().y<<")\n";
+                if(!thumbt.loadFromFile("img/cache"+thumbnail)){ cout<<"("<<name<<" thumbnail)\n"; good=0;}
+                if((thumbt.getSize().x!=30)||(thumbt.getSize().y!=30)){ cout<<name<<"'s thumbnail size is("<<thumbt.getSize().x<<", "<<thumbt.getSize().y<<")\n"; good=0;}
                 thumbs.setTexture(thumbt, 1);
                 thumbs.setPosition(986+((input%5)*36), 277+(int(input/5)*35));
-                if(!mgrapht.loadFromFile("img/cache"+thumbnail)) cout<<"("<<name<<" graphic)\n";
-                if((!thumbt.getSize().x)||(!thumbt.getSize().y)) cout<<name<<"'s graphic is invalid\n";
-                mgraphs.setTexture(mgrapht, 1);
+                if(!mgrapht.loadFromFile("img/cache"+thumbnail)){ cout<<"("<<name<<" graphic)\n"; good=0;}
+                if((!thumbt.getSize().x)||(!thumbt.getSize().y)){ cout<<name<<"'s graphic is invalid\n"; good=0;}
             }else{
                 sf::Http http;
                 http.setHost(HTTPURL, 80);
@@ -239,8 +244,8 @@ class weapon{public:
                 sf::Http::Response::Status httpstatus=response.getStatus();
                 if(httpstatus==sf::Http::Response::Ok){
                     buffer=response.getBody();
-                    if(!thumbt.loadFromMemory(&buffer[0], buffer.length())) cout<<"("<<name<<" thumbnail)\n";
-                    if((thumbt.getSize().x!=30)||(thumbt.getSize().y!=30)) cout<<name<<"'s thumbnail size is("<<thumbt.getSize().x<<", "<<thumbt.getSize().y<<")\n";
+                    if(!thumbt.loadFromMemory(&buffer[0], buffer.length())){ cout<<"("<<name<<" thumbnail)\n"; good=0;}
+                    if((thumbt.getSize().x!=30)||(thumbt.getSize().y!=30)){ cout<<name<<"'s thumbnail size is("<<thumbt.getSize().x<<", "<<thumbt.getSize().y<<")\n"; good=0;}
                     thumbs.setTexture(thumbt, 1);
                     thumbs.setPosition(986+((input%5)*36), 277+(int(input/5)*35));
 
@@ -249,15 +254,15 @@ class weapon{public:
                     httpstatus=response.getStatus();
                     if(httpstatus==sf::Http::Response::Ok){
                         buffer=response.getBody();
-                        if(!mgrapht.loadFromMemory(&buffer[0], buffer.length())) cout<<"("<<name<<" graphic)\n";
-                        if((!thumbt.getSize().x)||(!thumbt.getSize().y)) cout<<name<<"'s graphic is invalid\n";
-                        mgraphs.setTexture(mgrapht, 1);
-                        return 1;
-                    }else cout<<"error while trying to download "<<name<<"'s graphic\n";
-                }else cout<<"error while trying to download "<<name<<"'s thumbnail\n";
+                        if(!mgrapht.loadFromMemory(&buffer[0], buffer.length())){ cout<<"("<<name<<" graphic)\n"; good=0;}
+                        if((!thumbt.getSize().x)||(!thumbt.getSize().y)){ cout<<name<<"'s graphic is invalid\n"; good=0;}
+                    }else{ cout<<"error while trying to download "<<name<<"'s graphic\n"; good=0;}
+                }else{ cout<<"error while trying to download "<<name<<"'s thumbnail\n"; good=0;}
             }
-        }else cout<<name<<" has no thumbnail\n";
-        return 0;
+        }else{ cout<<name<<" has no thumbnail\n"; good=0;}
+        mgraphs.setTexture(mgrapht, 1);
+        mgraphs.setOrigin(ORG_X, ORG_Y);
+        return good;
     }
 };
 vector<weapon> weapons;
@@ -299,9 +304,6 @@ class worm{public:
         window.draw(sprite);
         window.draw(wormmask);
         window.draw(text);
-        if((currentworm)&&((*currentworm).id==id)&&(V==sf::Vector2f(0,0))){
-            window.draw(aimers);
-        }
     }
 
     void next_anim(){
@@ -315,6 +317,10 @@ class worm{public:
     void update(){
         sprite.setPosition((deltabg+position)*mapscale);
         sprite.setScale(mapscale*direction, mapscale);
+        if(V!=sf::Vector2f(0,0))
+            sprite.setTexture(wormt[animcount]);
+        else
+            sprite.setTexture(wormt[0]);
         wormmask.setPosition((deltabg+position+sf::Vector2f(12, -1))*mapscale);
         wormmask.setScale(mapscale*direction, mapscale);
         if(direction==-1){
@@ -325,6 +331,7 @@ class worm{public:
         text.setScale(mapscale, mapscale);
         text.setString("HP="+to_string(hp));
         if((currentworm)&&((*currentworm).id==id)){
+            weapons[choosedweapon].mgraphs.setRotation((angle+270)%360);
             aimers.setRotation((angle+270)%360);
             aimers.setScale(mapscale, mapscale);
             aimers.setPosition((position.x+20+(cos((angle-90)*3.14159265/180)*80)+deltabg.x)*mapscale, (position.y+23+(sin((angle-90)*3.14159265/180)*80)+deltabg.y)*mapscale);
@@ -411,7 +418,6 @@ worm worm::operator =(worm input){
     position =input.position;
     hp       =input.hp;
     id       =input.id;
-    sprite   =input.sprite;
     text     =input.text;
     team     =input.team;
     angle    =input.angle;
@@ -423,8 +429,14 @@ worm worm::operator =(worm input){
 
 void weapon::draw(sf::RenderWindow &window){
     if(currentworm){
-        mgraphs.setPosition((position+(*currentworm).position+deltabg)*mapscale);
-        mgraphs.setScale(mapscale, mapscale);
+        if((*currentworm).direction==1)
+            mgraphs.setPosition((sf::Vector2f(ORG_X/2, ORG_Y/2)+(*currentworm).position+deltabg)*mapscale);
+        else
+        if((*currentworm).direction==-1)
+            mgraphs.setPosition((sf::Vector2f((*currentworm).sprite.getLocalBounds().width-ORG_X/2, ORG_Y/2)+(*currentworm).position+deltabg)*mapscale);
+        else cout<<"weird direction, "<<(*currentworm).direction<<"\n";
+        if(weapons[choosedweapon].mgraphs.getScale()!=sf::Vector2f(mapscale*(*currentworm).direction, mapscale))
+            mgraphs.setScale(mapscale, mapscale*(*currentworm).direction);
         window.draw(mgraphs);
     }
 }
@@ -1441,25 +1453,28 @@ int main(){
                     textbox=none;
 
                     if((event.mouseButton.y<=120)||(event.mouseButton.x>1100)){
-                        if((event.mouseButton.x>=ipinput.getPosition().x-8)&&(event.mouseButton.x<=ipinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=ipinput.getPosition().y-8)&&(event.mouseButton.y<=ipinput.getPosition().y-8+inputbars.getLocalBounds().height)){
-                            textbox=ipbox;
-                            ipinput.setColor(checkedclr);
-                        }else
-                        if((event.mouseButton.x>=portinput.getPosition().x-8)&&(event.mouseButton.x<=portinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=portinput.getPosition().y-8)&&(event.mouseButton.y<=portinput.getPosition().y-8+inputbars.getLocalBounds().height)){
-                            textbox=portbox;
-                            portinput.setColor(checkedclr);
-                        }else
-                        if((event.mouseButton.x>=nickinput.getPosition().x-8)&&(event.mouseButton.x<=nickinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=nickinput.getPosition().y-8)&&(event.mouseButton.y<=nickinput.getPosition().y-8+binputbars.getLocalBounds().height)){
-                            textbox=nickbox;
-                            nickinput.setColor(checkedclr);
-                        }else
-                        if((event.mouseButton.x>=roomnameinput.getPosition().x-8)&&(event.mouseButton.x<=roomnameinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=roomnameinput.getPosition().y-8)&&(event.mouseButton.y<=roomnameinput.getPosition().y-8+binputbars.getLocalBounds().height)){
-                            textbox=roomnamebox;
-                            roomnameinput.setColor(checkedclr);
-                        }else
-                        if((event.mouseButton.x>=passwordinput.getPosition().x-8)&&(event.mouseButton.x<=passwordinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=passwordinput.getPosition().y-8)&&(event.mouseButton.y<=passwordinput.getPosition().y-8+binputbars.getLocalBounds().height)){
-                            textbox=passwordbox;
-                            passwordinput.setColor(checkedclr);
+                        if(connected){
+                            if((event.mouseButton.x>=nickinput.getPosition().x-8)&&(event.mouseButton.x<=nickinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=nickinput.getPosition().y-8)&&(event.mouseButton.y<=nickinput.getPosition().y-8+binputbars.getLocalBounds().height)){
+                                textbox=nickbox;
+                                nickinput.setColor(checkedclr);
+                            }else
+                            if((event.mouseButton.x>=roomnameinput.getPosition().x-8)&&(event.mouseButton.x<=roomnameinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=roomnameinput.getPosition().y-8)&&(event.mouseButton.y<=roomnameinput.getPosition().y-8+binputbars.getLocalBounds().height)){
+                                textbox=roomnamebox;
+                                roomnameinput.setColor(checkedclr);
+                            }else
+                            if((event.mouseButton.x>=passwordinput.getPosition().x-8)&&(event.mouseButton.x<=passwordinput.getPosition().x-8+binputbars.getLocalBounds().width)&&(event.mouseButton.y>=passwordinput.getPosition().y-8)&&(event.mouseButton.y<=passwordinput.getPosition().y-8+binputbars.getLocalBounds().height)){
+                                textbox=passwordbox;
+                                passwordinput.setColor(checkedclr);
+                            }else
+                            if((event.mouseButton.x>=oknicks.getPosition().x)&&(event.mouseButton.x<=oknicks.getPosition().x+oknicks.getLocalBounds().width)&&(event.mouseButton.y>=oknicks.getPosition().y)&&(event.mouseButton.y<=oknicks.getPosition().y+oknicks.getLocalBounds().height)){
+                                protocol1(nickinput.getString());
+                            }else
+                            if((event.mouseButton.x>=okcreaterooms.getPosition().x)&&(event.mouseButton.x<=okcreaterooms.getPosition().x+okcreaterooms.getLocalBounds().width)&&(event.mouseButton.y>=okcreaterooms.getPosition().y)&&(event.mouseButton.y<=okcreaterooms.getPosition().y+okcreaterooms.getLocalBounds().height)){
+                                protocol20(passwordinput.getString(), roomnameinput.getString());
+                            }else
+                            if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
+                                if(connected){protocol10();}
+                            }
                         }else
                         if((event.mouseButton.x>=okconnects.getPosition().x)&&(event.mouseButton.x<=okconnects.getPosition().x+okconnects.getLocalBounds().width)&&(event.mouseButton.y>=okconnects.getPosition().y)&&(event.mouseButton.y<=okconnects.getPosition().y+okconnects.getLocalBounds().height)){
                             if(connect(ipinput.getString(), portinput.getString())){
@@ -1468,20 +1483,19 @@ int main(){
                                 getWeaponsFromServer();
                             }
                         }else
-                        if((event.mouseButton.x>=oknicks.getPosition().x)&&(event.mouseButton.x<=oknicks.getPosition().x+oknicks.getLocalBounds().width)&&(event.mouseButton.y>=oknicks.getPosition().y)&&(event.mouseButton.y<=oknicks.getPosition().y+oknicks.getLocalBounds().height)){
-                            protocol1(nickinput.getString());
+                        if((event.mouseButton.x>=ipinput.getPosition().x-8)&&(event.mouseButton.x<=ipinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=ipinput.getPosition().y-8)&&(event.mouseButton.y<=ipinput.getPosition().y-8+inputbars.getLocalBounds().height)){
+                            textbox=ipbox;
+                            ipinput.setColor(checkedclr);
                         }else
-                        if((event.mouseButton.x>=okcreaterooms.getPosition().x)&&(event.mouseButton.x<=okcreaterooms.getPosition().x+okcreaterooms.getLocalBounds().width)&&(event.mouseButton.y>=okcreaterooms.getPosition().y)&&(event.mouseButton.y<=okcreaterooms.getPosition().y+okcreaterooms.getLocalBounds().height)){
-                            protocol20(passwordinput.getString(), roomnameinput.getString());
-                        }else
+                        if((event.mouseButton.x>=portinput.getPosition().x-8)&&(event.mouseButton.x<=portinput.getPosition().x-8+inputbars.getLocalBounds().width)&&(event.mouseButton.y>=portinput.getPosition().y-8)&&(event.mouseButton.y<=portinput.getPosition().y-8+inputbars.getLocalBounds().height)){
+                            textbox=portbox;
+                            portinput.setColor(checkedclr);
+                        }
                         if((event.mouseButton.x>=soundpointers.getPosition().x)&&(event.mouseButton.x<=soundpointers.getPosition().x+soundpointers.getLocalBounds().width)&&(event.mouseButton.y>=soundpointers.getPosition().y)&&(event.mouseButton.y<=soundpointers.getPosition().y+soundpointers.getLocalBounds().height)){
                             soundpointerpressed=1;
                         }else
                         if((event.mouseButton.x>=soundicons.getPosition().x)&&(event.mouseButton.x<=soundicons.getPosition().x+soundicons.getLocalBounds().width)&&(event.mouseButton.y>=soundicons.getPosition().y)&&(event.mouseButton.y<=soundicons.getPosition().y+soundicons.getLocalBounds().height)){
                             soundbarexchanged=!soundbarexchanged;
-                        }else
-                        if((event.mouseButton.x>=reloadgamelists.getPosition().x)&&(event.mouseButton.x<=reloadgamelists.getPosition().x+reloadgamelists.getLocalBounds().width)&&(event.mouseButton.y>=reloadgamelists.getPosition().y)&&(event.mouseButton.y<=reloadgamelists.getPosition().y+reloadgamelists.getLocalBounds().height)){
-                            if(connected){protocol10();}
                         }
                     }else{
                         int listelementbuffer=int(event.mouseButton.y-deltagamelist)/int(inputbars.getLocalBounds().height);
@@ -2578,7 +2592,6 @@ int main(){
                 }else udpto_ignore--;
             }
 
-
             if(receiving==0x32){
                 for(int i=udpdeltareceive; i<received; i++){//1=team, 2=x, 3=y, 4=hp, 5=id, 6=Vx, 7=Vy
                     if(protbufferi[0]){
@@ -3209,6 +3222,12 @@ int main(){
             for(int i=0; i<wormpointers.size(); i++){
                 (*wormpointers[i]).draw(window);
             }
+            if(currentworm){
+                (*currentworm).draw(window);
+                if((*currentworm).V==sf::Vector2f(0,0)){
+                    window.draw(aimers);
+                }
+            }
             for(int i=0; i<players.size(); i++){
                 players[i].draw(window);
             }
@@ -3222,35 +3241,35 @@ int main(){
             }
         }else
         if(mode==connectroom){
-            if(connected)
+            if(connected){
                 for(list<gamelistelements>::iterator i=gamelist.begin(); i!=gamelist.end(); ++i){
                     (*i).draw(window, inputbars, binputbars);
                 }
-            window.draw(bgplanes);
+                window.draw(bgplanes);
+                binputbars.setPosition(nickinput.getPosition()+sf::Vector2f(-8,-8));
+                window.draw(binputbars);
+                window.draw(nickinput);
+                binputbars.setPosition(roomnameinput.getPosition()+sf::Vector2f(-8,-8));
+                window.draw(binputbars);
+                window.draw(roomnameinput);
+                binputbars.setPosition(passwordinput.getPosition()+sf::Vector2f(-8,-8));
+                window.draw(binputbars);
+                window.draw(passwordinput);
+                for(int i=2; i<7; i++)
+                    window.draw(info[i]);
+                window.draw(oknicks);
+                window.draw(okcreaterooms);
+                window.draw(reloadgamelists);
+            }
             inputbars.setPosition(ipinput.getPosition()+sf::Vector2f(-8,-8));
             window.draw(inputbars);
             window.draw(ipinput);
             inputbars.setPosition(portinput.getPosition()+sf::Vector2f(-8,-8));
             window.draw(inputbars);
             window.draw(portinput);
-            binputbars.setPosition(nickinput.getPosition()+sf::Vector2f(-8,-8));
-            window.draw(binputbars);
-            window.draw(nickinput);
-            binputbars.setPosition(roomnameinput.getPosition()+sf::Vector2f(-8,-8));
-            window.draw(binputbars);
-            window.draw(roomnameinput);
-            binputbars.setPosition(passwordinput.getPosition()+sf::Vector2f(-8,-8));
-            window.draw(binputbars);
-            window.draw(passwordinput);
-            for(int i=0; i<5; i++)
+            for(int i=0; i<2; i++)
                 window.draw(info[i]);
-            if(connected)
-                for(int i=5; i<7; i++)
-                    window.draw(info[i]);
             window.draw(okconnects);
-            window.draw(oknicks);
-            window.draw(okcreaterooms);
-            window.draw(reloadgamelists);
             window.draw(connectionS);
             window.draw(soundicons);
             if(soundbarexchanged){
