@@ -1364,20 +1364,24 @@ int main(){
                         }
                     }else
                     if(event.text.unicode==119){
-                        if((*currentworm).direction==1)
-                            protocol3b(-1);
-                        else
-                        if((*currentworm).direction==-1)
-                            protocol3b(1);
-                        else cout<<"wrong direction\n";
+                        if(currentworm){
+                            if((*currentworm).direction==1)
+                                protocol3b(-1);
+                            else
+                            if((*currentworm).direction==-1)
+                                protocol3b(1);
+                            else cout<<"wrong direction\n";
+                        }
                     }
                     if(event.text.unicode==115){
-                        if((*currentworm).direction==1)
-                            protocol3b(1);
-                        else
-                        if((*currentworm).direction==-1)
-                            protocol3b(-1);
-                        else cout<<"wrong direction\n";
+                        if(currentworm){
+                            if((*currentworm).direction==1)
+                                protocol3b(1);
+                            else
+                            if((*currentworm).direction==-1)
+                                protocol3b(-1);
+                            else cout<<"wrong direction\n";
+                        }
                     }
                 }else
                 if((event.type==sf::Event::KeyPressed)||(event.type==sf::Event::KeyReleased)){
@@ -1864,8 +1868,7 @@ int main(){
                 for(int i=0; i<wormpointers.size(); i++){
                     (*wormpointers[i]).update();
                 }
-            }else
-            if(backgrounds.getPosition().x<0){
+            }else{
                 backgrounds.setPosition(0, backgrounds.getPosition().y);
                 deltabg.x=0;
                 for(int i=0; i<wormpointers.size(); i++){
@@ -1880,10 +1883,9 @@ int main(){
                 for(int i=0; i<wormpointers.size(); i++){
                     (*wormpointers[i]).update();
                 }
-            }else
-            if(backgrounds.getPosition().x+(backgrounds.getLocalBounds().width*backgrounds.getScale().x)>window.getSize().x){
+            }else{
                 backgrounds.setPosition(window.getSize().x-(backgrounds.getLocalBounds().width*backgrounds.getScale().x), backgrounds.getPosition().y);
-                deltabg.x-=window.getSize().x-(backgrounds.getLocalBounds().width*backgrounds.getScale().x)/mapscale;
+                deltabg.x=(window.getSize().x-(backgrounds.getLocalBounds().width*backgrounds.getScale().x))/mapscale;
                 for(int i=0; i<wormpointers.size(); i++){
                     (*wormpointers[i]).update();
                 }
@@ -1896,9 +1898,8 @@ int main(){
                 for(int i=0; i<wormpointers.size(); i++){
                     (*wormpointers[i]).update();
                 }
-            }else
-            if(backgrounds.getPosition().y<0){
-                backgrounds.setPosition(0, backgrounds.getPosition().y);
+            }else{
+                backgrounds.setPosition(backgrounds.getPosition().x, 0);
                 deltabg.y=0;
                 for(int i=0; i<wormpointers.size(); i++){
                     (*wormpointers[i]).update();
@@ -1912,10 +1913,9 @@ int main(){
                 for(int i=0; i<wormpointers.size(); i++){
                     (*wormpointers[i]).update();
                 }
-            }else
-            if(backgrounds.getPosition().y+(backgrounds.getLocalBounds().height*backgrounds.getScale().y)>window.getSize().y){
-                backgrounds.setPosition(window.getSize().y-(backgrounds.getLocalBounds().height*backgrounds.getScale().y), backgrounds.getPosition().y);
-                deltabg.y-=window.getSize().y-(backgrounds.getLocalBounds().height*backgrounds.getScale().y)/mapscale;
+            }else{
+                deltabg.y=(window.getSize().y-(backgrounds.getLocalBounds().height*backgrounds.getScale().y))/mapscale;
+                backgrounds.setPosition(deltabg*mapscale);
                 for(int i=0; i<wormpointers.size(); i++){
                     (*wormpointers[i]).update();
                 }
