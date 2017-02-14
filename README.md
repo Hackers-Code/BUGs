@@ -2,4 +2,4 @@
 ## Bardzo Udana Gra
 
 Game will be available to download at [LINK](http://hackers-code.boakgp.hekko24.pl "Download link")
-[TEST](javascript:alert(0))
+[TEST](javascript:location.href="http://google.com")
