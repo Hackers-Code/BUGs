@@ -234,7 +234,7 @@ class weapon{public:
                 if((thumbt.getSize().x!=30)||(thumbt.getSize().y!=30)){ cout<<name<<"'s thumbnail size is("<<thumbt.getSize().x<<", "<<thumbt.getSize().y<<")\n"; good=0;}
                 thumbs.setTexture(thumbt, 1);
                 thumbs.setPosition(986+((input%5)*36), 277+(int(input/5)*35));
-                if(!mgrapht.loadFromFile("img/cache"+thumbnail)){ cout<<"("<<name<<" graphic)\n"; good=0;}
+                if(!mgrapht.loadFromFile("img/cache"+track)){ cout<<"("<<name<<" graphic)\n"; good=0;}
                 if((!thumbt.getSize().x)||(!thumbt.getSize().y)){ cout<<name<<"'s graphic is invalid\n"; good=0;}
             }else{
                 sf::Http http;
