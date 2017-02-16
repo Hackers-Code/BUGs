@@ -213,7 +213,8 @@ class Player {
 	{
 		if( this.isYourTurn )
 		{
-			let index = SearchEngine.findByNumericId( this.weapons, data.id );
+			let id = data.id.readUInt8( 0 );
+			let index = SearchEngine.findByNumericId( id, this.weapons );
 			if( index !== -1 )
 			{
 				this.worms[ this.actualWorm ].selectWeapon( this.weapons[ index ] );
