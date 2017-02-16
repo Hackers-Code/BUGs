@@ -91,6 +91,10 @@ class Game {
 				opcode : 0x36
 			} );
 			this.players[ this.whoseTurnIndex ].endTurn();
+			if( this.players.length === 0 )
+			{
+				return;
+			}
 			this.whoseTurnIndex = ++this.whoseTurnIndex % this.players.length;
 			this.whoseTurn();
 			return;
@@ -104,6 +108,10 @@ class Game {
 	whoseTurn()
 	{
 		let worm_id = Buffer.alloc( 1 );
+		if( this.players.length === 0 || typeof this.players[ this.whoseTurnIndex ] === 'undefined' )
+		{
+			return;
+		}
 		worm_id.writeUInt8( this.players[ this.whoseTurnIndex ].chooseWorm(), 0 );
 		let player_id = Buffer.alloc( 1 );
 		player_id.writeUInt8( this.players[ this.whoseTurnIndex ].getPlayerID(), 0 );
