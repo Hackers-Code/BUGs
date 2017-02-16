@@ -6,7 +6,9 @@
     "thumbnail": "/weapons/t_noweapon.png",
     "image": "/dev/null",
     "dmg": 0,
-    "radius": 30
+    "radius": 30,
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   },
   {
     "id": 1,
@@ -14,14 +16,18 @@
     "usages": 3,
     "notEndRound": true,
     "thumbnail": "/weapons/t_wormchange.png",
-	"image": "/dev/null"
+	"image": "/dev/null",
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   },
   {
     "id": 2,
     "name": "Pass round",
     "usages": -1,
     "thumbnail": "/weapons/t_passround.png",
-    "image": "/weapons/w_passround.png"
+    "image": "/weapons/w_passround.png",
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   },
   {
     "id": 3,
@@ -31,7 +37,9 @@
     "image": "/weapons/w_bazooka.png",
     "dmg": 69,
     "explosive": true,
-    "radius": 80
+    "radius": 80,
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   },
   {
     "id": 4,
@@ -43,7 +51,9 @@
     "explosive": true,
     "delay": 2,
     "bounces": true,
-    "radius": 70
+    "radius": 70,
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   },
   {
     "id": 5,
@@ -51,7 +61,9 @@
     "usages": 4,
     "thumbnail": "/weapons/t_shotgun.png",
     "image": "/weapons/w_shotgun.png",
-    "dmg": 110
+    "dmg": 110,
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   },
   {
     "id": 6,
@@ -60,7 +72,9 @@
     "thumbnail": "/weapons/t_baseball.png",
     "image": "/weapons/w_baseball.png",
     "dmg": 20,
-    "radius": 40
+    "radius": 40,
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   },
   {
     "id": 7,
@@ -71,7 +85,9 @@
     "dmg": 120,
     "explosive": true,
     "delay": 5,
-    "radius": 150
+    "radius": 150,
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   },
   {
     "id": 8,
@@ -79,7 +95,9 @@
     "usages": 1,
     "thumbnail": "/weapons/t_revolver.png",
     "image": "/weapons/w_revolver.png",
-    "dmg": 125
+    "dmg": 125,
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   },
   {
     "id": 9,
@@ -91,6 +109,8 @@
     "explosive": true,
     "delay": 3,
     "bounces": true,
-    "radius": 200
+    "radius": 200,
+    "last_update": "1484998033032",
+    "created": "1484998033032"
   }
 ]
