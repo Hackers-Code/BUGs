@@ -228,7 +228,8 @@ class Player {
 	{
 		if( this.isYourTurn )
 		{
-			this.worms[ this.actualWorm ].useWeapon( data.param );
+			let param = data.param.readUInt8( 0 );
+			this.worms[ this.actualWorm ].useWeapon( param );
 		}
 		return false;
 	}
