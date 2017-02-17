@@ -2840,7 +2840,7 @@ int main(){
             }
         }
 
-        lastittime=currentittime;
+        lastittime=currentitteime;
         currentittime=clocker.getElapsedTime();
         FPStime+=currentittime-lastittime;
         if(FPStime.asSeconds()>=1){
@@ -3374,4 +3374,6 @@ void exitting(){
 }
 
 //"Mo¿liwe, ¿e bêdzie dzia³aæ, ale prawdopodobnie nie." Micha³ Marczewski
-//"Obawiam się, że będziemy się na spawnie spawnić" Jakub Olszewski
+//"Obawiam się, że będziemy się na spawnie spawnić." Jakub Olszewski
+//"Internet zawsze jest, chyba, że go nie ma." Michał Marczewski
+//"Czysto teoretycznie... (20kB wykładu)" Aleksander Czajka
