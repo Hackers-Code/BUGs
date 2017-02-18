@@ -332,6 +332,11 @@ class Room {
 			}, 'UDP' );
 		} );
 	}
+
+	endRound()
+	{
+		this.game.endRound();
+	}
 }
 
 module.exports = Room;

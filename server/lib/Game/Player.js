@@ -236,13 +236,17 @@ class Player {
 			}
 			switch( this.currentWeapon.id )
 			{
-				case 2:
+				case 1:
 				{
 					let index = SearchEngine.findByNumericId( param, this.worms );
 					if( index !== -1 )
 					{
 						this.actualWorm = index;
 					}
+					break;
+				}
+				case 2:
+				{
 					break;
 				}
 				default:

@@ -192,5 +192,10 @@ class Game {
 	{
 		return this.wormsList;
 	}
+
+	endRound()
+	{
+		this.timeleft = 5;
+	}
 }
 module.exports = Game;

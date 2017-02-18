@@ -345,6 +345,7 @@ class Client {
 			if( this.player.useWeapon( data ) )
 			{
 				this.room.broadcastUseWeapon( data );
+				this.room.endRound();
 			}
 		}
 	}
