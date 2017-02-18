@@ -21,6 +21,7 @@ class Player {
 		this.mask = Buffer.from( [ 0 ] );
 		this.isYourTurn = false;
 		this.world = null;
+		this.currentWeapon = null;
 	}
 
 	getWeaponsList()
@@ -217,7 +218,7 @@ class Player {
 			let index = SearchEngine.findByNumericId( id, this.weapons );
 			if( index !== -1 )
 			{
-				this.worms[ this.actualWorm ].selectWeapon( this.weapons[ index ] );
+				this.currentWeapon = this.weapons[ index ];
 				return true;
 			}
 		}
@@ -229,7 +230,26 @@ class Player {
 		if( this.isYourTurn )
 		{
 			let param = data.param.readUInt8( 0 );
-			this.worms[ this.actualWorm ].useWeapon( param );
+			if( this.currentWeapon === null )
+			{
+				return false;
+			}
+			switch( this.currentWeapon.id )
+			{
+				case 2:
+				{
+					let index = SearchEngine.findByNumericId( param, this.worms );
+					if( index !== -1 )
+					{
+						this.actualWorm = index;
+					}
+					break;
+				}
+				default:
+				{
+					console.log( 'unsupported weapon' );
+				}
+			}
 		}
 		return false;
 	}

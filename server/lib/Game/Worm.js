@@ -20,7 +20,6 @@ class Worm {
 		this._isMovingLeft = false;
 		this._isFalling = false;
 		this._isJumping = false;
-		this.weapon = 0;
 	}
 
 	get isMovingLeft()
@@ -172,17 +171,6 @@ class Worm {
 			speedY,
 			angle
 		};
-	}
-
-	selectWeapon( weapon )
-	{
-		this.weapon = weapon;
-	}
-
-	useWeapon( param )
-	{
-		console.log( this.weapon );
-		console.log( param );
 	}
 }
 
