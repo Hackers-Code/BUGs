@@ -108,7 +108,7 @@ modes mode=connectroom;
 textboxes textbox=none;
 string buffer, nickname, restofprotocol, protbuffers[3];
 size_t received=0;
-unsigned int myid=0, userid=0, to_receive=0, udpto_receive=0, to_ignore=0, udpto_ignore=0, lastgamelistelement=0, frame=0, FPSframe=0, protbufferi[8], colorpointerpressed=3, choosedmask=0;
+unsigned int myid=0, userid=0, userindex=0, to_receive=0, udpto_receive=0, to_ignore=0, udpto_ignore=0, lastgamelistelement=0, frame=0, FPSframe=0, protbufferi[8], colorpointerpressed=3, choosedmask=0;
 short protbuffersh[2];
 float deltagamelist=120;
 
@@ -132,6 +132,7 @@ sf::Vector2f deltabg(0,0);
 sf::Text turntimet;
 float mapscale=0.2;
 unsigned int turntime=0, clockframe=0, no18delta=0, force=0, choosedweapon=0;
+int choosedworm=0;
 bool shooting=0, choosingweapon=0;
 
 //fizyka
@@ -428,6 +429,14 @@ worm worm::operator =(worm input){
 }
 
 void weapon::draw(sf::RenderWindow &window){
+    bool fdraw=1;
+    if(id==1){
+        if(players[userindex].worms[choosedworm].direction==1)
+            mgraphs.setPosition((sf::Vector2f(ORG_X/2, ORG_Y/2)+players[userindex].worms[choosedworm].position+deltabg)*mapscale);
+        else
+        if(players[userindex].worms[choosedworm].direction==-1)
+            mgraphs.setPosition((sf::Vector2f(players[userindex].worms[choosedworm].sprite.getLocalBounds().width-ORG_X/2, ORG_Y/2)+players[userindex].worms[choosedworm].position+deltabg)*mapscale);
+    }else
     if(currentworm){
         if((*currentworm).direction==1)
             mgraphs.setPosition((sf::Vector2f(ORG_X/2, ORG_Y/2)+(*currentworm).position+deltabg)*mapscale);
@@ -435,6 +444,8 @@ void weapon::draw(sf::RenderWindow &window){
         if((*currentworm).direction==-1)
             mgraphs.setPosition((sf::Vector2f((*currentworm).sprite.getLocalBounds().width-ORG_X/2, ORG_Y/2)+(*currentworm).position+deltabg)*mapscale);
         else cout<<"weird direction, "<<(*currentworm).direction<<"\n";
+    }else fdraw=0;
+    if(fdraw){
         if(weapons[choosedweapon].mgraphs.getScale()!=sf::Vector2f(mapscale*(*currentworm).direction, mapscale))
             mgraphs.setScale(mapscale, mapscale*(*currentworm).direction);
         window.draw(mgraphs);
@@ -1386,7 +1397,7 @@ int main(){
                             }
                         }
                     }else
-                    if(event.text.unicode==119){
+                    if((event.text.unicode==119)&&(choosedweapon!=1)){
                         if(currentworm){
                             if((*currentworm).direction==1)
                                 protocol3b(-1);
@@ -1395,8 +1406,8 @@ int main(){
                                 protocol3b(1);
                             else cout<<"wrong direction\n";
                         }
-                    }
-                    if(event.text.unicode==115){
+                    }else
+                    if((event.text.unicode==115)&&(choosedweapon!=1)){
                         if(currentworm){
                             if((*currentworm).direction==1)
                                 protocol3b(1);
@@ -1443,6 +1454,35 @@ int main(){
                     if(event.type==sf::Event::KeyReleased){
                         if(event.key.code==sf::Keyboard::F)
                             choosingweapon=!choosingweapon;
+                        else
+                        if(choosedweapon==1){
+                            if(event.key.code==sf::Keyboard::W){
+                                choosedworm++;
+                                while(players[userindex].worms[choosedworm].hp<=0){
+                                    choosedworm++;
+                                    if(choosedworm>4)
+                                        choosedworm=0;
+                                }
+                                deltabg=sf::Vector2f(window.getSize().x/2, window.getSize().y/2)/mapscale-(players[userindex].worms[choosedworm].position);
+                                backgrounds.setPosition(deltabg*mapscale);
+                                for(int i=0; i<wormpointers.size(); i++){
+                                    (*wormpointers[i]).update();
+                                }
+                            }else
+                            if(event.key.code==sf::Keyboard::S){
+                                choosedworm--;
+                                while(players[userindex].worms[choosedworm].hp<=0){
+                                    choosedworm--;
+                                    if(choosedworm<0)
+                                        choosedworm=4;
+                                }
+                                deltabg=sf::Vector2f(window.getSize().x/2, window.getSize().y/2)/mapscale-(players[userindex].worms[choosedworm].position);
+                                backgrounds.setPosition(deltabg*mapscale);
+                                for(int i=0; i<wormpointers.size(); i++){
+                                    (*wormpointers[i]).update();
+                                }
+                            }
+                        }
                     }
                 }else
                 if(event.type==sf::Event::MouseButtonPressed){
@@ -2426,7 +2466,9 @@ int main(){
                         }
                     }else{
                         if(!(to_receive%25)){
-                            if(protbufferi[1]!=40){players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
+                            if(protbufferi[1]!=40){
+                                players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
+                                if(userid==protbufferi[1])userindex=players.size()-1;
                             }
                             protbufferi[1]=data[i];
                             protbuffers[0]="";
@@ -2464,6 +2506,7 @@ int main(){
                         {//end of protocol
                             receiving=0;
                             players.push_back(player(protbufferi[1], protbuffers[0], sf::Color(protbufferi[2], protbufferi[3], protbufferi[4]), protbufferi[5]));
+                            if(userid==protbufferi[1])userindex=players.size()-1;
                             protbufferi[1]=0;
                             protbuffers[0]="";
                             break;
@@ -2840,7 +2883,7 @@ int main(){
             }
         }
 
-        lastittime=currentitteime;
+        lastittime=currentittime;
         currentittime=clocker.getElapsedTime();
         FPStime+=currentittime-lastittime;
         if(FPStime.asSeconds()>=1){
