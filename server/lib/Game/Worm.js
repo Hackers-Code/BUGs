@@ -71,7 +71,6 @@ class Worm {
 	{
 		this.isMovingRight = false;
 		this.isMovingLeft = false;
-		this.weapon = 0;
 		this.speedX = 0;
 	}
 

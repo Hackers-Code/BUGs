@@ -29,6 +29,11 @@ class Client {
 		this.keepAliveUDP = null;
 	}
 
+	getRoom()
+	{
+		return this.room;
+	}
+
 	sendID()
 	{
 		this.send( {
@@ -331,10 +336,7 @@ class Client {
 	{
 		if( this.player !== null )
 		{
-			if( this.player.selectWeapon( data ) )
-			{
-				this.room.broadcastSelectedWeapon( data );
-			}
+			this.player.selectWeapon( data );
 		}
 	}
 
@@ -342,11 +344,7 @@ class Client {
 	{
 		if( this.player !== null )
 		{
-			if( this.player.useWeapon( data ) )
-			{
-				this.room.broadcastUseWeapon( data );
-				this.room.endRound();
-			}
+			this.player.useWeapon( data );
 		}
 	}
 }
