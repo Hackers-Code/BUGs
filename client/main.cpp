@@ -677,7 +677,7 @@ bool protocol3b(signed char input=0){
         unsigned char to_send[2];
         to_send[0]=0x3b;
         to_send[1]=input;
-        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x39\n";
+        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x3b\n";
         else return 1;
     }else cout<<"not connected, can not aim\n";
     return 0;
@@ -686,7 +686,7 @@ bool protocol40(){
     if(connected){
         unsigned char to_send[1];
         to_send[0]=0x40;
-        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x38\n";
+        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x40\n";
         else return 1;
     }else cout<<"not connected, can not move\n";
     return 0;
@@ -696,9 +696,19 @@ bool protocol42(unsigned char weaponid=0){
         unsigned char to_send[2];
         to_send[0]=0x42;
         to_send[1]=weaponid;
-        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x38\n";
+        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x42\n";
         else return 1;
-    }else cout<<"not connected, can not move\n";
+    }else cout<<"not connected, can change weapon\n";
+    return 0;
+}
+bool protocol43(unsigned int power=0){
+    if(connected){
+        unsigned char to_send[2];
+        to_send[0]=0x43;
+        to_send[1]=power%256;
+        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x43\n";
+        else return 1;
+    }else cout<<"not connected, can not shoot\n";
     return 0;
 }
 
@@ -1458,6 +1468,8 @@ int main(){
                         if(choosedweapon==1){
                             if(event.key.code==sf::Keyboard::W){
                                 choosedworm++;
+                                if(choosedworm>4)
+                                    choosedworm=0;
                                 while(players[userindex].worms[choosedworm].hp<=0){
                                     choosedworm++;
                                     if(choosedworm>4)
@@ -1471,6 +1483,8 @@ int main(){
                             }else
                             if(event.key.code==sf::Keyboard::S){
                                 choosedworm--;
+                                if(choosedworm<0)
+                                    choosedworm=4;
                                 while(players[userindex].worms[choosedworm].hp<=0){
                                     choosedworm--;
                                     if(choosedworm<0)
@@ -1480,6 +1494,11 @@ int main(){
                                 backgrounds.setPosition(deltabg*mapscale);
                                 for(int i=0; i<wormpointers.size(); i++){
                                     (*wormpointers[i]).update();
+                                }
+                            }else
+                            if(event.key.code==sf::Keyboard::Return){
+                                if(protocol43(players[userid].worms[choosedweapon].id)){
+                                    cout<<"worm changed\n";
                                 }
                             }
                         }
