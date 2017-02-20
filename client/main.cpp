@@ -1497,7 +1497,7 @@ int main(){
                                 }
                             }else
                             if(event.key.code==sf::Keyboard::Return){
-                                if(protocol43(players[userid].worms[choosedweapon].id)){
+                                if(protocol43(players[userid].worms[choosedworm].id)){
                                     cout<<"worm changed\n";
                                 }
                             }
@@ -2191,8 +2191,21 @@ int main(){
                         i++;
                         if(i<received){
                             if(data[i]<wormpointers.size()){
-                                if(currentworm)(*currentworm).text.setColor(normalclr);
-                                currentworm=wormpointers[data[i]];
+                                if((*wormpointers[data[i]]).id==data[i])
+                                    currentworm=wormpointers[data[i]];
+                                else{
+                                    bool foccurred=0;
+                                    for(int j=0; j<wormpointers.size(); j++){
+                                        if((*wormpointers[j]).id==data[i]){
+                                            foccurred=1;
+                                            currentworm=wormpointers[j];
+                                            if((*currentworm).hp<=0) cout<<"currentworm is dead\n";
+                                        }
+                                    }
+                                    if(!foccurred){
+                                        cout<<"There is no worm with id "<<int(data[i])<<"\n";
+                                    }
+                                }
                                 i++;
                                 if(i<received){
                                     if(data[i]<playersamount){
@@ -2671,6 +2684,31 @@ int main(){
                                 if(fnotexist) cout<<"choosed not existing weapon("<<int(data[i])<<")\n";;
                             }
                         }else cout<<"lost selected`s weapon id\n";
+                        break;
+                    }
+                    if(data[i]==0x45){
+                        i++;
+                        if(i<received){
+                            if(choosedweapon==1){
+                                if(data[i]<wormpointers.size()){
+                                    if((*wormpointers[data[i]]).id==data[i])
+                                        currentworm=wormpointers[data[i]];
+                                    else{
+                                        bool foccurred=0;
+                                        for(int j=0; j<wormpointers.size(); j++){
+                                            if((*wormpointers[j]).id==data[i]){
+                                                foccurred=1;
+                                                currentworm=wormpointers[j];
+                                                if((*currentworm).hp<=0) cout<<"currentworm is dead\n";
+                                            }
+                                        }
+                                        if(!foccurred){
+                                            cout<<"There is no worm with id "<<int(data[i])<<"\n";
+                                        }
+                                    }
+                                }else cout<<"wrong worm id: "<<int(data[i])<<"\n";
+                            }else cout<<"Not supported weapon used :P\n";
+                        }else cout<<"lost used weapon power\n";
                         break;
                     }
                     cout<<"recieved unknown UDP protocol: "<<int(data[i])<<"\n";
