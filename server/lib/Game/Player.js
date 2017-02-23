@@ -32,12 +32,17 @@ class Player {
 		let weapons = [];
 		this.weapons.forEach( ( element ) =>
 		{
+			let id = Buffer.alloc( 1 );
+			id.writeUInt8( element.id );
+			let usages = Buffer.alloc( 1 );
+			usages.writeInt8( element.usages );
 			weapons.push( {
-				id : Buffer.from( [ element.id ] ),
-				usages : Buffer.from( [ element.usages ] )
+				id,
+				usages
 			} );
 		} );
 		return {
+			opcode : 0x41,
 			count,
 			weapons
 		};

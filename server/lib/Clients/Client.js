@@ -328,7 +328,7 @@ class Client {
 	{
 		if( this.player !== null )
 		{
-			return this.player.getWeaponsList();
+			this.send( this.player.getWeaponsList(), 'UDP' );
 		}
 	}
 
