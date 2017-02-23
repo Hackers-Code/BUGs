@@ -210,22 +210,31 @@ class weapon{public:
     sf::Vector2f origin, position;
     sf::Texture thumbt, mgrapht;
     sf::Sprite thumbs, mgraphs;
+    sf::Text text;//ambitne, prawda?
 
     weapon(string namein){
         position.x=ORG_X;
         position.y=ORG_Y;
         origin=position;
         name=namein;
+        text.setColor(sf::Color(255,0,0));
+        text.setFont(mainfont);
+        text.setCharacterSize(12);
     }
 
     bool clicked(float xin, float yin){
         float x=thumbs.getPosition().x, y=thumbs.getPosition().y, h=thumbt.getSize().y, w=thumbt.getSize().x;
-        if((xin>x)&&(yin>y)&&(xin<x+w)&&(yin<y+h))
+        if((usages)&&(xin>x)&&(yin>y)&&(xin<x+w)&&(yin<y+h))
             return 1;
         return 0;
     }
 
     void draw(sf::RenderWindow &window);
+
+    void setUsages(int input){
+        usages=input;
+        text.setString(to_string(input));
+    }
 
     bool loadGraphics(int input, bool fromFile=0){
         bool good=1;
@@ -235,6 +244,7 @@ class weapon{public:
                 if((thumbt.getSize().x!=30)||(thumbt.getSize().y!=30)){ cout<<name<<"'s thumbnail size is("<<thumbt.getSize().x<<", "<<thumbt.getSize().y<<")\n"; good=0;}
                 thumbs.setTexture(thumbt, 1);
                 thumbs.setPosition(986+((input%5)*36), 277+(int(input/5)*35));
+                text.  setPosition(986+((input%5)*36), 277+(int(input/5)*35));
                 if(!mgrapht.loadFromFile("img/cache"+track)){ cout<<"("<<name<<" graphic)\n"; good=0;}
                 if((!thumbt.getSize().x)||(!thumbt.getSize().y)){ cout<<name<<"'s graphic is invalid\n"; good=0;}
             }else{
@@ -249,6 +259,7 @@ class weapon{public:
                     if((thumbt.getSize().x!=30)||(thumbt.getSize().y!=30)){ cout<<name<<"'s thumbnail size is("<<thumbt.getSize().x<<", "<<thumbt.getSize().y<<")\n"; good=0;}
                     thumbs.setTexture(thumbt, 1);
                     thumbs.setPosition(986+((input%5)*36), 277+(int(input/5)*35));
+                    text.  setPosition(986+((input%5)*36), 277+(int(input/5)*35));
 
                     request=sf::Http::Request(track);
                     response=http.sendRequest(request);
@@ -2213,6 +2224,7 @@ int main(){
                                             if(players[j].id==data[i]) cout<<players[j].name<<"'s ["<<j<<"] turn\n";
                                         if((*currentworm).team!=data[i]) cout<<"current worm doesn't belong to current player\n";
                                     }else cout<<"there is no player with id="<<int(data[i])<<"\n";
+                                    protocol40();
                                     continue;
                                 }else cout<<"lost worm id\n";
                             }else cout<<"wrong worm id: "<<int(data[i])<<"\n";
@@ -2235,7 +2247,6 @@ int main(){
                     if(data[i]==0x36){
                         currentworm=0;
                         choosedweapon=0;
-                        protocol40();
                         cout<<"end of your turn\n";
                         continue;
                     }
@@ -2708,6 +2719,7 @@ int main(){
                                     }
                                 }else cout<<"wrong worm id: "<<int(data[i])<<"\n";
                             }else cout<<"Not supported weapon used :P\n";
+                            protocol40();
                         }else cout<<"lost used weapon power\n";
                         break;
                     }
@@ -2873,7 +2885,7 @@ int main(){
                                 bool fnotexists=1;
                                 for(int j=0; j<weapons.size(); j++){
                                     if(weapons[j].id==protbufferi[2]){
-                                        weapons[j].usages=protbuffersh[0];
+                                        weapons[j].setUsages(protbuffersh[0]);
                                         fnotexists=0;
                                         break;
                                     }
@@ -2881,9 +2893,8 @@ int main(){
                                 if(fnotexists){
                                     cout<<"weapon with id "<<protbufferi[2]<<" does not exist\n";
                                 }
-                            }
-                            else{
-                                weapons[protbufferi[2]].usages=protbuffersh[0];
+                            }else{
+                                weapons[protbufferi[2]].setUsages(protbuffersh[0]);
                             }
                         }
                     }
@@ -3359,8 +3370,11 @@ int main(){
             weapons[choosedweapon].draw(window);
             if(choosingweapon){
                 window.draw(backpacks);
-                for(int i=0; i<weapons.size(); i++)
-                    window.draw(weapons[i].thumbs);
+                for(int i=0; i<weapons.size(); i++){
+                    if(weapons[i].usages)
+                        window.draw(weapons[i].thumbs);
+                        window.draw(weapons[i].text);
+                }
             }
         }else
         if(mode==connectroom){
