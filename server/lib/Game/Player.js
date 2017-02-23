@@ -56,7 +56,6 @@ class Player {
 
 	endTurn()
 	{
-		this.currentWeapon = this.weapons[ 0 ];
 		this.isYourTurn = false;
 		this.canAttack = false;
 		this.worms[ this.actualWorm ].stop();
@@ -320,6 +319,11 @@ class Player {
 					this.endRound( data );
 					break;
 				}
+			}
+			if( this.currentWeapon.usages === 0 )
+			{
+				this.currentWeapon = this.weapons[ 0 ];
+				this.room.broadcastSelectedWeapon( { id : Buffer.from( [ 0 ] ) } );
 			}
 		}
 	}
