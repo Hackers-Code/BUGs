@@ -21,6 +21,7 @@ class Player {
 		};
 		this.mask = Buffer.from( [ 0 ] );
 		this.isYourTurn = false;
+		this.canAttack = false;
 		this.world = null;
 		this.currentWeapon = null;
 	}
@@ -57,12 +58,14 @@ class Player {
 	{
 		this.currentWeapon = this.weapons[ 0 ];
 		this.isYourTurn = false;
+		this.canAttack = false;
 		this.worms[ this.actualWorm ].stop();
 	}
 
 	startTurn()
 	{
 		this.isYourTurn = true;
+		this.canAttack = true;
 	}
 
 	addWorm( spawn, id, physics )
@@ -231,9 +234,16 @@ class Player {
 		}
 	}
 
+	endRound( data )
+	{
+		this.canAttack = false;
+		this.room.broadcastUseWeapon( data );
+		this.room.endRound();
+	}
+
 	useWeapon( data )
 	{
-		if( this.isYourTurn )
+		if( this.isYourTurn && this.canAttack )
 		{
 			let param = data.param.readUInt8( 0 );
 			if( this.currentWeapon === null )
@@ -250,8 +260,7 @@ class Player {
 				case 0:
 				{
 					//TODO:No weapon
-					this.room.broadcastUseWeapon( data );
-					this.room.endRound();
+					this.endRound( data );
 					break;
 				}
 				case 1:
@@ -266,57 +275,49 @@ class Player {
 				}
 				case 2:
 				{
-					this.room.broadcastUseWeapon( data );
-					this.room.endRound();
+					this.endRound( data );
 					break;
 				}
 				case 3:
 				{
 					//TODO:Bazooka
-					this.room.broadcastUseWeapon( data );
-					this.room.endRound();
+					this.endRound( data );
 					break;
 				}
 				case 4:
 				{
 					//TODO:Grenade
-					this.room.broadcastUseWeapon( data );
-					this.room.endRound();
+					this.endRound( data );
 					break;
 				}
 				case 5:
 				{
 					//TODO:Shotgun
-					this.room.broadcastUseWeapon( data );
-					this.room.endRound();
+					this.endRound( data );
 					break;
 				}
 				case 6:
 				{
 					//TODO:Baseball
-					this.room.broadcastUseWeapon( data );
-					this.room.endRound();
+					this.endRound( data );
 					break;
 				}
 				case 7:
 				{
 					//TODO:Dynamite
-					this.room.broadcastUseWeapon( data );
-					this.room.endRound();
+					this.endRound( data );
 					break;
 				}
 				case 8:
 				{
 					//TODO:Revolver
-					this.room.broadcastUseWeapon( data );
-					this.room.endRound();
+					this.endRound( data );
 					break;
 				}
 				case 9:
 				{
 					//TODO:Holy hand grenade
-					this.room.broadcastUseWeapon( data );
-					this.room.endRound();
+					this.endRound( data );
 					break;
 				}
 			}
