@@ -3,21 +3,17 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 const sinon = require( 'sinon' );
 const ClientsStorage = require( '../../lib/Clients/ClientsStorage' );
+const RoomsStorage = require( '../../lib/Rooms/RoomsStorage' );
 const Client = require( '../../lib/Clients/Client' ).Client;
 const UniqueNameStorage = require( '../../lib/Utils/UniqueNameStorage' );
 describe( 'Client', () =>
 {
 	let client;
 	let write;
-	let end;
 	beforeEach( () =>
 	{
 		write = sinon.spy();
-		end = sinon.spy();
-		client = new Client( {
-			write : write,
-			end : end
-		}, Buffer.from( '00000000', 'hex' ), new UniqueNameStorage( 20, 'Anonymous' ) );
+		client = new Client( write, Buffer.from( '00000000', 'hex' ), new ClientsStorage( 0, {} ) );
 	} );
 	describe( '#getCallbacks()', () =>
 	{

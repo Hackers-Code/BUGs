@@ -16,7 +16,7 @@ describe( 'MapInterface', () =>
 			{
 				if( dir === process.cwd() + '/resources/maps/list.json' )
 				{
-					callback( void 0, "{\"list\":[]}" );
+					callback( void 0, "[]" );
 					return;
 				}
 				callback( new Error() );

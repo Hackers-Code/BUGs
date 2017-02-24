@@ -26,6 +26,10 @@ describe( 'RoomsStorage', () =>
 		} );
 		it( 'should return array with length 1 after adding 1 room', () =>
 		{
+			roomsStorage.addRoom( {
+				name : Buffer.from( 'abcdefghijklmnoprtuw' ),
+				password : Buffer.from( 'ABCD' )
+			}, {} );
 			expect( roomsStorage.getRooms() ).to.be.an( 'array' ).with.length( 1 );
 		} );
 	} );

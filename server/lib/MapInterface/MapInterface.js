@@ -17,7 +17,7 @@ const MapInterface = {
 			let parsedJSON = JSON.parse( data );
 			if( typeof parsedJSON === 'undefined' || parsedJSON instanceof Array === false )
 			{
-				callback( new Error( 'JSON does not contain list field' ) );
+				callback( new Error( 'JSON is not an array' ) );
 				return;
 			}
 			callback( void 0, parsedJSON );

@@ -20,12 +20,10 @@ describe( 'Clients storage', () =>
 	{
 		it( 'should return false if there are no empty slots', () =>
 		{
-			clientsStorage.addClient( {
-				write : () => {},
-				end : () => {}
-			} );
-			clientsStorage.addClient( {} );
-			expect( clientsStorage.addClient( {} ) ).to.equal( false );
+			let write = () => {};
+			clientsStorage.addClient( write );
+			clientsStorage.addClient( write );
+			expect( clientsStorage.addClient( write ) ).to.equal( false );
 		} )
 	} );
 } );

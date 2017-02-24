@@ -1,3 +1,4 @@
+'use strict';
 const Logger = require( './Logger' );
 const ClientsStorage = require( '../Clients/ClientsStorage' );
 const RoomsStorage = require( '../Rooms/RoomsStorage' );
