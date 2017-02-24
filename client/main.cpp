@@ -131,7 +131,7 @@ sf::Image backgroundi;
 sf::Vector2f deltabg(0,0);
 sf::Text turntimet;
 float mapscale=0.2;
-unsigned int turntime=0, clockframe=0, no18delta=0, force=0, choosedweapon=0;
+unsigned int turntime=0, clockframe=0, no18delta=0, force=0, currentplayer=0;
 int choosedworm=0;
 bool shooting=0, choosingweapon=0;
 
@@ -326,35 +326,13 @@ class worm{public:
         sprite.setTexture(wormt[animcount]);
     }
 
-    void update(){
-        sprite.setPosition((deltabg+position)*mapscale);
-        sprite.setScale(mapscale*direction, mapscale);
-        if(V!=sf::Vector2f(0,0))
-            sprite.setTexture(wormt[animcount]);
-        else
-            sprite.setTexture(wormt[0]);
-        wormmask.setPosition((deltabg+position+sf::Vector2f(12, -1))*mapscale);
-        wormmask.setScale(mapscale*direction, mapscale);
-        if(direction==-1){
-            sprite.move(sprite.getLocalBounds().width*mapscale, 0);
-            wormmask.setPosition(sf::Vector2f((sprite.getPosition().x-12*mapscale), (sprite.getPosition().y-1*mapscale)));
-        }
-        text.setPosition((deltabg+position+sf::Vector2f(0,-20))*mapscale);
-        text.setScale(mapscale, mapscale);
-        text.setString("HP="+to_string(hp));
-        if((currentworm)&&((*currentworm).id==id)){
-            weapons[choosedweapon].mgraphs.setRotation((angle+270)%360);
-            aimers.setRotation((angle+270)%360);
-            aimers.setScale(mapscale, mapscale);
-            aimers.setPosition((position.x+20+(cos((angle-90)*3.14159265/180)*80)+deltabg.x)*mapscale, (position.y+23+(sin((angle-90)*3.14159265/180)*80)+deltabg.y)*mapscale);
-        }
-    }
+    void update();
 };
 vector<worm*> wormpointers;
 
 class player{public:
     worm worms[5];
-    unsigned char id, hp, emptyworm, mask;
+    unsigned char id, hp, emptyworm, mask, choosenweapon;
     string name;
     sf::Text namet;
     sf::Color color;
@@ -366,8 +344,7 @@ class player{public:
         name=namein;
         color=colorin;
         mask=maskin;
-        hp=0;
-        emptyworm=0;
+        choosenweapon=emptyworm=hp=0;
         namet.setString(namein);
         namet.setCharacterSize(12);
         namet.setColor(color);
@@ -439,6 +416,31 @@ worm worm::operator =(worm input){
     return input;
 }
 
+void worm::update(){
+    sprite.setPosition((deltabg+position)*mapscale);
+    sprite.setScale(mapscale*direction, mapscale);
+    if(V!=sf::Vector2f(0,0))
+        sprite.setTexture(wormt[animcount]);
+    else
+        sprite.setTexture(wormt[0]);
+    wormmask.setPosition((deltabg+position+sf::Vector2f(12, -1))*mapscale);
+    wormmask.setScale(mapscale*direction, mapscale);
+    if(direction==-1){
+        sprite.move(sprite.getLocalBounds().width*mapscale, 0);
+        wormmask.setPosition(sf::Vector2f((sprite.getPosition().x-12*mapscale), (sprite.getPosition().y-1*mapscale)));
+    }
+    text.setPosition((deltabg+position+sf::Vector2f(0,-20))*mapscale);
+    text.setScale(mapscale, mapscale);
+    text.setString("HP="+to_string(hp));
+    if((currentworm)&&((*currentworm).id==id)){
+        if(players[currentplayer].choosenweapon!=1)
+            weapons[players[currentplayer].choosenweapon].mgraphs.setRotation((angle+270)%360);
+        aimers.setRotation((angle+270)%360);
+        aimers.setScale(mapscale, mapscale);
+        aimers.setPosition((position.x+20+(cos((angle-90)*3.14159265/180)*80)+deltabg.x)*mapscale, (position.y+23+(sin((angle-90)*3.14159265/180)*80)+deltabg.y)*mapscale);
+    }
+}
+
 void weapon::draw(sf::RenderWindow &window){
     bool fdraw=1;
     if(id==1){
@@ -457,7 +459,7 @@ void weapon::draw(sf::RenderWindow &window){
         else cout<<"weird direction, "<<(*currentworm).direction<<"\n";
     }else fdraw=0;
     if(fdraw){
-        if(weapons[choosedweapon].mgraphs.getScale()!=sf::Vector2f(mapscale*(*currentworm).direction, mapscale))
+        if(weapons[players[currentplayer].choosenweapon].mgraphs.getScale()!=sf::Vector2f(mapscale*(*currentworm).direction, mapscale))
             mgraphs.setScale(mapscale, mapscale*(*currentworm).direction);
         window.draw(mgraphs);
     }
@@ -1418,7 +1420,7 @@ int main(){
                             }
                         }
                     }else
-                    if((event.text.unicode==119)&&(choosedweapon!=1)){
+                    if((event.text.unicode==119)&&(players[currentplayer].choosenweapon!=1)&&(players[currentplayer].choosenweapon!=2)){
                         if(currentworm){
                             if((*currentworm).direction==1)
                                 protocol3b(-1);
@@ -1428,7 +1430,7 @@ int main(){
                             else cout<<"wrong direction\n";
                         }
                     }else
-                    if((event.text.unicode==115)&&(choosedweapon!=1)){
+                    if((event.text.unicode==115)&&(players[currentplayer].choosenweapon!=1)&&(players[currentplayer].choosenweapon!=2)){
                         if(currentworm){
                             if((*currentworm).direction==1)
                                 protocol3b(1);
@@ -1476,7 +1478,7 @@ int main(){
                         if(event.key.code==sf::Keyboard::F)
                             choosingweapon=!choosingweapon;
                         else
-                        if(choosedweapon==1){
+                        if(players[currentplayer].choosenweapon==1){
                             if(event.key.code==sf::Keyboard::W){
                                 choosedworm++;
                                 if(choosedworm>4)
@@ -1511,6 +1513,11 @@ int main(){
                                 if(protocol43(players[userid].worms[choosedworm].id)){
                                     cout<<"worm changed\n";
                                 }
+                            }
+                        }else
+                        if(players[currentplayer].choosenweapon==2){
+                            if(event.key.code==sf::Keyboard::Return){
+                                protocol43(0);
                             }
                         }
                     }
@@ -2220,8 +2227,12 @@ int main(){
                                 i++;
                                 if(i<received){
                                     if(data[i]<playersamount){
-                                        for(int j=0; j<playersamount; j++)
-                                            if(players[j].id==data[i]) cout<<players[j].name<<"'s ["<<j<<"] turn\n";
+                                        for(int j=0; j<playersamount; j++){
+                                            if(players[j].id==data[i]){
+                                                cout<<players[j].name<<"'s ["<<j<<"] turn\n";
+                                                currentplayer=j;
+                                            }
+                                        }
                                         if((*currentworm).team!=data[i]) cout<<"current worm doesn't belong to current player\n";
                                     }else cout<<"there is no player with id="<<int(data[i])<<"\n";
                                     protocol40();
@@ -2246,7 +2257,6 @@ int main(){
                     }
                     if(data[i]==0x36){
                         currentworm=0;
-                        choosedweapon=0;
                         cout<<"end of your turn\n";
                         continue;
                     }
@@ -2682,12 +2692,12 @@ int main(){
                         i++;
                         if(i<received){
                             if((data[i]<weapons.size())&&(weapons[data[i]].id==data[i])){
-                                choosedweapon=data[i];
+                                players[currentplayer].choosenweapon=data[i];
                             }else{
                                 bool fnotexist=1;
                                 for(int j=0; j<weapons.size(); j++){
                                     if(weapons[j].id==data[i]){
-                                        choosedweapon=weapons[j].id;
+                                        players[currentplayer].choosenweapon=weapons[j].id;
                                         fnotexist=0;
                                         break;
                                     }
@@ -2700,7 +2710,7 @@ int main(){
                     if(data[i]==0x45){
                         i++;
                         if(i<received){
-                            if(choosedweapon==1){
+                            if(players[currentplayer].choosenweapon==1){
                                 if(data[i]<wormpointers.size()){
                                     if((*wormpointers[data[i]]).id==data[i])
                                         currentworm=wormpointers[data[i]];
@@ -2718,7 +2728,11 @@ int main(){
                                         }
                                     }
                                 }else cout<<"wrong worm id: "<<int(data[i])<<"\n";
-                            }else cout<<"Not supported weapon used :P\n";
+                            }else
+                            if(players[currentplayer].choosenweapon==2){
+                                cout<<players[currentplayer].name<<" surrended\n";
+                            }else
+                                cout<<"Not supported weapon used :P\n";
                             protocol40();
                         }else cout<<"lost used weapon power\n";
                         break;
@@ -3367,7 +3381,7 @@ int main(){
             }
             window.draw(clocks);
             window.draw(turntimet);
-            weapons[choosedweapon].draw(window);
+            weapons[players[currentplayer].choosenweapon].draw(window);
             if(choosingweapon){
                 window.draw(backpacks);
                 for(int i=0; i<weapons.size(); i++){
@@ -3490,4 +3504,8 @@ void exitting(){
 //"Mo¿liwe, ¿e bêdzie dzia³aæ, ale prawdopodobnie nie." Micha³ Marczewski
 //"Obawiam się, że będziemy się na spawnie spawnić." Jakub Olszewski
 //"Internet zawsze jest, chyba, że go nie ma." Michał Marczewski
-//"Czysto teoretycznie... (20kB wykładu)" Aleksander Czajka
+//"Czysto teoretycznie... (wstaw 20kB wykładu)" Aleksander Czajka
+/*
+-"To jaką animację mam dać na poddanie się?"
+-"Nie wiem, wbij to w ziemię i napisz "mały krok dla worma, duży dla wormsowości"..." Michał Marczewski
+*/
