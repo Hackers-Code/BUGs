@@ -29,6 +29,7 @@
     "url": "https://github.com/Hackers-Code/Creepy-crawlies"
   },
   "dependencies": {
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "sat": "^0.6.0"
   }
 }
