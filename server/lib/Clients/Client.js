@@ -97,7 +97,7 @@ class Client {
 		{
 			let msg;
 			let opcode;
-			if( e.message == 0xe0 )
+			if( e.message === 0xe0 )
 			{
 				msg = Buffer.from( 'Unknown instruction' );
 				opcode = 0xe0;
