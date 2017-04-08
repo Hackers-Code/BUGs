@@ -70,7 +70,8 @@ class Client {
 	{
 		return {
 			onData : this.handleData.bind( this ),
-			onClose : this.disconnect.bind( this )
+			onClose : this.disconnect.bind( this ),
+			onError : null
 		};
 	}
 

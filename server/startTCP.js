@@ -8,11 +8,20 @@ module.exports = ( port, connectionHandler, errorHandler, listeningHandler ) =>
 			remoteAddress : socket.remoteAddress,
 			remotePort : socket.remotePort
 		}, socket.write.bind( socket ) );
-		if( socketCallbacks !== false )
+		if( typeof socketCallbacks === 'object' )
 		{
-			socket.on( 'data', socketCallbacks.onData );
-			socket.on( 'close', socketCallbacks.onClose );
-			socket.on( 'error', () => {} );
+			if( typeof socketCallbacks.onData === 'function' )
+			{
+				socket.on( 'data', socketCallbacks.onData );
+			}
+			if( typeof socketCallbacks.onClose === 'function' )
+			{
+				socket.on( 'close', socketCallbacks.onClose );
+			}
+			if( typeof socketCallbacks.onError === 'function' )
+			{
+				socket.on( 'error', socketCallbacks.onError );
+			}
 		}
 		else
 		{
