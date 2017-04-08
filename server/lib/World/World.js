@@ -4,8 +4,11 @@ const KillingZone = require( './Objects/KillingZone' );
 class World {
 	constructor( parsedMap )
 	{
-		this.width = parsedMap.metadata.width.readInt32BE( 0 );
-		this.height = parsedMap.metadata.height.readInt32BE( 0 );
+		let width = parsedMap.metadata.width.readUInt32BE( 0 );
+		let height = parsedMap.metadata.height.readUInt32BE( 0 );
+		let corner = new SAT.Vector( 0, 0 );
+		let box = new SAT.Box( corner, width, height );
+		this.hitbox = box.toPolygon();
 		this.spawns = [];
 		this.blocks = [];
 		this.killingZones = [];
@@ -13,103 +16,36 @@ class World {
 		{
 			parsedMap.spawns.forEach( ( element ) =>
 			{
-				let spawn = new Spawn( element );
-				this.spawns.push( spawn );
+				this.spawns.push( new Spawn( element ) );
 			} );
 		}
-		this.unusedSpawns = this.spawns;
 		if( typeof parsedMap.blocks !== 'undefined' )
 		{
 			parsedMap.blocks.forEach( ( element ) =>
 			{
-				let block = new Block( element );
-				this.blocks.push( block );
+				this.blocks.push( new Block( element ) );
 			} );
 		}
 		if( typeof parsedMap.killingZones !== 'undefined' )
 		{
 			parsedMap.killingZones.forEach( ( element ) =>
 			{
-				let killingZone = new KillingZone( element );
-				this.killingZones.push( killingZone );
+				this.killingZones.push( new KillingZone( element ) );
 			} );
 		}
 	}
 
+	getHitbox()
+	{
+		return this.hitbox;
+	}
+
 	getUniqueSpawn()
 	{
-		let index = Math.floor( Math.random() * this.unusedSpawns.length );
-		let spawn = this.unusedSpawns[ index ];
-		this.unusedSpawns.splice( index, 1 );
+		let index = Math.floor( Math.random() * this.spawns.length );
+		let spawn = this.spawns[ index ];
+		this.spawns.splice( index, 1 );
 		return spawn;
-	}
-
-	checkCollisionLeft( y, x )
-	{
-		if( x < 0 )
-		{
-			return 0;
-		}
-		for( let i = 0 ; i < this.blocks.length ; i++ )
-		{
-			let block = this.blocks[ i ];
-			if( (y >= block.y) && (y <= block.y + block.height) && ( x <= block.x ) && ( x >= block.x + block.width) )
-			{
-				return block.x + block.width;
-			}
-		}
-		return false;
-	}
-
-	checkCollisionRight( y, x, width )
-	{//(((block.y>=y)&&(block.y<=y+worm.height))||((block.y<y)&&(block.y+block.width>y)))
-		if( x + width > this.width )
-		{
-			return this.width - width;
-		}
-		for( let i = 0 ; i < this.blocks.length ; i++ )
-		{
-			let block = this.blocks[ i ];
-			if( (y >= block.y) && (y <= block.y + block.height) && (x + width >= block.x ) && ( x + width <= block.x + block.width) )
-			{
-				return block.x - width;
-			}
-		}
-		return false;
-	}
-
-	checkCollisionTop( y, x )
-	{
-		if( y < 0 )
-		{
-			return 0;
-		}
-		for( let i = 0 ; i < this.blocks.length ; i++ )
-		{
-			let block = this.blocks[ i ];
-			if( (y >= block.y) && (y <= block.y + block.height) && ( x >= block.x ) && ( x <= block.x + block.width) )
-			{
-				return block.y + block.height;
-			}
-		}
-		return false;
-	}
-
-	checkCollisionBottom( y, height, x )
-	{
-		if( y + height > this.height )
-		{
-			return this.height - height;
-		}
-		for( let i = 0 ; i < this.blocks.length ; i++ )
-		{
-			let block = this.blocks[ i ];
-			if( (y + height <= block.y + block.height) && (y + height >= block.y) && ( x >= block.x ) && ( x <= block.x + block.width) )
-			{
-				return block.y - height;
-			}
-		}
-		return false;
 	}
 }
 
