@@ -19,7 +19,7 @@ const SearchEngine = {
 	{
 		for( let i = 0 ; i < array.length ; i++ )
 		{
-			if( id == array[ i ].id )
+			if( id === array[ i ].id )
 			{
 				return i;
 			}
