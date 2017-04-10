@@ -1,14 +1,6 @@
 'use strict';
-const App = require( './lib/App/App' );
-const Config = require( './config' );
-const TCP = require( './startTCP' );
-const UDP = require( './startUDP' );
+const App = require( './lib2.0/App' );
 (function()
 {
-	let options = {
-		config : Config,
-		tcpStart : TCP,
-		udpStart : UDP
-	};
-	new App( options );
+	new App();
 })();
