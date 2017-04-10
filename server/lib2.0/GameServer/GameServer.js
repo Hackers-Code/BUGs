@@ -52,7 +52,7 @@ class GameServer {
 			this.sendKickMessage( socketWrite );
 			return false;
 		}
-		return this.clientsStorage.addClient( socketWrite );
+		return this.clientsStorage.addClient( socketWrite, this );
 	}
 
 	handleUDPPacket( packet, rinfo, socketSend )
