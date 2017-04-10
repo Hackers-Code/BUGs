@@ -10,6 +10,8 @@
 #include <SFML/Audio.hpp>
 #include <unordered_map>
 #include "lib/json.hpp"
+#include "../biblioteki_me/tcs.cpp"
+#include "../biblioteki_me/char_converter.cpp"
 
 #define INFO_AMOUNT 11
 #define HTTPURL "http://bugs.hackers-code.boakgp.hekko24.pl"
@@ -137,6 +139,7 @@ bool shooting=0, choosingweapon=0;
 
 //fizyka
 short vjump=-300, ay=43, vxmax=27, vymax=875;
+float tarcie;
 sf::Clock clocker;
 sf::Time lastittime, currentittime, starttime, FPStime;
 bool started=0;
@@ -489,241 +492,7 @@ bool colide(sf::Vector2f pixelin, sf::Image &imagein){
         return 1;
 }
 
-void protocol1(string buffer){
-    if(buffer.length()<=20){
-        if(connected){
-            unsigned char to_send[21]={0};
-            to_send[0]=1;
-            for(int i=0; i<buffer.length(); i++){
-                to_send[i+1]=buffer[i];
-            }
-            if(clientsocket.send(to_send, 21)==sf::Socket::Done) cout<<"poszlo 0x1\n"; else cout<<"sending error\n";
-        }else cout<<"not connected, cannot get nick\n";
-    }else cout<<"nick must have no more than 20 letters\n";
-}
-bool protocol3(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x3;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-            cout<<"room leaved\n";
-            mode=connectroom;
-            return 1;
-        }else cout<<"sending error 0x3\n";
-    }else cout<<"not connected, cannot leave room\n";
-    return 0;
-}
-void protocol6(){
-    unsigned char to_send[7];
-    to_send[0]=6;
-    protbufferi[0]=myid;
-    for(int i=4; i>0; i--){
-        to_send[i]=protbufferi[0]%256;
-        protbufferi[0]=protbufferi[0]>>8;
-    }
-    to_send[5]=(udpsocket.getLocalPort()>>8)%256;
-    to_send[6]=udpsocket.getLocalPort()%256;
-    if(udpsocket.send(to_send, 5, serverip, 31337)!=sf::Socket::Done){
-        cout<<"sending error 0x6\n";
-    }
-    protbufferi[0]=0;
-}
-void protocol10(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x10;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-            cout<<"poszlo 0x10\n";
-            gamelist.clear();
-            lastgamelistelement=0;
-            deltagamelist=120;
-        }else cout<<"sending error 0x10\n";
-    }else cout<<"not connected, cannot get room list\n";
-}
-void protocol20(string buffer, string buffer2){
-    if(connected){
-        unsigned char to_send[22+(buffer.length())];
-        to_send[0]=0x20;
-        for(int i=1; i<21; i++){
-            if(i-1<buffer2.length()){
-                to_send[i]=buffer2[i-1];
-            }else
-                to_send[i]=0;
-        }
-        to_send[21]=buffer.length();
-        for(int i=22; i<to_send[21]+22; i++){
-            to_send[i]=buffer[i-22];
-        }
-        if(clientsocket.send(to_send, 22+(buffer.length()))==sf::Socket::Done) cout<<"poszlo 0x20\n";
-        else cout<<"sending error\n";
-    }else cout<<"not connected, can not create room\n";
-}
-void protocol22(){
-    if(connected){
-        unsigned char to_send[9];
-        to_send[0]=0x22;
-        to_send[1]=(ay>>8)%256;
-        to_send[2]=ay%256;
-        to_send[3]=(vjump)>>8;
-        to_send[4]=vjump;
-        to_send[5]=(vymax>>8)%256;
-        to_send[6]=(vymax)%256;
-        to_send[7]=(vxmax>>8)%256;
-        to_send[8]=(vxmax)%256;
-        if(clientsocket.send(to_send, 9)==sf::Socket::Done){
-            cout<<"poszlo 0x22\n";
-        }else cout<<"sending error 0x22\n";
-    }else cout<<"not connected, cannot set physic\n";
-}
-void protocol24(unsigned int seed, unsigned char playersamount){
-    if(connected){
-		unsigned char to_send[6];
-		to_send[0]=0x24;
-		for(int i=4; i>0; i--){
-			to_send[i]=seed%256;
-			seed=seed>>8;
-		}
-		to_send[5]=playersamount;
-		if(clientsocket.send(to_send, 6)==sf::Socket::Done) cout<<"poszlo 0x24\n";
-		else cout<<"sending error\n";
-    }else cout<<"not connected, cannot change settings\n";
-}
-void protocol26(unsigned int gameid, string password){
-    if(password.length()<256){
-        if(connected){
-            unsigned char length=password.length(), to_send[10+length];
-            to_send[0]=0x26;
-            protbufferi[0]=gameid;
-            for(int i=4; i>0; i--){
-                to_send[i]=gameid%256;
-                gameid=gameid>>8;
-            }
-            protbuffers[0]=password;
-            to_send[5]=length;
-            for(int i=0; i<length; i++){
-                to_send[i+6]=password[i];
-            }
-            if(clientsocket.send(to_send, 6+length)==sf::Socket::Done){
-                cout<<"poszlo 0x26\n";
-            }else cout<<"sending error 0x26\n";
-        }else cout<<"not connected, cannot join\n";
-    }else cout<<"password too long (255 chars max)\n";
-}
-bool protocol28(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x28;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-            cout<<"poszlo 0x28\n";
-            return 1;
-        }else cout<<"sending error 0x28\n";
-    }else cout<<"not connected, cannot get room settings\n";
-    return 0;
-}
-void protocol2a(sf::Color input, unsigned char maskid){
-    if(connected){
-        unsigned char to_send[5];
-        to_send[0]=0x2a;
-        to_send[1]=input.r;
-        to_send[2]=input.g;
-        to_send[3]=input.b;
-        to_send[4]=maskid;
-        if(clientsocket.send(to_send, 5)==sf::Socket::Done){
-            cout<<"poszlo 0x2a\n";
-        }else cout<<"sending error 0x2a\n";
-    }else cout<<"not connected, cannot set player settings\n";
-}
-void protocol2c(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x2c;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-            cout<<"poszlo 0x2c\n";
-        }else cout<<"sending error 0x2c\n";
-    }else cout<<"not connected, cannot get ready\n";
-}
-void protocol2e(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x2e;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-        }else cout<<"sending error 0x2e\n";
-    }else cout<<"not connected, cannot get players list\n";
-}
-void protocol31(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x31;
-        if(clientsocket.send(to_send, 1)==sf::Socket::Done){
-        }else cout<<"sending error 0x31\n";
-    }else cout<<"not connected, cannot get turn time\n";
-}
-bool protocol37(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x37;
-        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x37\n";
-        else return 1;
-    }else cout<<"not connected, can not jump\n";
-    return 0;
-}
-bool protocol38(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x38;
-        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x38\n";
-        else return 1;
-    }else cout<<"not connected, can not move\n";
-    return 0;
-}
-bool protocol39(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x39;
-        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x39\n";
-        else return 1;
-    }else cout<<"not connected, can not move\n";
-    return 0;
-}
-bool protocol3b(signed char input=0){
-    if(connected){
-        unsigned char to_send[2];
-        to_send[0]=0x3b;
-        to_send[1]=input;
-        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x3b\n";
-        else return 1;
-    }else cout<<"not connected, can not aim\n";
-    return 0;
-}
-bool protocol40(){
-    if(connected){
-        unsigned char to_send[1];
-        to_send[0]=0x40;
-        if(udpsocket.send(to_send, 1, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x40\n";
-        else return 1;
-    }else cout<<"not connected, can not move\n";
-    return 0;
-}
-bool protocol42(unsigned char weaponid=0){
-    if(connected){
-        unsigned char to_send[2];
-        to_send[0]=0x42;
-        to_send[1]=weaponid;
-        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x42\n";
-        else return 1;
-    }else cout<<"not connected, can change weapon\n";
-    return 0;
-}
-bool protocol43(unsigned int power=0){
-    if(connected){
-        unsigned char to_send[2];
-        to_send[0]=0x43;
-        to_send[1]=power%256;
-        if(udpsocket.send(to_send, 2, serverip, 31337)!=sf::Socket::Done) cout<<"sending error 0x43\n";
-        else return 1;
-    }else cout<<"not connected, can not shoot\n";
-    return 0;
-}
+#include "protocols.cpp"
 
 class metamap{public:
     string ids, author, name, thumbnail, map_file, version, last_update, created;
@@ -956,62 +725,79 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
     sf::Http::Response::Status httpstatus=response.getStatus();
     if(httpstatus==sf::Http::Response::Ok){
         buffer=response.getBody();
-        unsigned char ch, structure=0, to_load=0;
-        int width=0, height=0, uintbuffer[8];
+        int signature=0, version=0, compression=0, width=0, height=0, uintbuffer[8];
         sf::Color solid(80, 100, 0);
-        for(int i=0; i<4; i++){
-            if(i>=buffer.size()){
-                cout<<track<<"'s metadata broken\n";
-                return output;
-            }
-            width=width<<8;
-            width+=(unsigned char)buffer[i];
+        //-------------------------------------------------------    metadata   -------------------------------------------
+        signature=char_to_uint(&buffer[0]);//<0;3>
+        version=                buffer[4];
+        compression=            buffer[5];
+        width=    char_to_uint(&buffer[8]);//<8;11>
+        height=   char_to_uint(&buffer[12]);//<12;15>
+        //-------------------------------------------------------   /metadata   -------------------------------------------
+        //-------------------------------------------------------   validation     -------------------------------------------
+        if(signature!=0x006d6170){
+            cout<<"loadmap(); wrong signature: "<<signature<<" \n";
+            return output;
         }
-        for(int i=4; i<8; i++){
-            if(i>=buffer.size()){
-                cout<<track<<"'s metadata broken\n";
-                return output;
-            }
-            height=height<<8;
-            height+=buffer[i];
+        if(version!=1){
+            cout<<"loadmap(); wrong format version: "<<version<<"\n";
+            return output;
         }
+        if(compression){
+            cout<<"loadmap(); not supported compression:"<<compression<<"\n";
+            return output;
+        }
+        if(width==0){
+            cout<<"loadmap(); width==0\n";
+            return output;
+        }
+        if(height==0){
+            cout<<"loadmap(); height==0\n";
+            return output;
+        }
+        //-------------------------------------------------------   /validation    -------------------------------------------
         output.create(width, height, sf::Color(0,0,0,0));
-        for(int i=8; i<buffer.size(); i++){
-            ch=buffer[i];
-            if(structure==1){
-                uintbuffer[(to_load)/4]=uintbuffer[(to_load)/4]<<8;
-                uintbuffer[(to_load)/4]+=ch;
-                if(!to_load){
-                    spawnpoints.push_back(sf::Vector2u(uintbuffer[1], uintbuffer[0]));
-                    structure=0;
+        for(int i=16; i<buffer.size(); i++){
+            if(buffer[i]==1){
+                if(i+8>=buffer.size()){
+                    cout<<"loadmap(); lost rest of spawn point, i="<<i<<"\n";
+                    return output;
                 }
+                spawnpoints.push_back(sf::Vector2u(char_to_uint(&buffer[i+1]), char_to_uint(&buffer[i+5])));
+                i+=8;
             }else
-            if(structure==2){
-                uintbuffer[(to_load)/4]=uintbuffer[(to_load)/4]<<8;
-                uintbuffer[(to_load)/4]+=ch;
-                if(!to_load){
-                    for(int i=0; i<uintbuffer[1]; i++)
-                        if(i+uintbuffer[3]<width){
-                            for(int j=0; j<uintbuffer[0]; j++)
-                                if(j+uintbuffer[2]<height){
-                                    output.setPixel(i+uintbuffer[3], j+uintbuffer[2], solid);
-                                }else break;
-                        }else break;
-                    structure=0;
+            if(buffer[i]==2){
+                if(i+16>=buffer.size()){
+                    cout<<"loadmap(); lost rest of block, i="<<i<<"\n";
+                    return output;
                 }
-            }
-
-            if(!structure){
-                if(ch==1){
-                    structure=1;
-                    to_load=8;
-                }else
-                if(ch==2){
-                    structure=2;
-                    to_load=16;
+                uintbuffer[0]+=char_to_uint(&buffer[i+1]);//<1;4>
+                uintbuffer[1]+=char_to_uint(&buffer[i+5]);//<5;8>
+                uintbuffer[2]+=char_to_uint(&buffer[i+9]);//<9;12>
+                uintbuffer[3]+=char_to_uint(&buffer[i+13]);//<13;16>
+                for(int k=0; k<uintbuffer[0]; k++)
+                    if(k+uintbuffer[3]<width){
+                        for(int j=0; j<uintbuffer[1]; j++)
+                            if(j+uintbuffer[2]<height){
+                                output.setPixel(k+uintbuffer[3], j+uintbuffer[2], solid);
+                            }else break;
+                    }else break;
+                i+=16;
+            }else
+            if(buffer[i]==3){
+                if(i+16>=buffer.size()){
+                    cout<<"loadmap(); lost rest of killing zone, i="<<i<<"\n";
+                    return output;
                 }
+                uintbuffer[0]+=char_to_uint(&buffer[i+1]);//<1;4>
+                uintbuffer[1]+=char_to_uint(&buffer[i+5]);//<5;8>
+                uintbuffer[2]+=char_to_uint(&buffer[i+9]);//<9;12>
+                uintbuffer[3]+=char_to_uint(&buffer[i+13]);//<13;16>
+                i+=16;
+            }else{
+                cout<<"loadmap(); invalid structure, i="<<i<<", buffer[i]="<<buffer[i]<<"\n";
+                return output;
             }
-            to_load--;
         }
 
     }else{
@@ -2481,6 +2267,7 @@ int main(){
                         vjump=-protbufferi[2];
                         vymax=protbufferi[3];
                         vxmax=protbufferi[4];
+                        tarcie=ay/vymax;
                         cb2players.setTexture(checkboxoff);
                         cb3players.setTexture(checkboxoff);
                         cb4players.setTexture(checkboxoff);
@@ -3505,6 +3292,7 @@ void exitting(){
 //"Obawiam się, że będziemy się na spawnie spawnić." Jakub Olszewski
 //"Internet zawsze jest, chyba, że go nie ma." Michał Marczewski
 //"Czysto teoretycznie... (wstaw 20kB wykładu)" Aleksander Czajka
+//"W razie zawalłu proszę skonsultować się z lekarzem lub farmaceutą, gdyż każdy kod niewłaściwie zinterpretowany może zagrażać twojemu życiu lub zdrowiu." Michał Marczewski
 /*
 -"To jaką animację mam dać na poddanie się?"
 -"Nie wiem, wbij to w ziemię i napisz "mały krok dla worma, duży dla wormsowości"..." Michał Marczewski
