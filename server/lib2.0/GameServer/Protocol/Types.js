@@ -3,12 +3,14 @@ const Attributes = {
 	boolean : -1,
 	signed : 0,
 	unsigned : 1,
-	string : 2
+	string : 2,
+	buffer : 3
 };
 const boolean = Attributes.boolean;
 const signed = Attributes.signed;
 const unsigned = Attributes.unsigned;
 const string = Attributes.string;
+const buffer = Attributes.buffer;
 const Encoding = {
 	be : 1,
 	le : 2
@@ -16,9 +18,12 @@ const Encoding = {
 const be = Encoding.be;
 
 const DataTypes = {
-	string20 : {
-		type : string,
-		length : 20
+	buffer : ( length ) =>
+	{
+		return {
+			type : buffer,
+			length : length
+		}
 	},
 	shortString : {
 		type : string,

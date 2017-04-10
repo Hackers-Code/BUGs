@@ -4,8 +4,7 @@ const DataTypes = require( './Types' ).DataTypes;
 
 const tcp = Sockets.tcp;
 const udp = Sockets.udp;
-
-const String20 = DataTypes.string20;
+const BinaryString = DataTypes.buffer;
 const ShortString = DataTypes.shortString;
 const Array = DataTypes.array;
 const U8 = DataTypes.u8;
@@ -52,7 +51,7 @@ module.exports = {
 		params : {
 			games : Array( {
 				id : U32BE,
-				name : String20
+				name : BinaryString( 20 )
 			} )
 		}
 	},
@@ -106,7 +105,7 @@ module.exports = {
 			ready : U8,
 			players : Array( {
 				playerID : U8,
-				name : String20,
+				name : BinaryString( 20 ),
 				colourR : U8,
 				colourG : U8,
 				colourB : U8,

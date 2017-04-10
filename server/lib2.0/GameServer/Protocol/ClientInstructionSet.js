@@ -5,7 +5,7 @@ const DataTypes = require( './Types' ).DataTypes;
 const tcp = Sockets.tcp;
 const udp = Sockets.udp;
 
-const String20 = DataTypes.string20;
+const BinaryString = DataTypes.buffer;
 const ShortString = DataTypes.shortString;
 const U8 = DataTypes.u8;
 const U16BE = DataTypes.u16be;
@@ -16,7 +16,7 @@ module.exports = {
 		socket : tcp,
 		callback : 'setName',
 		response : 0x02,
-		params : { name : String20 }
+		params : { name : BinaryString( 20 ) }
 	},
 	0x03 : {
 		socket : tcp,
@@ -38,7 +38,7 @@ module.exports = {
 	0x20 : {
 		socket : tcp,
 		params : {
-			name : String20,
+			name : BinaryString( 20 ),
 			password : ShortString
 		},
 		callback : 'createRoom',
