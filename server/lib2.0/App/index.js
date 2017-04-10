@@ -5,7 +5,7 @@ class App {
 	constructor()
 	{
 		this.resourcesDownloader = new ResourcesDownloader();
-		this.resourcesDownloader.download( this.startServer );
+		this.resourcesDownloader.download( this.startServer.bind( this ) );
 	}
 
 	startServer()
