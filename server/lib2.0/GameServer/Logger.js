@@ -1,9 +1,10 @@
 'use strict';
+const fs = require( 'fs' );
 class Logger {
-	constructor( logFile, errorFile )
+	constructor()
 	{
-		this.logFile = logFile;
-		this.errorFile = errorFile;
+		this.logFile = fs.createWriteStream( process.cwd() + '/logs/log.txt' );
+		this.errorFile = fs.createWriteStream( process.cwd() + '/logs/error.txt' );
 	}
 
 	static formatData( data )
