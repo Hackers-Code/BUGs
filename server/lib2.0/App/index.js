@@ -10,6 +10,7 @@ class App {
 
 	startServer()
 	{
+		this.gameServer = GameServer( { maxClients : 4 } );
 	}
 }
 module.exports = App;
