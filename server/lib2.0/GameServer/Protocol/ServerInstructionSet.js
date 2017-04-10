@@ -1,3 +1,4 @@
+'use strict';
 const Sockets = require( './Types' ).Sockets;
 const DataTypes = require( './Types' ).DataTypes;
 
