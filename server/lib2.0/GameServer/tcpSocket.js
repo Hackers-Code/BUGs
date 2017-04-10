@@ -30,6 +30,6 @@ module.exports = ( port, connectionHandler, errorHandler, listeningHandler ) =>
 	} ).on( 'error', errorHandler );
 	server.listen( port, () =>
 	{
-		listeningHandler( server.address() )
+		listeningHandler( 'TCP', server.address() )
 	} );
 };

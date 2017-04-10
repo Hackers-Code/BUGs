@@ -12,7 +12,7 @@ module.exports = ( port, messageHandler, errorHandler, listeningHandler ) =>
 	server.on( 'error', errorHandler );
 	server.on( 'listening', () =>
 	{
-		listeningHandler( server.address() );
+		listeningHandler( 'UDP', server.address() );
 	} );
 	server.bind( port );
 };
