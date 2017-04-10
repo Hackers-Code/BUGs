@@ -3,16 +3,15 @@ const fs = require( 'fs' );
 const mkdirp = require( 'mkdirp' );
 const path = require( 'path' );
 class ResourcesDownloader {
-	constructor()
+	constructor( localDirectory = process.cwd() + '/resources' )
 	{
-		this.host = 'bugs.hackers-code.boakgp.hekko24.pl';
-		this.target = '';
+		this._host = 'bugs.hackers-code.boakgp.hekko24.pl';
+		this._localDirectory = localDirectory;
 	}
 
-	download( targetDirectory, callback )
+	download( callback )
 	{
-		this.target = targetDirectory;
-		mkdirp( this.target, ( err ) =>
+		mkdirp( this._localDirectory, ( err ) =>
 		{
 			if( err )
 			{
@@ -33,7 +32,7 @@ class ResourcesDownloader {
 		uri.forEach( ( element ) =>
 		{
 			http.get( {
-				host : this.host,
+				host : this._host,
 				path : element
 			}, ( response ) =>
 			{
@@ -55,7 +54,7 @@ class ResourcesDownloader {
 					{
 						uris = ResourcesDownloader.getUrisFromMapsJson( body.toString() );
 					}
-					let filename = this.target + element;
+					let filename = this._localDirectory + element;
 					let dir = path.dirname( filename );
 					mkdirp( dir, ( err ) =>
 					{
