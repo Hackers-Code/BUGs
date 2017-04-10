@@ -2,12 +2,13 @@
 const Attributes = {
 	boolean : -1,
 	signed : 0,
-	unsigned : 1
+	unsigned : 1,
+	string : 2
 };
 const boolean = Attributes.boolean;
 const signed = Attributes.signed;
 const unsigned = Attributes.unsigned;
-
+const string = Attributes.string;
 const Encoding = {
 	be : 1,
 	le : 2
@@ -16,9 +17,11 @@ const be = Encoding.be;
 
 const DataTypes = {
 	string20 : {
+		type : string,
 		length : 20
 	},
 	shortString : {
+		type : string,
 		metadata : {
 			length : 1
 		}
