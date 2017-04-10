@@ -23,7 +23,7 @@ class GameServer {
 		{
 			socketWrite( EncodePacket( {
 				opcode : 0,
-				message : 'No free slots on server'
+				reason : 'No free slots on server'
 			} ) );
 			return false;
 		}
