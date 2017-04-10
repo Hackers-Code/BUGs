@@ -1,0 +1,55 @@
+'use strict';
+const ClientInstructions = require( './ClientInstructionSet' );
+const Types = require( './Types' ).Attributes;
+module.exports = ( buffer ) =>
+{
+	if( Buffer.isBuffer( buffer ) === false || buffer.length === 0 )
+	{
+		return false;
+	}
+	let instruction = ClientInstructions[ buffer[ 0 ] ];
+
+	if( typeof instruction === 'undefined' )
+	{
+		throw new Error( 0xe0 );
+	}
+
+	let object = {};
+	let keys = Object.keys( instruction.params );
+	let offset = 1;
+	keys.forEach( ( element ) =>
+	{
+		let rule = instruction.params[ element ];
+		if( rule.type === Types.buffer )
+		{
+			let result = parseBuffer( rule, buffer, offset );
+			offset += result.readBytes;
+			object[ element ] = result.value;
+		}
+	} );
+	if( offset <= buffer.length )
+	{
+		return {
+			instruction,
+			object,
+			offset
+		};
+	}
+	return false;
+};
+
+function parseBuffer( rule, buffer, offset )
+{
+	if( typeof rule.length === 'undefined' )
+	{
+		return false;
+	}
+	if( buffer.length < offset + rule.length )
+	{
+		return false;
+	}
+	let result = {};
+	result.value = buffer.slice( offset, rule.length );
+	result.readBytes = rule.length;
+	return result;
+}
