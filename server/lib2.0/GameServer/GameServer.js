@@ -16,15 +16,40 @@ class GameServer {
 			this.handleListening.bind( this ) );
 	}
 
+	sendServerErrorMessage( socketWrite )
+	{
+		let encodedPacket = EncodePacket( {
+			opcode : 0xe2,
+			error : 'Internal server error'
+		} );
+		if( encodedPacket === false )
+		{
+			this.logger.error( `Server was unable to form error message packet` );
+			return;
+		}
+		socketWrite( encodedPacket );
+	}
+
+	sendKickMessage( socketWrite )
+	{
+		let encodedPacket = EncodePacket( {
+			opcode : 0x00,
+			error : 'No free slots on server'
+		} );
+		if( encodedPacket === false )
+		{
+			this.sendServerErrorMessage( socketWrite );
+			return;
+		}
+		socketWrite( encodedPacket );
+	}
+
 	handleTCPConnection( address, socketWrite )
 	{
 		this.logger.log( `Connection from ${address.remoteAddress}:${address.remotePort}` );
 		if( this.clientsStorage.getClientsCount() === this.maxClients )
 		{
-			socketWrite( EncodePacket( {
-				opcode : 0,
-				reason : 'No free slots on server'
-			} ) );
+			this.sendKickMessage( socketWrite );
 			return false;
 		}
 		return this.clientsStorage.addClient( socketWrite );
