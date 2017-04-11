@@ -3,11 +3,8 @@
   "version": "0.0.1",
   "description": "Game server for creepy-crawlies",
   "main": "start.js",
-  "directories": {
-    "test": "tests"
-  },
+  "directories": {},
   "scripts": {
-    "test": "mocha tests --recursive",
     "start": "node start"
   },
   "keywords": [
@@ -19,11 +16,7 @@
   ],
   "author": "BOAKGP",
   "license": "WTFPL",
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.2.0",
-    "sinon": "^1.17.7"
-  },
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/Hackers-Code/Creepy-crawlies"
