@@ -1,4 +1,5 @@
 'use strict';
+const Sockets = require( '../Protocol/Types' ).Sockets;
 const StreamParser = require( './StreamParser' );
 const EncodePacket = require( '../Protocol/PacketEncoder' );
 const DecodePacket = require( '../Protocol/PacketDecoder' );
@@ -10,11 +11,32 @@ class Client {
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.streamParser = new StreamParser();
 		this.name = this.uniqueNameStorage.getDefault();
+		this.hasCustomName = false;
+		this.isInLobby = false;
+		this.isInGame = false;
 	}
 
 	setId( id )
 	{
 		this.id = id;
+	}
+
+	setName( data )
+	{
+		if( this.uniqueNameStorage.addName( data.name ) )
+		{
+			if( this.hasCustomName === true )
+			{
+				if( !this.uniqueNameStorage.removeName( this.name ) )
+				{
+					return false;
+				}
+			}
+			this.name = data.name;
+			this.hasCustomName = true;
+			return true;
+		}
+		return false;
 	}
 
 	getCallbacks()
@@ -26,24 +48,33 @@ class Client {
 		};
 	}
 
-	handleData( data )
+	handleData( data, type = Sockets.tcp )
 	{
-		if( typeof data !== 'undefined' )
-		{
-			this.streamParser.appendData( data );
-		}
 		try
 		{
-			let buffer = this.streamParser.getBuffer();
-			let decoded = DecodePacket( buffer );
-			console.log( decoded );
+			let buffer;
+			if( type === Sockets.tcp )
+			{
+				if( typeof data !== 'undefined' )
+				{
+					this.streamParser.appendData( data );
+				}
+				buffer = this.streamParser.getBuffer();
+			}
+			else
+			{
+				buffer = data;
+			}
+			let decoded = DecodePacket( buffer, type );
 			if( decoded === false )
 			{
 				return;
 			}
-			this.streamParser.freeBufferToOffset( decoded.offset );
-			//this.respond( decoded.instruction, decoded.object );
-			this.handleData();
+			if( type === Sockets.tcp )
+			{
+				this.streamParser.freeBufferToOffset( decoded.offset );
+				this.handleData();
+			}
 		}
 		catch( e )
 		{
@@ -63,11 +94,14 @@ class Client {
 				opcode : opcode,
 				error : msg
 			} );
-			this.streamParser.clearBuffer();
+			if( type === Sockets.tcp )
+			{
+				this.streamParser.clearBuffer();
+			}
 		}
 	}
 
-	send( data, type = 'TCP' )
+	send( data, type = Sockets.tcp )
 	{
 		let encodedPacket = EncodePacket( data );
 		if( encodedPacket === false )
@@ -75,23 +109,20 @@ class Client {
 			this.server.sendServerErrorMessage( this.tcpSocketWrite );
 			return;
 		}
-		if( type === 'TCP' )
+		if( type === Sockets.tcp )
 		{
 			this.tcpSocketWrite( encodedPacket );
 		}
 		else
 		{
-			//this.udpSend( encoded, this.rinfo.port, this.rinfo.address );
+			/*todo:UDP send*/
 		}
 	}
 
 	disconnect()
 	{
-		/*if( this.keepAliveUDP !== null )
-		 {
-		 clearInterval( this.keepAliveUDP );
-		 }
-		 this.clientsStorage.removeClient( this.id );*/
+		/*todo:kill udp
+		 * todo:remove from clientsStorage*/
 	}
 }
 
