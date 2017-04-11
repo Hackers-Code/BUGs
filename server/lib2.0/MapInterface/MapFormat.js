@@ -3,6 +3,22 @@ const MapFormat = {
 	'meta' : {
 		values : [
 			{
+				name : 'signature',
+				length : 4
+			},
+			{
+				name : 'version',
+				length : 1
+			},
+			{
+				name : 'compression',
+				length : 1
+			},
+			{
+				name : 'reserved',
+				length : 2
+			},
+			{
 				name : 'width',
 				length : 4
 			},

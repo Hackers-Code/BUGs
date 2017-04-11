@@ -1,7 +1,7 @@
 'use strict';
 const MapLoader = require( './MapLoader' );
 const MapParser = require( './MapParser' );
-const SearchEngine = require( '../Utils/SearchEngine' );
+const SearchEngine = require( '../GameServer/Helpers/SearchEngine' );
 const fs = require( 'fs' );
 const MapInterface = {
 

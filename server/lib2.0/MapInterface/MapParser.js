@@ -4,7 +4,7 @@ const MapParser = {
 	parse : function( map )
 	{
 		let mapStruct = { metadata : {} };
-		let offset = 8;
+		let offset = 0;
 		MapFormat.meta.values.forEach( ( element ) =>
 		{
 			if( offset + element.length > map.length )
