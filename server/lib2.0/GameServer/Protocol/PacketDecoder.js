@@ -1,7 +1,7 @@
 'use strict';
 const ClientInstructions = require( './ClientInstructionSet' );
 const Types = require( './Types' ).Attributes;
-module.exports = ( buffer ) =>
+module.exports = ( buffer, type ) =>
 {
 	if( Buffer.isBuffer( buffer ) === false || buffer.length === 0 )
 	{
@@ -12,6 +12,10 @@ module.exports = ( buffer ) =>
 	if( typeof instruction === 'undefined' )
 	{
 		throw new Error( 0xe0 );
+	}
+	if( type !== instruction.socket )
+	{
+		return false;
 	}
 
 	let object = {};
