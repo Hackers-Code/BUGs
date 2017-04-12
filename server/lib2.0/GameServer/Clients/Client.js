@@ -7,6 +7,7 @@ class Client {
 	constructor( socketWrite, server, clientsStorage )
 	{
 		this.tcpSocketWrite = socketWrite;
+		this.udpSocketSend = null;
 		this.server = server;
 		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
 		this.streamParser = new StreamParser();
@@ -14,6 +15,19 @@ class Client {
 		this.hasCustomName = false;
 		this.isInLobby = false;
 		this.isInGame = false;
+		this.rinfo = null;
+	}
+
+	getRinfo()
+	{
+		return this.rinfo;
+	}
+
+	assignUDPSocket( rinfo, udpSocketSend )
+	{
+		this.rinfo = rinfo;
+		this.udpSocketSend = udpSocketSend;
+		this.send( { opcode : 0x7 }, Sockets.udp );
 	}
 
 	setId( id )

@@ -2,6 +2,9 @@
 const Client = require( './Client' );
 const UniqueKeyGenerator = require( '../Helpers/UniqueKeyGenerator' );
 const UniqueNameStorage = require( '../Helpers/UniqueNameStorage' );
+const SearchEngine = require( '../Helpers/SearchEngine' );
+const DecodePacket = require( '../Protocol/PacketDecoder' );
+const Sockets = require( '../Protocol/Types' ).Sockets;
 class ClientsStorage {
 
 	constructor()
@@ -27,6 +30,30 @@ class ClientsStorage {
 		let id = this.uniqueKeyGenerator.generateKey();
 		this.clients[ index ].setId( id );
 		return this.clients[ index ].getCallbacks();
+	}
+
+	passUDPPacket( packet, rinfo, socketSend )
+	{
+		let result = SearchEngine.findByRinfo( rinfo, this.clients );
+		if( result === -1 )
+		{
+			let decodedPacket = DecodePacket( packet );
+			if( typeof decodedPacket.id !== 'undefined' )
+			{
+				return false;
+			}
+			let index = SearchEngine.findByUniqueID( decodedPacket.id, this.clients );
+			if( index === -1 )
+			{
+				return false;
+			}
+			this.clients[ index ].assignUDPSocket( rinfo, socketSend );
+		}
+		else
+		{
+			this.clients[ result ].handleData( packet, Sockets.udp );
+		}
+		return true;
 	}
 }
 
