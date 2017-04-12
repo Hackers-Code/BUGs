@@ -122,6 +122,7 @@ class Client {
 	send( data, type = Sockets.tcp )
 	{
 		let encodedPacket = EncodePacket( data );
+		console.log( data );
 		if( encodedPacket === false )
 		{
 			this.server.sendServerErrorMessage( this.tcpSocketWrite );

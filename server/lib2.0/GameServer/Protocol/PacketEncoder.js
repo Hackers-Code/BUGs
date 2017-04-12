@@ -22,8 +22,6 @@ module.exports = ( object ) =>
 	for( let i = 0 ; i < requiredProperties.length ; i++ )
 	{
 		let requiredProperty = requiredProperties[ i ];
-		console.log( requiredProperty );
-		console.log( object );
 		let result = parseParam( instruction.params[ requiredProperty ], object[ requiredProperty ] );
 		if( result === false )
 		{
@@ -46,7 +44,6 @@ function parseParam( rule, value )
 	{
 		return false;
 	}
-	console.log( rule );
 	if( rule.type === Types.string )
 	{
 		return parseString( rule, value );
