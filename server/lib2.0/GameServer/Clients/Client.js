@@ -14,7 +14,6 @@ class Client extends EventEmitter {
 		this.clientsStorage = server.getClientsStorage();
 		this.streamParser = new StreamParser();
 		this.rinfo = null;
-		this.handlers = {};
 		this.keepAliveUDP = null;
 	}
 
