@@ -15,7 +15,7 @@ module.exports = ( object ) =>
 	}
 
 	let buffer = Buffer.alloc( 1 );
-	buffer.writeUInt8( object.opcode );
+	buffer.writeUInt8( object.opcode, 0 );
 
 	let requiredProperties = Object.keys( instruction.params );
 	for( let i = 0 ; i < requiredProperties.length ; i++ )
@@ -62,7 +62,7 @@ function parseParam( rule, value )
 					return false;
 				}
 				let buffer = Buffer.alloc( length + value.length );
-				buffer.writeUInt8( value.length );
+				buffer.writeUInt8( value.length, 0 );
 				buffer.write( value, 1 );
 				return buffer;
 			}
@@ -72,4 +72,5 @@ function parseParam( rule, value )
 			}
 		}
 	}
+	return false;
 }
