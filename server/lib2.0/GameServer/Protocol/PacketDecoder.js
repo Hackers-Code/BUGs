@@ -53,7 +53,7 @@ function parseBuffer( rule, buffer, offset )
 		return false;
 	}
 	let result = {};
-	result.value = buffer.slice( offset, rule.length );
+	result.value = buffer.slice( offset, offset + rule.length );
 	result.readBytes = rule.length;
 	return result;
 }
