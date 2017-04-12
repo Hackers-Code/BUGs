@@ -16,6 +16,11 @@ class GameServer {
 			this.handleListening.bind( this ) );
 	}
 
+	getClientsStorage()
+	{
+		return this.clientsStorage;
+	}
+
 	sendServerErrorMessage( socketWrite )
 	{
 		let encodedPacket = EncodePacket( {
