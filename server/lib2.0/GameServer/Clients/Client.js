@@ -19,6 +19,10 @@ class Client {
 	setId( id )
 	{
 		this.id = id;
+		this.send( {
+			opcode : 0x5,
+			id : this.id
+		} );
 	}
 
 	setName( data )
