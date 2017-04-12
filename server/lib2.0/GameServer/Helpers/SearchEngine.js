@@ -4,7 +4,7 @@ const SearchEngine = {
 	{
 		if( !(id instanceof Buffer) )
 		{
-			return false;
+			return -1;
 		}
 		for( let i = 0 ; i < array.length ; i++ )
 		{
