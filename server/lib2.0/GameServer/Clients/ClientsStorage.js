@@ -22,7 +22,7 @@ class ClientsStorage {
 		let index = this.clients.push( new Client( socketWrite, server, this ) ) - 1;
 		let id = this.uniqueKeyGenerator.generateKey();
 		this.clients[ index ].setId( id );
-		return this.clients[ index ].getCallbacks();
+		return this.clients[ index ];
 	}
 
 	removeClient( id )

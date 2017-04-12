@@ -4,9 +4,11 @@ const ClientsStorage = require( './Clients/ClientsStorage' );
 const startTCPSocket = require( './tcpSocket' );
 const startUDPSocket = require( './udpSocket' );
 const Logger = require( './Logger' );
-class GameServer {
+const EventEmitter = require( 'events' );
+class GameServer extends EventEmitter {
 	constructor( tcpPort, udpPort, maxClients )
 	{
+		super();
 		this.logger = new Logger();
 		this.clientsStorage = new ClientsStorage();
 		this.maxClients = maxClients;
@@ -57,7 +59,9 @@ class GameServer {
 			this.sendKickMessage( socketWrite );
 			return false;
 		}
-		return this.clientsStorage.addClient( socketWrite, this );
+		let client = this.clientsStorage.addClient( socketWrite, this );
+		this.emit( 'connection', client );
+		return client.getCallbacks();
 	}
 
 	handleUDPPacket( packet, rinfo, socketSend )
