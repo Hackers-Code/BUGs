@@ -25,6 +25,18 @@ class ClientsStorage {
 		return this.clients[ index ].getCallbacks();
 	}
 
+	removeClient( id )
+	{
+		let client = SearchEngine.findByUniqueID( id, this.clients );
+		if( client !== -1 )
+		{
+			this.uniqueKeyGenerator.freeKey( this.clients[ client ].id );
+			this.clients.splice( client, 1 );
+			return true;
+		}
+		return false;
+	}
+
 	passUDPPacket( packet, rinfo, socketSend )
 	{
 		let result = SearchEngine.findByRinfo( rinfo, this.clients );

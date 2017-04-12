@@ -134,8 +134,11 @@ class Client {
 
 	disconnect()
 	{
-		/*todo:kill udp
-		 * todo:remove from clientsStorage*/
+		if( this.keepAliveUDP !== null )
+		{
+			clearInterval( this.keepAliveUDP );
+			this.clientsStorage.removeClient( this.id );
+		}
 	}
 }
 
