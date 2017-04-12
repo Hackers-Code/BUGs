@@ -25,7 +25,7 @@ module.exports = {
 	},
 	0x06 : {
 		socket : udp,
-		params : { id : U32BE },
+		params : { id : BinaryString( 4 ) },
 		callback : 'setUDP',
 		response : 0x07
 	},
