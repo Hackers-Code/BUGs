@@ -14,25 +14,24 @@ const I8 = DataTypes.i8;
 module.exports = {
 	0x01 : {
 		socket : tcp,
-		callback : 'setName',
+		event : 'changeName',
 		response : 0x02,
 		params : { name : BinaryString( 20 ) }
 	},
 	0x03 : {
 		socket : tcp,
 		params : {},
-		callback : 'leaveRoom'
+		event : 'leaveRoom'
 	},
 	0x06 : {
 		socket : udp,
 		params : { id : BinaryString( 4 ) },
-		callback : 'setUDP',
 		response : 0x07
 	},
 	0x10 : {
 		socket : tcp,
 		params : {},
-		callback : 'listGames',
+		event : 'listGames',
 		response : 0x11
 	},
 	0x20 : {
@@ -41,7 +40,7 @@ module.exports = {
 			name : BinaryString( 20 ),
 			password : ShortString
 		},
-		callback : 'createRoom',
+		event : 'createRoom',
 		response : 0x21
 	},
 	0x22 : {
@@ -52,7 +51,7 @@ module.exports = {
 			maxSpeedY : U16BE,
 			maxSpeedX : U16BE
 		},
-		callback : 'setGamePhysics',
+		event : 'setGamePhysics',
 		response : 0x23
 	},
 	0x24 : {
@@ -61,7 +60,7 @@ module.exports = {
 			map : U32BE,
 			players : U8
 		},
-		callback : 'setRoomConfig',
+		event : 'setRoomConfig',
 		response : 0x25
 	},
 	0x26 : {
@@ -70,13 +69,13 @@ module.exports = {
 			room : U32BE,
 			password : ShortString
 		},
-		callback : 'joinRoom',
+		event : 'joinRoom',
 		response : 0x27
 	},
 	0x28 : {
 		socket : tcp,
 		params : {},
-		callback : 'getRoomConfig',
+		event : 'getRoomConfig',
 		response : 0x29
 	},
 	0x2a : {
@@ -87,62 +86,62 @@ module.exports = {
 			colourB : U8,
 			mask : U8
 		},
-		callback : 'setPlayerProperties',
+		event : 'setPlayerProperties',
 		response : 0x2b
 	},
 	0x2c : {
 		socket : tcp,
 		params : {},
-		callback : 'switchReady',
+		event : 'switchReady',
 		response : 0x2d
 	},
 	0x2e : {
 		socket : tcp,
 		params : {},
-		callback : 'listPlayers',
+		event : 'listPlayers',
 		response : 0x2f
 	},
 	0x31 : {
 		socket : tcp,
 		params : {},
-		callback : 'mapLoaded'
+		event : 'mapLoaded'
 	},
 	0x37 : {
 		socket : udp,
 		params : {},
-		callback : 'jump'
+		event : 'jump'
 	},
 	0x38 : {
 		socket : udp,
 		params : {},
-		callback : 'switchMoveLeft'
+		event : 'switchMoveLeft'
 	},
 	0x39 : {
 		socket : udp,
 		params : {},
-		callback : 'switchMoveRight'
+		event : 'switchMoveRight'
 	},
 	0x3b : {
 		socket : udp,
 		params : {
 			angle : I8
 		},
-		callback : 'setAngle'
+		event : 'setAngle'
 	},
 	0x40 : {
 		socket : udp,
 		params : {},
 		response : 0x41,
-		callback : 'getWeaponsList'
+		event : 'getWeaponsList'
 	},
 	0x42 : {
 		socket : udp,
 		params : { id : U8 },
-		callback : 'selectWeapon'
+		event : 'selectWeapon'
 	},
 	0x43 : {
 		socket : udp,
 		params : { param : U8 },
-		callback : 'useWeapon'
+		event : 'useWeapon'
 	}
 };
