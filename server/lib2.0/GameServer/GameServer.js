@@ -57,7 +57,7 @@ class GameServer {
 
 	handleUDPPacket( packet, rinfo, socketSend )
 	{
-
+		this.clientsStorage.passUDPPacket( packet, rinfo, socketSend );
 	}
 
 	handleError( error )
