@@ -85,7 +85,5 @@ function parseBuffer( rule, value )
 	{
 		return false;
 	}
-	let buffer = Buffer.alloc( value.length );
-	buffer.write( value, 0 );
-	return buffer;
+	return value;
 }
