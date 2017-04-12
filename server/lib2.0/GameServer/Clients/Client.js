@@ -133,7 +133,7 @@ class Client {
 		}
 		else
 		{
-			/*todo:UDP send*/
+			this.udpSocketSend( encodedPacket, this.rinfo.port, this.rinfo.address );
 		}
 	}
 
