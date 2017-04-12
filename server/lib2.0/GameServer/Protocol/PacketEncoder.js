@@ -50,7 +50,10 @@ function parseParam( rule, value )
 	if( rule.type === Types.string )
 	{
 		return parseString( rule, value );
-
+	}
+	if( rule.type === Types.buffer )
+	{
+		return parseBuffer( rule, value );
 	}
 	return false;
 }
@@ -74,4 +77,15 @@ function parseString( rule, value )
 		return buffer;
 	}
 	return false;
+}
+
+function parseBuffer( rule, value )
+{
+	if( typeof rule.length === 'undefined' || Buffer.isBuffer( value ) === false || value.length !== rule.length )
+	{
+		return false;
+	}
+	let buffer = Buffer.alloc( value.length );
+	buffer.write( value, 0 );
+	return buffer;
 }
