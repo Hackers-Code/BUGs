@@ -16,6 +16,8 @@ class Client {
 		this.isInLobby = false;
 		this.isInGame = false;
 		this.rinfo = null;
+		this.handlers = {};
+		this.keepAliveUDP = null;
 	}
 
 	getRinfo()
@@ -28,6 +30,10 @@ class Client {
 		this.rinfo = rinfo;
 		this.udpSocketSend = udpSocketSend;
 		this.send( { opcode : 0x7 }, Sockets.udp );
+		this.keepAliveUDP = setInterval( () =>
+		{
+			this.send( { opcode : 0x8 }, Sockets.udp );
+		}, 15000 );
 	}
 
 	setId( id )
@@ -87,6 +93,17 @@ class Client {
 			if( decoded === false )
 			{
 				return;
+			}
+			if( decoded.instruction.response !== 'undefined' )
+			{
+				if( this.handlers[ decoded.instruction.response ] !== 'function' )
+				{
+					this.send( {
+						opcode : 0xe2,
+						error : 'Server does not support this operation'
+					} );
+				}
+				this.handlers[ decoded.instruction.response ]();
 			}
 			if( type === Sockets.tcp )
 			{
