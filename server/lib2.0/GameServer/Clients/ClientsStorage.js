@@ -37,12 +37,12 @@ class ClientsStorage {
 		let result = SearchEngine.findByRinfo( rinfo, this.clients );
 		if( result === -1 )
 		{
-			let decodedPacket = DecodePacket( packet );
-			if( typeof decodedPacket.id !== 'undefined' )
+			let decodedPacket = DecodePacket( packet, Sockets.udp );
+			if( typeof decodedPacket.object.id === 'undefined' )
 			{
 				return false;
 			}
-			let index = SearchEngine.findByUniqueID( decodedPacket.id, this.clients );
+			let index = SearchEngine.findByUniqueID( decodedPacket.object.id, this.clients );
 			if( index === -1 )
 			{
 				return false;
