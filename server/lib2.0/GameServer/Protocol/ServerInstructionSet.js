@@ -35,7 +35,7 @@ module.exports = {
 	},
 	0x05 : {
 		socket : tcp,
-		params : { id : U32BE }
+		params : { id : BinaryString( 4 ) }
 
 	},
 	0x07 : {
@@ -50,7 +50,7 @@ module.exports = {
 		socket : tcp,
 		params : {
 			games : Array( {
-				id : U32BE,
+				id : BinaryString( 4 ),
 				name : BinaryString( 20 )
 			} )
 		}
@@ -156,7 +156,7 @@ module.exports = {
 		socket : tcp,
 		params : {
 			players : Array( {
-				id : 1
+				id : U8
 			} )
 		}
 	},
