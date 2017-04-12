@@ -1,7 +1,6 @@
 'use strict';
 const Client = require( './Client' );
 const UniqueKeyGenerator = require( '../Helpers/UniqueKeyGenerator' );
-const UniqueNameStorage = require( '../Helpers/UniqueNameStorage' );
 const SearchEngine = require( '../Helpers/SearchEngine' );
 const DecodePacket = require( '../Protocol/PacketDecoder' );
 const Sockets = require( '../Protocol/Types' ).Sockets;
@@ -11,12 +10,6 @@ class ClientsStorage {
 	{
 		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
-		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
-	}
-
-	getUniqueNameStorage()
-	{
-		return this.uniqueNameStorage;
 	}
 
 	getClientsCount()

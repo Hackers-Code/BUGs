@@ -4,17 +4,13 @@ const StreamParser = require( './StreamParser' );
 const EncodePacket = require( '../Protocol/PacketEncoder' );
 const DecodePacket = require( '../Protocol/PacketDecoder' );
 class Client {
-	constructor( socketWrite, server, clientsStorage )
+	constructor( socketWrite, server )
 	{
 		this.tcpSocketWrite = socketWrite;
 		this.udpSocketSend = null;
 		this.server = server;
-		this.uniqueNameStorage = clientsStorage.getUniqueNameStorage();
+		this.clientsStorage = server.getClientsStorage();
 		this.streamParser = new StreamParser();
-		this.name = this.uniqueNameStorage.getDefault();
-		this.hasCustomName = false;
-		this.isInLobby = false;
-		this.isInGame = false;
 		this.rinfo = null;
 		this.handlers = {};
 		this.keepAliveUDP = null;
@@ -43,24 +39,6 @@ class Client {
 			opcode : 0x5,
 			id : this.id
 		} );
-	}
-
-	setName( data )
-	{
-		if( this.uniqueNameStorage.addName( data.name ) )
-		{
-			if( this.hasCustomName === true )
-			{
-				if( !this.uniqueNameStorage.removeName( this.name ) )
-				{
-					return false;
-				}
-			}
-			this.name = data.name;
-			this.hasCustomName = true;
-			return true;
-		}
-		return false;
 	}
 
 	getCallbacks()
@@ -139,7 +117,6 @@ class Client {
 	send( data, type = Sockets.tcp )
 	{
 		let encodedPacket = EncodePacket( data );
-		console.log( data );
 		if( encodedPacket === false )
 		{
 			this.server.sendServerErrorMessage( this.tcpSocketWrite );
