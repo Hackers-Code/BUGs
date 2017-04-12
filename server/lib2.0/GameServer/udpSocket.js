@@ -7,7 +7,6 @@ module.exports = ( port, messageHandler, errorHandler, listeningHandler ) =>
 	{
 		let send = server.send.bind( server );
 		messageHandler( msg, rinfo, send );
-
 	} );
 	server.on( 'error', errorHandler );
 	server.on( 'listening', () =>
