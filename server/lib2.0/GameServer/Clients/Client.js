@@ -3,9 +3,11 @@ const Sockets = require( '../Protocol/Types' ).Sockets;
 const StreamParser = require( './StreamParser' );
 const EncodePacket = require( '../Protocol/PacketEncoder' );
 const DecodePacket = require( '../Protocol/PacketDecoder' );
-class Client {
+const EventEmitter = require( 'events' );
+class Client extends EventEmitter {
 	constructor( socketWrite, server )
 	{
+		super();
 		this.tcpSocketWrite = socketWrite;
 		this.udpSocketSend = null;
 		this.server = server;
@@ -138,6 +140,7 @@ class Client {
 		{
 			clearInterval( this.keepAliveUDP );
 			this.clientsStorage.removeClient( this.id );
+			this.emit( 'disconnect' );
 		}
 	}
 }
