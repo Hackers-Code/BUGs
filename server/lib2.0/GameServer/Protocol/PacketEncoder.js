@@ -1,5 +1,6 @@
 'use strict';
 const ServerInstructions = require( './ServerInstructionSet' );
+const Types = require( './Types' ).Attributes;
 module.exports = ( object ) =>
 {
 	if( typeof object.opcode !== 'number' )
@@ -45,32 +46,32 @@ function parseParam( rule, value )
 	{
 		return false;
 	}
-	if( typeof rule.metadata !== 'undefined' )
+	console.log( rule );
+	if( rule.type === Types.string )
 	{
-		let metadata = rule.metadata;
-		if( typeof metadata.length !== 'undefined' )
+		return parseString( rule, value );
+
+	}
+	return false;
+}
+
+function parseString( rule, value )
+{
+	if( typeof rule.metadata === 'undefined' || typeof rule.metadata.length === 'undefined' || value !== 'string' )
+	{
+		return false;
+	}
+	let length = rule.metadata.length;
+	if( length === 1 )
+	{
+		if( value.length > 255 )
 		{
-			let length = metadata.length;
-			if( typeof value !== 'string' )
-			{
-				return false;
-			}
-			if( length === 1 )
-			{
-				if( value.length > 255 )
-				{
-					return false;
-				}
-				let buffer = Buffer.alloc( length + value.length );
-				buffer.writeUInt8( value.length, 0 );
-				buffer.write( value, 1 );
-				return buffer;
-			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
+		let buffer = Buffer.alloc( length + value.length );
+		buffer.writeUInt8( value.length, 0 );
+		buffer.write( value, 1 );
+		return buffer;
 	}
 	return false;
 }
