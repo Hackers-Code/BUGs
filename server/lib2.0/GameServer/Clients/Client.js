@@ -102,8 +102,16 @@ class Client extends EventEmitter {
 		}
 		else
 		{
-			let hasListeners = this.emit( decoded.instruction.event, decoded.object,
-				this.respond.bind( this, decoded.instruction.response ) );
+			let hasListeners;
+			if( decoded.instruction.response )
+			{
+				hasListeners = this.emit( decoded.instruction.event, decoded.object,
+					this.respond.bind( this, decoded.instruction.response ) );
+			}
+			else
+			{
+				hasListeners = this.emit( decoded.instruction.event, decoded.object );
+			}
 			if( hasListeners === false )
 			{
 				this.server.sendServerErrorMessage( this.tcpSocketWrite );
