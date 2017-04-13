@@ -88,4 +88,4 @@ class RoomsStorage {
 	}
 }
 
-module.expors = RoomsStorage;
+module.exports = RoomsStorage;
