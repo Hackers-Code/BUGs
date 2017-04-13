@@ -1,6 +1,11 @@
 class Room {
-	constructor()
+	constructor( settings, admin, id, roomsStorage )
 	{
+		this.name = settings.name;
+		this.password = settings.password;
+		this.admin = admin;
+		this.id = id;
+		this.roomsStorage = roomsStorage;
 		this.isWaitingForPlayers = false;
 	}
 

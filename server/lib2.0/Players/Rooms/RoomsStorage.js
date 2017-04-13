@@ -11,18 +11,19 @@ class RoomsStorage {
 		this.uniqueNameStorage = new UniqueNameStorage( 20, '' );
 	}
 
-	addRoom( settings, client )
+	addRoom( settings, admin )
 	{
-		if( settings !== null && (typeof settings.name !== 'undefined' || typeof settings.password !== 'undefined' ) )
+		if( typeof settings === 'undefined' || typeof settings.name !== 'undefined' || Buffer.isBuffer(
+				settings.name ) === false || typeof settings.password !== 'string' )
 		{
-			if( this.uniqueNameStorage.addName( settings.name ) )
-			{
-				let id = this.uniqueKeyGenerator.generateKey();
-				let room = new Room( settings, client, id, this );
-				let length = this.rooms.push( room );
-				return this.rooms[ length - 1 ];
-			}
 			return false;
+		}
+		if( this.uniqueNameStorage.addName( settings.name ) )
+		{
+			let id = this.uniqueKeyGenerator.generateKey();
+			let room = new Room( settings, admin, id, this );
+			let length = this.rooms.push( room );
+			return this.rooms[ length - 1 ];
 		}
 		return false;
 	}
