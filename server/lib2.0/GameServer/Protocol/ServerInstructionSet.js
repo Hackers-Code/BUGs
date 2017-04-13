@@ -31,12 +31,10 @@ module.exports = {
 		params : {
 			reason : ShortString
 		}
-
 	},
 	0x05 : {
 		socket : tcp,
 		params : { id : BinaryString( 4 ) }
-
 	},
 	0x07 : {
 		socket : udp,
@@ -92,12 +90,10 @@ module.exports = {
 	0x2b : {
 		socket : tcp,
 		params : { status : Bool }
-
 	},
 	0x2d : {
 		socket : tcp,
 		params : { status : Bool }
-
 	},
 	0x2f : {
 		socket : tcp,
@@ -139,7 +135,6 @@ module.exports = {
 			worm_id : U8,
 			player_id : U8
 		}
-
 	},
 	0x35 : {
 		socket : udp,
