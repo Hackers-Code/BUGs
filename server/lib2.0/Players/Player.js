@@ -86,7 +86,13 @@ class Player {
 
 	createRoom( data, respond )
 	{
-		respond( { status : this.roomsStorage.addRoom( data, this ) } );
+		let result = this.roomsStorage.addRoom( data, this );
+		if( result !== false )
+		{
+			this.room = result;
+			result = true;
+		}
+		respond( { status : result } );
 	}
 }
 module.exports = Player;
