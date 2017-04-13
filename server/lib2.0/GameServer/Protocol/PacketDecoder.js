@@ -21,6 +21,7 @@ module.exports = ( buffer, type ) =>
 	let object = {};
 	let keys = Object.keys( instruction.params );
 	let offset = 1;
+	let errorFlag = false;
 	keys.forEach( ( element ) =>
 	{
 		let rule = instruction.params[ element ];
@@ -30,8 +31,12 @@ module.exports = ( buffer, type ) =>
 			offset += result.readBytes;
 			object[ element ] = result.value;
 		}
+		else
+		{
+			errorFlag = true;
+		}
 	} );
-	if( offset <= buffer.length )
+	if( offset <= buffer.length && errorFlag === false )
 	{
 		return {
 			instruction,

@@ -43,7 +43,7 @@ class ClientsStorage {
 		if( result === -1 )
 		{
 			let decodedPacket = DecodePacket( packet, Sockets.udp );
-			if( typeof decodedPacket.object.id === 'undefined' )
+			if( decodedPacket === false || typeof decodedPacket.object.id === 'undefined' )
 			{
 				return false;
 			}
