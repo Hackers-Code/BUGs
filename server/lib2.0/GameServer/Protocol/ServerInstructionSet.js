@@ -98,7 +98,7 @@ module.exports = {
 	0x2f : {
 		socket : tcp,
 		params : {
-			ready : U8,
+			readyPlayers : U8,
 			players : Array( {
 				playerID : U8,
 				name : BinaryString( 20 ),
