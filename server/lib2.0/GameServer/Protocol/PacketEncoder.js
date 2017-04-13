@@ -57,7 +57,7 @@ function parseParam( rule, value )
 
 function parseString( rule, value )
 {
-	if( typeof rule.metadata === 'undefined' || typeof rule.metadata.length === 'undefined' || value !== 'string' )
+	if( typeof rule.metadata === 'undefined' || typeof rule.metadata.length === 'undefined' || typeof value !== 'string' )
 	{
 		return false;
 	}
