@@ -4,13 +4,15 @@ const Attributes = {
 	signed : 0,
 	unsigned : 1,
 	string : 2,
-	buffer : 3
+	buffer : 3,
+	array : 4
 };
 const boolean = Attributes.boolean;
 const signed = Attributes.signed;
 const unsigned = Attributes.unsigned;
 const string = Attributes.string;
 const buffer = Attributes.buffer;
+const array = Attributes.array;
 const Encoding = {
 	be : 1,
 	le : 2
@@ -34,6 +36,7 @@ const DataTypes = {
 	array : ( item ) =>
 	{
 		return {
+			type : array,
 			metadata : {
 				size : 4
 			},
