@@ -34,6 +34,23 @@ class Player {
 		this.currentBug = 0;
 	}
 
+	getPublicData()
+	{
+		return {
+			playerID : this.roomClientId,
+			name : this.name,
+			colourR : this.color.R,
+			colourG : this.color.G,
+			colourB : this.color.B,
+			mask : this.mask
+		};
+	}
+
+	isReady()
+	{
+		return this.readyStatus;
+	}
+
 	handleEvents()
 	{
 		this.client.on( 'disconnect', () =>
