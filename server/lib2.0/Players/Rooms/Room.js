@@ -1,3 +1,4 @@
+'use strict';
 class Room {
 	constructor( settings, admin, id, roomsStorage )
 	{
@@ -15,4 +16,4 @@ class Room {
 	}
 }
 
-module.exporst = Room;
+module.exports = Room;

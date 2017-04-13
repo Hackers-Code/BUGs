@@ -13,7 +13,7 @@ class RoomsStorage {
 
 	addRoom( settings, admin )
 	{
-		if( typeof settings === 'undefined' || typeof settings.name !== 'undefined' || Buffer.isBuffer(
+		if( typeof settings === 'undefined' || typeof settings.name === 'undefined' || Buffer.isBuffer(
 				settings.name ) === false || typeof settings.password !== 'string' )
 		{
 			return false;
