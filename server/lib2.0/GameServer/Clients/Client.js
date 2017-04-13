@@ -77,8 +77,12 @@ class Client extends EventEmitter {
 			{
 				this.server.sendServerErrorMessage( this.tcpSocketWrite );
 			}
-			this.emit( decoded.instruction.event, decoded.object,
-				this.respond.bind( this, decoded.instruction.response ) );
+			if( this.emit( decoded.instruction.event, decoded.object,
+					this.respond.bind( this, decoded.instruction.response ) ) === false )
+			{
+				this.server.sendServerErrorMessage( this.tcpSocketWrite );
+				this.emit( 'error', new Error( `No listener for event ${decoded.instruction.event}` ) );
+			}
 			if( type === Sockets.tcp )
 			{
 				this.streamParser.freeBufferToOffset( decoded.offset );
