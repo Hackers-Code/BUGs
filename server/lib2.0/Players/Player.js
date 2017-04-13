@@ -77,7 +77,7 @@ class Player {
 
 	listGames( data, respond )
 	{
-		return respond( this.roomsStorage.listAvailableGames() );
+		return respond( { games : this.roomsStorage.listAvailableGames() } );
 	}
 
 }
