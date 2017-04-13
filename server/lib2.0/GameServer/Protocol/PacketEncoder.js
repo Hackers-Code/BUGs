@@ -18,11 +18,25 @@ module.exports = ( object ) =>
 	let buffer = Buffer.alloc( 1 );
 	buffer.writeUInt8( object.opcode, 0 );
 
-	let requiredProperties = Object.keys( instruction.params );
+	let result = parseParams( instruction.params, object );
+	if( result === false )
+	{
+		return false;
+	}
+	return Buffer.concat( [
+		buffer,
+		result
+	] );
+};
+
+function parseParams( rules, values )
+{
+	let requiredProperties = Object.keys( rules );
+	let buffer = Buffer.alloc( 0 );
 	for( let i = 0 ; i < requiredProperties.length ; i++ )
 	{
 		let requiredProperty = requiredProperties[ i ];
-		let result = parseParam( instruction.params[ requiredProperty ], object[ requiredProperty ] );
+		let result = parseParam( rules[ requiredProperty ], values[ requiredProperty ] );
 		if( result === false )
 		{
 			return false;
@@ -36,7 +50,7 @@ module.exports = ( object ) =>
 		}
 	}
 	return buffer;
-};
+}
 
 function parseParam( rule, value )
 {
@@ -55,6 +69,10 @@ function parseParam( rule, value )
 	if( rule.type === Types.buffer )
 	{
 		return parseBuffer( rule, value );
+	}
+	if( rule.type === Types.array )
+	{
+		return parseArray( rule, value );
 	}
 	return false;
 }
@@ -87,4 +105,35 @@ function parseBuffer( rule, value )
 		return false;
 	}
 	return value;
+}
+
+function parseArray( rule, value )
+{
+	if( typeof rule.metadata === 'undefined' || typeof rule.metadata.size === 'undefined' || typeof rule.item !== 'object' || value instanceof Array === false )
+	{
+		return false;
+	}
+	let size = rule.metadata.size;
+	if( size === 4 )
+	{
+		if( value.length > Math.pow( 2, 32 ) )
+		{
+			return false;
+		}
+		let buffer = Buffer.alloc( 4 );
+		buffer.writeUInt32BE( value.length, 0 );
+		let subBuffers = [];
+		subBuffers.push( buffer );
+		for( let i = 0 ; i < value.length ; i++ )
+		{
+			let result = parseParams( rule.item, value[ i ] );
+			if( result === false )
+			{
+				return false;
+			}
+			subBuffers.push( result );
+		}
+		return Buffer.concat( subBuffers );
+	}
+	return false;
 }
