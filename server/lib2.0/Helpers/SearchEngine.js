@@ -30,12 +30,12 @@ const SearchEngine = {
 	{
 		for( let i = 0 ; i < array.length ; i++ )
 		{
-			let rinfo = array[ i ].getRinfo();
+			let clientRinfo = array[ i ].getRinfo();
 			if( rinfo === null )
 			{
 				continue;
 			}
-			if( rinfo.port === rinfo.port && rinfo.address === rinfo.address )
+			if( rinfo.port === clientRinfo.port && rinfo.address === clientRinfo.address )
 			{
 				return i;
 			}
