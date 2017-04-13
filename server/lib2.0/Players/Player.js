@@ -49,24 +49,28 @@ class Player {
 		this.client.on( 'changeName', this.setName.bind( this ) );
 		this.client.on( 'leaveRoom', this.leaveRoom.bind( this ) );
 		this.client.on( 'listGames', this.listGames.bind( this ) );
+		this.client.on( 'createRoom', this.createRoom.bind( this ) );
 	}
 
 	setName( data, respond )
 	{
 		if( this.uniqueNameStorage.addName( data.name ) )
 		{
-			if( this.hasCustomName === true )
+			if( this.hasCustomName === true && !this.uniqueNameStorage.removeName( this.name ) )
 			{
-				if( !this.uniqueNameStorage.removeName( this.name ) )
-				{
-					return respond( { status : false } );
-				}
+				respond( { status : false } );
 			}
-			this.name = data.name;
-			this.hasCustomName = true;
-			return respond( { status : true } );
+			else
+			{
+				this.name = data.name;
+				this.hasCustomName = true;
+				respond( { status : true } );
+			}
 		}
-		return respond( { status : false } );
+		else
+		{
+			respond( { status : false } );
+		}
 	}
 
 	leaveRoom()
@@ -77,8 +81,12 @@ class Player {
 
 	listGames( data, respond )
 	{
-		return respond( { games : this.roomsStorage.listAvailableGames() } );
+		respond( { games : this.roomsStorage.listAvailableGames() } );
 	}
 
+	createRoom( data, respond )
+	{
+		respond( { status : this.roomsStorage.addRoom( data, this ) } );
+	}
 }
 module.exports = Player;
