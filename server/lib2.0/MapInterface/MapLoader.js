@@ -1,6 +1,6 @@
 'use strict';
 const fs = require( 'fs' );
-const SearchEngine = require( '../GameServer/Helpers/SearchEngine' );
+const SearchEngine = require( '../Helpers/SearchEngine' );
 const MapLoader = {
 	loadMap : function( mapID, mapList, callback )
 	{

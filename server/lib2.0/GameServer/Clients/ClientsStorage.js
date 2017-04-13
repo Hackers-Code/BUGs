@@ -1,7 +1,7 @@
 'use strict';
 const Client = require( './Client' );
-const UniqueKeyGenerator = require( '../Helpers/UniqueKeyGenerator' );
-const SearchEngine = require( '../Helpers/SearchEngine' );
+const UniqueKeyGenerator = require( '../../Helpers/UniqueKeyGenerator' );
+const SearchEngine = require( '../../Helpers/SearchEngine' );
 const DecodePacket = require( '../Protocol/PacketDecoder' );
 const Sockets = require( '../Protocol/Types' ).Sockets;
 class ClientsStorage {
