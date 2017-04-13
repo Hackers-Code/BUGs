@@ -15,6 +15,7 @@ class Player {
 	{
 		this.room = null;
 		this.roomClientId = -1;
+		this.isAdmin = false;
 		this.isInLobby = false;
 		this.isInGame = false;
 		this.color = {
@@ -50,6 +51,7 @@ class Player {
 		this.client.on( 'leaveRoom', this.leaveRoom.bind( this ) );
 		this.client.on( 'listGames', this.listGames.bind( this ) );
 		this.client.on( 'createRoom', this.createRoom.bind( this ) );
+		this.client.on( 'setPhysics', this.createRoom.bind( this ) );
 	}
 
 	setName( data, respond )
@@ -86,13 +88,14 @@ class Player {
 
 	createRoom( data, respond )
 	{
-		let result = this.roomsStorage.addRoom( data, this );
-		if( result !== false )
-		{
-			this.room = result;
-			result = true;
-		}
-		respond( { status : result } );
+		respond( { status : this.roomsStorage.addRoom( data, this ) } );
+	}
+
+	assignRoom( room, roomClientId, isAdmin = false )
+	{
+		this.room = room;
+		this.roomClientId = roomClientId;
+		this.isAdmin = isAdmin;
 	}
 }
 module.exports = Player;

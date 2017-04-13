@@ -22,8 +22,8 @@ class RoomsStorage {
 		{
 			let id = this.uniqueKeyGenerator.generateKey();
 			let room = new Room( settings, admin, id, this );
-			let length = this.rooms.push( room );
-			return this.rooms[ length - 1 ];
+			this.rooms.push( room );
+			return true;
 		}
 		return false;
 	}
