@@ -16,6 +16,7 @@ class Client extends EventEmitter {
 		this.streamParser = new StreamParser();
 		this.rinfo = null;
 		this.keepAliveUDP = null;
+		this.id = null;
 	}
 
 	getRinfo()
