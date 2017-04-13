@@ -25,7 +25,7 @@ class StreamParser {
 
 	clearBuffer()
 	{
-		this.buffer = new Buffer.alloc( 0 );
+		this.buffer = Buffer.alloc( 0 );
 	}
 
 	freeBufferToOffset( offset )
