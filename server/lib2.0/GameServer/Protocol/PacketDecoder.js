@@ -31,6 +31,12 @@ module.exports = ( buffer, type ) =>
 			offset += result.readBytes;
 			object[ element ] = result.value;
 		}
+		else if( rule.type === Types.string )
+		{
+			let result = parseString( rule, buffer, offset );
+			offset += result.readBytes;
+			object[ element ] = result.value;
+		}
 		else
 		{
 			errorFlag = true;
@@ -60,5 +66,22 @@ function parseBuffer( rule, buffer, offset )
 	let result = {};
 	result.value = buffer.slice( offset, offset + rule.length );
 	result.readBytes = rule.length;
+	return result;
+}
+
+function parseString( rule, buffer, offset )
+{
+	if( typeof rule.metadata === 'undefined' || typeof rule.metadata.length === 'undefined' )
+	{
+		return false;
+	}
+	let length = buffer.readUInt8( offset );
+	if( buffer.length < offset + length + 1 )
+	{
+		return false;
+	}
+	let result = {};
+	result.value = buffer.slice( offset + 1, offset + length + 1 ).toString();
+	result.readBytes = length + 1;
 	return result;
 }
