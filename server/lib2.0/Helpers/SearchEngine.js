@@ -31,7 +31,7 @@ const SearchEngine = {
 		for( let i = 0 ; i < array.length ; i++ )
 		{
 			let clientRinfo = array[ i ].getRinfo();
-			if( rinfo === null )
+			if( clientRinfo === null )
 			{
 				continue;
 			}
