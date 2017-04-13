@@ -12,6 +12,7 @@ class Client extends EventEmitter {
 		this.udpSocketSend = null;
 		this.server = server;
 		this.clientsStorage = server.getClientsStorage();
+		this.logger = server.getLogger();
 		this.streamParser = new StreamParser();
 		this.rinfo = null;
 		this.keepAliveUDP = null;
@@ -53,64 +54,66 @@ class Client extends EventEmitter {
 
 	handleData( data, type = Sockets.tcp )
 	{
+		let buffer;
+		if( type === Sockets.tcp )
+		{
+			if( typeof data !== 'undefined' )
+			{
+				this.streamParser.appendData( data );
+			}
+			buffer = this.streamParser.getBuffer();
+		}
+		else
+		{
+			buffer = data;
+		}
+		let decoded;
 		try
 		{
-			let buffer;
-			if( type === Sockets.tcp )
-			{
-				if( typeof data !== 'undefined' )
-				{
-					this.streamParser.appendData( data );
-				}
-				buffer = this.streamParser.getBuffer();
-			}
-			else
-			{
-				buffer = data;
-			}
-			let decoded = DecodePacket( buffer, type );
-			if( decoded === false )
-			{
-				return;
-			}
-			if( decoded.instruction.event === 'undefined' )
-			{
-				this.server.sendServerErrorMessage( this.tcpSocketWrite );
-			}
-			if( this.emit( decoded.instruction.event, decoded.object,
-					this.respond.bind( this, decoded.instruction.response ) ) === false )
-			{
-				this.server.sendServerErrorMessage( this.tcpSocketWrite );
-				this.emit( 'error', new Error( `No listener for event ${decoded.instruction.event}` ) );
-			}
-			if( type === Sockets.tcp )
-			{
-				this.streamParser.freeBufferToOffset( decoded.offset );
-				this.handleData();
-			}
+			decoded = DecodePacket( buffer, type );
 		}
 		catch( e )
 		{
-			let msg;
-			let opcode;
 			if( e.message === 0xe0 )
 			{
-				msg = 'Unknown instruction';
-				opcode = 0xe0;
+				this.send( {
+					opcode : 0xe0,
+					error : 'Unknown opcode'
+				} );
+				if( type === Sockets.tcp )
+				{
+					this.streamParser.clearBuffer();
+				}
 			}
 			else
 			{
-				msg = 'Parsing request error';
-				opcode = 0xe2;
+				this.logger.error( e.message )
 			}
-			this.send( {
-				opcode : opcode,
-				error : msg
-			} );
-			if( type === Sockets.tcp )
+			return;
+		}
+		if( decoded === false )
+		{
+			return;
+		}
+		if( decoded.instruction.event === 'undefined' )
+		{
+			this.server.sendServerErrorMessage( this.tcpSocketWrite );
+		}
+		else
+		{
+			let hasListeners = this.emit( decoded.instruction.event, decoded.object,
+				this.respond.bind( this, decoded.instruction.response ) );
+			console.log( hasListeners );
+			if( hasListeners === false )
 			{
-				this.streamParser.clearBuffer();
+				console.log( this.emit( 'error', new Error( `No listener for event ${decoded.instruction.event}` ) ) );
+				this.server.sendServerErrorMessage( this.tcpSocketWrite );
 			}
+		}
+		if( type === Sockets.tcp )
+		{
+			this.streamParser.freeBufferToOffset( decoded.offset );
+			this.handleData();
 		}
 	}
 

@@ -23,6 +23,11 @@ class GameServer extends EventEmitter {
 		return this.clientsStorage;
 	}
 
+	getLogger()
+	{
+		return this.logger;
+	}
+
 	sendServerErrorMessage( socketWrite )
 	{
 		let encodedPacket = EncodePacket( {
