@@ -44,6 +44,10 @@ function parseParam( rule, value )
 	{
 		return false;
 	}
+	if( rule.type === Types.boolean )
+	{
+		return Buffer.from( [ !!value ] );
+	}
 	if( rule.type === Types.string )
 	{
 		return parseString( rule, value );
