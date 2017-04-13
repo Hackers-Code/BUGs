@@ -73,17 +73,12 @@ class Client extends EventEmitter {
 			{
 				return;
 			}
-			if( decoded.instruction.response !== 'undefined' )
+			if( decoded.instruction.event === 'undefined' )
 			{
-				if( this.handlers[ decoded.instruction.response ] !== 'function' )
-				{
-					this.send( {
-						opcode : 0xe2,
-						error : 'Server does not support this operation'
-					} );
-				}
-				this.handlers[ decoded.instruction.response ]();
+				this.server.sendServerErrorMessage( this.tcpSocketWrite );
 			}
+			this.emit( decoded.instruction.event, decoded.object,
+				this.respond.bind( this, decoded.instruction.response ) );
 			if( type === Sockets.tcp )
 			{
 				this.streamParser.freeBufferToOffset( decoded.offset );
@@ -113,6 +108,12 @@ class Client extends EventEmitter {
 				this.streamParser.clearBuffer();
 			}
 		}
+	}
+
+	respond( opcode, object, type = Sockets.tcp )
+	{
+		object.opcode = opcode;
+		this.send( object, type );
 	}
 
 	send( data, type = Sockets.tcp )
