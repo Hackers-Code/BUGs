@@ -103,11 +103,10 @@ class Client extends EventEmitter {
 		{
 			let hasListeners = this.emit( decoded.instruction.event, decoded.object,
 				this.respond.bind( this, decoded.instruction.response ) );
-			console.log( hasListeners );
 			if( hasListeners === false )
 			{
-				console.log( this.emit( 'error', new Error( `No listener for event ${decoded.instruction.event}` ) ) );
 				this.server.sendServerErrorMessage( this.tcpSocketWrite );
+				this.emit( 'error', new Error( `No listener for event ${decoded.instruction.event}` ) );
 			}
 		}
 		if( type === Sockets.tcp )
