@@ -15,21 +15,19 @@ class Player {
 	{
 		this.client.on( 'disconnect', () =>
 		{
-			this.playersStorage.remove();
-			console.log( 'disconnected' );
+			if( this.hasCustomName )
+			{
+				this.uniqueNameStorage.removeName( this.name );
+			}
 		} );
-		client.on( 'error', ( error ) =>
+		this.client.on( 'error', ( error ) =>
 		{
-			console.log( error.message );
+			throw error.message;
 		} );
-		client.on( 'changeName', ( data, respond ) =>
-		{
-			console.log( data.name );
-			respond( { status : true } );
-		} );
+		this.client.on( 'changeName', this.setName.bind( this ) );
 	}
 
-	setName( data )
+	setName( data, respond )
 	{
 		if( this.uniqueNameStorage.addName( data.name ) )
 		{
@@ -37,14 +35,14 @@ class Player {
 			{
 				if( !this.uniqueNameStorage.removeName( this.name ) )
 				{
-					return false;
+					return respond( { status : false } );
 				}
 			}
 			this.name = data.name;
 			this.hasCustomName = true;
-			return true;
+			return respond( { status : true } );
 		}
-		return false;
+		return respond( { status : false } );
 	}
 
 }
