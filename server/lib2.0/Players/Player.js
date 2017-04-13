@@ -3,6 +3,7 @@ class Player {
 	{
 		this.playersStorage = playersStorage;
 		this.uniqueNameStorage = playersStorage.getUniqueNameStorage();
+		this.roomsStorage = playersStorage.getRoomsStorage();
 		this.name = this.uniqueNameStorage.getDefault();
 		this.client = client;
 		this.hasCustomName = false;
@@ -47,6 +48,7 @@ class Player {
 		} );
 		this.client.on( 'changeName', this.setName.bind( this ) );
 		this.client.on( 'leaveRoom', this.leaveRoom.bind( this ) );
+		this.client.on( 'listGames', this.listGames.bind( this ) );
 	}
 
 	setName( data, respond )
@@ -71,6 +73,11 @@ class Player {
 	{
 		//TODO:room.leave()
 		this.setDefaults();
+	}
+
+	listGames( data, respond )
+	{
+		return respond( this.roomsStorage.listAvailableGames() );
 	}
 
 }

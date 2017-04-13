@@ -1,14 +1,21 @@
 const UniqueNameStorage = require( '../Helpers/UniqueNameStorage' );
 const Player = require( './Player' );
+const RoomsStorage = require( './Rooms/RoomsStorage' );
 class PlayersStorage {
 	constructor()
 	{
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
+		this.roomsStorage = new RoomsStorage();
 	}
 
 	getUniqueNameStorage()
 	{
 		return this.uniqueNameStorage;
+	}
+
+	getRoomsStorage()
+	{
+		return this.roomsStorage;
 	}
 
 	addPlayer( client )
