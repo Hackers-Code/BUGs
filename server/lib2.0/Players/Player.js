@@ -6,9 +6,30 @@ class Player {
 		this.name = this.uniqueNameStorage.getDefault();
 		this.client = client;
 		this.hasCustomName = false;
+		this.setDefaults();
+		this.handleEvents();
+	}
+
+	setDefaults()
+	{
+		this.room = null;
+		this.roomClientId = -1;
 		this.isInLobby = false;
 		this.isInGame = false;
-		this.handleEvents();
+		this.color = {
+			R : 0,
+			G : 0,
+			B : 0
+		};
+		this.mask = 0;
+		this.isYourTurn = false;
+		this.canAttack = false;
+		this.world = null;
+		this.currentWeapon = null;
+		this.readyStatus = false;
+		this.mapLoaded = false;
+		this.bugs = [];
+		this.currentBug = 0;
 	}
 
 	handleEvents()
@@ -25,6 +46,7 @@ class Player {
 			throw error.message;
 		} );
 		this.client.on( 'changeName', this.setName.bind( this ) );
+		this.client.on( 'leaveRoom', this.leaveRoom.bind( this ) );
 	}
 
 	setName( data, respond )
@@ -43,6 +65,12 @@ class Player {
 			return respond( { status : true } );
 		}
 		return respond( { status : false } );
+	}
+
+	leaveRoom()
+	{
+		//TODO:room.leave()
+		this.setDefaults();
 	}
 
 }
