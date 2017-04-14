@@ -62,6 +62,10 @@ function parseParam( rule, value )
 	{
 		return Buffer.from( [ !!value ] );
 	}
+	if( rule.type === Types.unsigned )
+	{
+		return parseUnsigned( rule, value );
+	}
 	if( rule.type === Types.string )
 	{
 		return parseString( rule, value );
@@ -75,6 +79,25 @@ function parseParam( rule, value )
 		return parseArray( rule, value );
 	}
 	return false;
+}
+
+function parseUnsigned( rule, value )
+{
+	if( typeof rule.length === 'undefined' || typeof value !== 'number' )
+	{
+		return false;
+	}
+	let length = rule.length;
+	let buffer = Buffer.alloc( length );
+	if( length === 1 )
+	{
+		buffer.writeUInt8( value, 0 );
+	}
+	else
+	{
+		return false;
+	}
+	return buffer;
 }
 
 function parseString( rule, value )
