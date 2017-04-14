@@ -12,6 +12,12 @@ class Room {
 		this.id = id;
 		this.roomsStorage = roomsStorage;
 		this.isWaitingForPlayers = false;
+		this.physics = {
+			gravity : 475,
+			jumpHeight : -300,
+			maxSpeedY : 1024,
+			maxSpeedX : 160
+		};
 	}
 
 	isAvailable()
@@ -37,6 +43,11 @@ class Room {
 			retval += this.players[ i ].isReady();
 		}
 		return retval;
+	}
+
+	setPhysics( data )
+	{
+		this.physics = data;
 	}
 }
 
