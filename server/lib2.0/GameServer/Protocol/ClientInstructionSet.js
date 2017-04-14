@@ -11,6 +11,7 @@ const U8 = DataTypes.u8;
 const U16BE = DataTypes.u16be;
 const U32BE = DataTypes.u32be;
 const I8 = DataTypes.i8;
+const I16BE = DataTypes.i16be;
 module.exports = {
 	0x01 : {
 		socket : tcp,
@@ -47,7 +48,7 @@ module.exports = {
 		socket : tcp,
 		params : {
 			gravity : U16BE,
-			jumpHeight : U16BE,
+			jumpHeight : I16BE,
 			maxSpeedY : U16BE,
 			maxSpeedX : U16BE
 		},
