@@ -1,6 +1,7 @@
 'use strict';
 const ClientInstructions = require( './ClientInstructionSet' );
 const Types = require( './Types' ).Attributes;
+const Encodings = require( './Types' ).Encoding;
 module.exports = ( buffer, type ) =>
 {
 	if( Buffer.isBuffer( buffer ) === false || buffer.length === 0 )
@@ -34,6 +35,12 @@ module.exports = ( buffer, type ) =>
 		else if( rule.type === Types.string )
 		{
 			let result = parseString( rule, buffer, offset );
+			offset += result.readBytes;
+			object[ element ] = result.value;
+		}
+		else if( rule.type === Types.unsigned )
+		{
+			let result = parseUnsigned( rule, buffer, offset );
 			offset += result.readBytes;
 			object[ element ] = result.value;
 		}
@@ -84,4 +91,38 @@ function parseString( rule, buffer, offset )
 	result.value = buffer.slice( offset + 1, offset + length + 1 ).toString();
 	result.readBytes = length + 1;
 	return result;
+}
+
+function parseUnsigned( rule, buffer, offset )
+{
+	if( typeof rule.length === 'undefined' || rule.encoding === Encodings.le )
+	{
+		return false;
+	}
+	let length = rule.length;
+	if( length === 2 )
+	{
+		let result = {};
+		result.value = buffer.readUInt16BE( offset );
+		result.readBytes = 2;
+		return result;
+	}
+	return false;
+}
+
+function parseSigned( rule, buffer, offset )
+{
+	if( typeof rule.length === 'undefined' || rule.encoding === Encodings.le )
+	{
+		return false;
+	}
+	let length = rule.length;
+	if( length === 2 )
+	{
+		let result = {};
+		result.value = buffer.readInt16BE( offset );
+		result.readBytes = 2;
+		return result;
+	}
+	return false;
 }
