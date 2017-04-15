@@ -1,5 +1,4 @@
 'use strict';
-const SearchEngine = require( '../../Helpers/SearchEngine' );
 class Room {
 	constructor( settings, admin, id, roomsStorage )
 	{
