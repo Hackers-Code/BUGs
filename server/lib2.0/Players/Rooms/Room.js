@@ -18,6 +18,8 @@ class Room {
 			maxSpeedY : 1024,
 			maxSpeedX : 160
 		};
+		this.playersCount = 0;
+		this.mapID = 0;
 	}
 
 	isAvailable()
@@ -48,6 +50,14 @@ class Room {
 	setPhysics( data )
 	{
 		this.physics = data;
+		return true;
+	}
+
+	setConfig( data )
+	{
+		this.mapID = data.map;
+		this.playersCount = data.players;
+		return false;
 	}
 }
 
