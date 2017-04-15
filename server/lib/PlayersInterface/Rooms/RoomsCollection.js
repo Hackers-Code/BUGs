@@ -1,12 +1,13 @@
 'use strict';
 const UniqueKeyGenerator = require( '../../Helpers/UniqueKeyGenerator' );
 const UniqueNameStorage = require( '../../Helpers/UniqueNameStorage' );
-const SearchEngine = require( '../../Helpers/SearchEngine' );
 const Room = require( './Room' );
-class RoomsStorage {
+const Collection = require( '../../Collections' ).UniqueKeyCollection;
+class RoomsCollection extends Collection {
 	constructor()
 	{
-		this.rooms = [];
+		super();
+		this.items = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, '' );
 	}
@@ -22,7 +23,7 @@ class RoomsStorage {
 		{
 			let id = this.uniqueKeyGenerator.generateKey();
 			let room = new Room( settings, admin, id, this );
-			this.rooms.push( room );
+			this.items.push( room );
 			return true;
 		}
 		return false;
@@ -31,9 +32,9 @@ class RoomsStorage {
 	listAvailableGames()
 	{
 		let games = [];
-		for( let i = 0 ; i < this.rooms.length ; i++ )
+		for( let i = 0 ; i < this.items.length ; i++ )
 		{
-			let roomInfo = this.rooms[ i ].isAvailable();
+			let roomInfo = this.items[ i ].isAvailable();
 			if( roomInfo !== false )
 			{
 				games.push( {
@@ -47,18 +48,12 @@ class RoomsStorage {
 
 	removeRoom( id )
 	{
-		let room = SearchEngine.findByUniqueID( id, this.rooms );
-		if( room !== false && room !== -1 )
+		let room = this.find( id );
+		if( room !== -1 )
 		{
-			let game = this.rooms[ room ].getGame();
-			game.stop();
-			this.rooms[ room ].tasks.forEach( ( element ) =>
-			{
-				this.tasksStorage.removeTask( element );
-			} );
-			this.uniqueKeyGenerator.freeKey( this.rooms[ room ].id );
-			this.uniqueNameStorage.removeName( this.rooms[ room ].name );
-			this.rooms.splice( room, 1 );
+			this.uniqueKeyGenerator.freeKey( this.items[ room ].id );
+			this.uniqueNameStorage.removeName( this.items[ room ].name );
+			this.items.splice( room, 1 );
 			return true;
 		}
 		else
@@ -71,12 +66,12 @@ class RoomsStorage {
 	{
 		if( typeof params.room !== 'undefined' && typeof params.password !== 'undefined' )
 		{
-			let room = SearchEngine.findByUniqueID( params.room, this.rooms );
-			if( room !== false && room !== -1 )
+			let room = this.find( params.room );
+			if( room !== -1 )
 			{
-				if( this.rooms[ room ].joinRoom( params.password, client ) )
+				if( this.items[ room ].joinRoom( params.password, client ) )
 				{
-					return this.rooms[ room ];
+					return this.items[ room ];
 				}
 				return false;
 			}
@@ -89,4 +84,4 @@ class RoomsStorage {
 	}
 }
 
-module.exports = RoomsStorage;
+module.exports = RoomsCollection;
