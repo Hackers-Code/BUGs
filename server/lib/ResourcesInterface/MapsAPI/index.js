@@ -1,13 +1,13 @@
 'use strict';
 const fs = require( 'fs' );
-const MapLoader = require( './MapLoader' );
 const MapParser = require( './MapParser' );
 const Collection = require( '../../Collections' ).NumericIdCollection;
 class MapsAPI extends Collection {
-	constructor( array )
+	constructor( array, resourcesPath )
 	{
 		super();
 		this.items = array;
+		this.resourcesPath = resourcesPath;
 	}
 
 	loadMap( id, callback )
@@ -16,12 +16,14 @@ class MapsAPI extends Collection {
 		{
 			throw new TypeError( 'Callback must be a function' );
 		}
-		if( !this.mapExists( id ) )
+		let index = this.find( id );
+		if( index === -1 )
 		{
 			callback( new Error( `Map with id ${id} does not exist` ) );
 			return;
 		}
-		MapLoader.loadMap( id, ( loadMapError, data ) =>
+		let mapPath = this.resourcesPath + this.items[ index ][ "map_file" ];
+		fs.readFile( mapPath, ( loadMapError, data ) =>
 		{
 			if( loadMapError )
 			{
