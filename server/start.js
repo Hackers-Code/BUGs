@@ -1,5 +1,5 @@
 'use strict';
-const App = require( './lib2.0/App' );
+const App = require( './lib/App' );
 (function()
 {
 	new App();
