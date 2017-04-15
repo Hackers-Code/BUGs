@@ -1,7 +1,8 @@
+'use strict';
 const UniqueNameStorage = require( '../Helpers/UniqueNameStorage' );
 const Player = require( './Player' );
 const RoomsStorage = require( './Rooms/RoomsStorage' );
-class PlayersStorage {
+class PlayersInterface {
 	constructor()
 	{
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
@@ -23,4 +24,4 @@ class PlayersStorage {
 		new Player( client, this );
 	}
 }
-module.exports = PlayersStorage;
+module.exports = PlayersInterface;
