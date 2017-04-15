@@ -1,3 +1,4 @@
+'use strict';
 const Sockets = require( '../GameServer/Protocol/Types' ).Sockets;
 class Player {
 	constructor( client, playersStorage )
