@@ -44,6 +44,12 @@ module.exports = ( buffer, type ) =>
 			offset += result.readBytes;
 			object[ element ] = result.value;
 		}
+		else if( rule.type === Types.signed )
+		{
+			let result = parseSigned( rule, buffer, offset );
+			offset += result.readBytes;
+			object[ element ] = result.value;
+		}
 		else
 		{
 			errorFlag = true;
@@ -100,14 +106,25 @@ function parseUnsigned( rule, buffer, offset )
 		return false;
 	}
 	let length = rule.length;
-	if( length === 2 )
+	let result = {};
+	if( length === 1 )
 	{
-		let result = {};
 		result.value = buffer.readUInt16BE( offset );
-		result.readBytes = 2;
-		return result;
 	}
-	return false;
+	else if( length === 2 )
+	{
+		result.value = buffer.readUInt16BE( offset );
+	}
+	else if( length === 4 )
+	{
+		result.value = buffer.readUInt16BE( offset );
+	}
+	else
+	{
+		return false;
+	}
+	result.readBytes = length;
+	return result;
 }
 
 function parseSigned( rule, buffer, offset )
@@ -117,12 +134,15 @@ function parseSigned( rule, buffer, offset )
 		return false;
 	}
 	let length = rule.length;
+	let result = {};
 	if( length === 2 )
 	{
-		let result = {};
 		result.value = buffer.readInt16BE( offset );
-		result.readBytes = 2;
-		return result;
 	}
-	return false;
+	else
+	{
+		return false;
+	}
+	result.readBytes = length;
+	return result;
 }
