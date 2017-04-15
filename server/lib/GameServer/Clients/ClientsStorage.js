@@ -1,15 +1,30 @@
 'use strict';
 const Client = require( './Client' );
 const UniqueKeyGenerator = require( '../../Helpers/UniqueKeyGenerator' );
-const SearchEngine = require( '../../Helpers/SearchEngine' );
 const DecodePacket = require( '../Protocol/PacketDecoder' );
 const Sockets = require( '../Protocol/Types' ).Sockets;
 class ClientsStorage {
-
 	constructor()
 	{
 		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
+	}
+
+	findByRinfo( rinfo )
+	{
+		for( let i = 0 ; i < this.clients.length ; i++ )
+		{
+			let clientRinfo = this.clients[ i ].getRinfo();
+			if( clientRinfo === null )
+			{
+				continue;
+			}
+			if( rinfo.port === clientRinfo.port && rinfo.address === clientRinfo.address )
+			{
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	getClientsCount()
@@ -39,7 +54,7 @@ class ClientsStorage {
 
 	passUDPPacket( packet, rinfo, socketSend )
 	{
-		let result = SearchEngine.findByRinfo( rinfo, this.clients );
+		let result = this.findByRinfo( rinfo );
 		if( result === -1 )
 		{
 			let decodedPacket = DecodePacket( packet, Sockets.udp );
