@@ -5,21 +5,21 @@ class Weapons {
 		this.weaponsList = [];
 	}
 
-	loadWeaponsListFromFile( path, callback )
+	loadWeaponsListFromFile( callback )
 	{
-		fs.readFile( path, ( err, data ) =>
+		fs.readFile( process.cwd() + '/resources/weapons/list.json', ( err, data ) =>
 		{
 			if( err )
 			{
-				throw err;
+				callback( err );
 			}
 			try
 			{
 				this.weaponsList = JSON.parse( data );
 			}
-			catch( e )
+			catch( err )
 			{
-				throw e;
+				callback( err );
 			}
 			callback();
 		} );
