@@ -44,6 +44,11 @@ class Client extends EventEmitter {
 		} );
 	}
 
+	getId()
+	{
+		return this.id;
+	}
+
 	getCallbacks()
 	{
 		return {
