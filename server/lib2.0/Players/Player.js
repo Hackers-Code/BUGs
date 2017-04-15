@@ -69,7 +69,7 @@ class Player {
 		this.client.on( 'listGames', this.listGames.bind( this ) );
 		this.client.on( 'createRoom', this.createRoom.bind( this ) );
 		this.client.on( 'setGamePhysics', this.setPhysics.bind( this ) );
-		this.client.on( 'setRoomConfig', this.setPhysics.bind( this ) );
+		this.client.on( 'setRoomConfig', this.setRoomConfig.bind( this ) );
 		//this.client.on( 'joinRoom', this.setPhysics.bind( this ) );
 		//this.client.on( 'getRoomConfig', this.setPhysics.bind( this ) );
 		//this.client.on( 'setPlayerProperties', this.setPhysics.bind( this ) );
