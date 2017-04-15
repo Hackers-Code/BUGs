@@ -3,15 +3,15 @@ const fs = require( 'fs' );
 const mkdirp = require( 'mkdirp' );
 const path = require( 'path' );
 class ResourcesDownloader {
-	constructor( localDirectory = process.cwd() + '/resources' )
+	constructor( downloadDirectory )
 	{
 		this._host = 'bugs.hackers-code.boakgp.hekko24.pl';
-		this._localDirectory = localDirectory;
+		this._downloadDirectory = downloadDirectory;
 	}
 
 	download( callback )
 	{
-		mkdirp( this._localDirectory, ( err ) =>
+		mkdirp( this._downloadDirectory, ( err ) =>
 		{
 			if( err )
 			{
@@ -54,7 +54,7 @@ class ResourcesDownloader {
 					{
 						uris = ResourcesDownloader.getUrisFromMapsJson( body.toString() );
 					}
-					let filename = this._localDirectory + element;
+					let filename = this._downloadDirectory + element;
 					let dir = path.dirname( filename );
 					mkdirp( dir, ( err ) =>
 					{
