@@ -1,3 +1,4 @@
+const Sockets = require( '../GameServer/Protocol/Types' ).Sockets;
 class Player {
 	constructor( client, playersStorage )
 	{
@@ -32,6 +33,11 @@ class Player {
 		this.mapLoaded = false;
 		this.bugs = [];
 		this.currentBug = 0;
+	}
+
+	getRoomClientId()
+	{
+		return this.roomClientId;
 	}
 
 	getPublicData()
@@ -100,8 +106,20 @@ class Player {
 
 	leaveRoom()
 	{
-		//TODO:room.leave()
-		this.setDefaults();
+		if( this.room !== null )
+		{
+			this.room.leave();
+			this.setDefaults();
+		}
+	}
+
+	kickFromLobby( reason )
+	{
+		this.client.send( {
+			opcode : 0x04,
+			reason
+		}, Sockets.tcp );
+		this.leaveRoom();
 	}
 
 	listGames( data, respond )
