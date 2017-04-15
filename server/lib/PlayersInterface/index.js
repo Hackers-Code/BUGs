@@ -1,12 +1,12 @@
 'use strict';
 const UniqueNameStorage = require( '../Helpers/UniqueNameStorage' );
 const Player = require( './Player' );
-const RoomsStorage = require( './Rooms/RoomsStorage' );
+const RoomsCollection = require( './Rooms/RoomsCollection' );
 class PlayersInterface {
 	constructor()
 	{
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
-		this.roomsStorage = new RoomsStorage();
+		this.roomsCollection = new RoomsCollection();
 	}
 
 	getUniqueNameStorage()
@@ -14,9 +14,9 @@ class PlayersInterface {
 		return this.uniqueNameStorage;
 	}
 
-	getRoomsStorage()
+	getRoomsCollection()
 	{
-		return this.roomsStorage;
+		return this.roomsCollection;
 	}
 
 	addPlayer( client )
