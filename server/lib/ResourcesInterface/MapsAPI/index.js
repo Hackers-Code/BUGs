@@ -16,21 +16,28 @@ class MapsAPI extends Collection {
 		{
 			throw new TypeError( 'Callback must be a function' );
 		}
-		MapLoader.loadMap( id, this.items, ( err, data ) =>
+		if( !this.mapExists( id ) )
 		{
-			if( err )
+			callback( new Error( `Map with id ${id} does not exist` ) );
+			return;
+		}
+		MapLoader.loadMap( id, ( loadMapError, data ) =>
+		{
+			if( loadMapError )
 			{
-				callback( err );
-				return;
+				callback( loadMapError );
 			}
-			try
+			else
 			{
-				let parsedMap = MapParser.parse( data );
-				callback( void 0, parsedMap );
-			}
-			catch( e )
-			{
-				callback( e );
+				try
+				{
+					let parsedMap = MapParser.parse( data );
+					callback( void 0, parsedMap );
+				}
+				catch( parseMapError )
+				{
+					callback( parseMapError );
+				}
 			}
 		} );
 	}
