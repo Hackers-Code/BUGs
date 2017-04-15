@@ -3,7 +3,7 @@ const EncodePacket = require( './Protocol/PacketEncoder' );
 const ClientsStorage = require( './Clients/ClientsStorage' );
 const startTCPSocket = require( './tcpSocket' );
 const startUDPSocket = require( './udpSocket' );
-const Logger = require( './Logger' );
+const Logger = require( '../App/Logger' );
 const EventEmitter = require( 'events' );
 class GameServer extends EventEmitter {
 	constructor( tcpPort, udpPort, maxClients )
