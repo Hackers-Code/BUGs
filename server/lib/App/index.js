@@ -1,46 +1,49 @@
 'use strict';
 const Logger = require( './Logger' );
+const ResourcesInterface = require( '../ResourcesInterface' );
 const GameServer = require( '../GameServer' );
-const PlayersStorage = require( '../Players/PlayersStorage' );
-const ResourcesDownloader = require( '../ResourcesDownloader' );
-const MapInterface = require( '../MapInterface' );
-const WeaponsInterface = require( '../WeaponsInterface' );
+const PlayersInterface = require( '../PlayersInterface' );
 class App {
 	constructor()
 	{
 		this.logger = new Logger();
-		this.mapsList = [];
-		this.playersStorage = new PlayersStorage();
-		this.resourcesDownloader = new ResourcesDownloader();
-		this.resourcesDownloader.download( this.startServer.bind( this ) );
-		MapInterface.loadAndParseMapsList( this.loadMapsList.bind( this ) );
-		this.weaponsInterface = new WeaponsInterface();
-		this.weaponsInterface.loadWeaponsListFromFile( this.loadWeaponsList.bind( this ) );
+		this.resources = new ResourcesInterface( process.cwd() );
+		this.resources.download( this.loadResources.bind( this ) );
+		this.players = new PlayersInterface();
+	}
+
+	loadResources()
+	{
+		this.resources.loadMapsAPI( this.loadMapsList.bind( this ) );
+		this.resources.loadWeapons( this.loadWeaponsList.bind( this ) );
 	}
 
 	startServer()
 	{
 		this.gameServer = GameServer( { maxClients : 4 } );
-		this.gameServer.on( 'connection', this.playersStorage.addPlayer.bind( this.playersStorage ) );
+		this.gameServer.on( 'connection', this.players.addPlayer.bind( this.players ) );
 	}
 
 	loadMapsList( error, data )
 	{
 		if( error )
 		{
-			console.log( 'Maps list does not exist' );
+			this.logger.error( 'Loading maps failed with message: %s', error.message );
 			process.exit( 1 );
 		}
-		this.mapsList = data;
+		this.logger.log( 'Maps list successfully loaded' );
+		this.maps = data;
 	}
 
-	loadWeaponsList( error )
+	loadWeaponsList( error, data )
 	{
 		if( error )
 		{
-			console.log( 'Weapons list does not exist' );
+			this.logger.error( 'Loading weapons failed with message: %s', error.message );
 			process.exit( 1 );
 		}
+		this.logger.log( 'Weapons list successfully loaded' );
+		this.weapons = data;
 	}
 }
 module.exports = App;
