@@ -5,9 +5,9 @@ const SearchEngine = require( '../Helpers/SearchEngine' );
 const fs = require( 'fs' );
 const MapInterface = {
 
-	loadAndParseMapsList : ( dir, callback ) =>
+	loadAndParseMapsList : ( callback ) =>
 	{
-		fs.readFile( dir, ( err, data ) =>
+		fs.readFile( process.cwd() + '/resources/maps/list.json', ( err, data ) =>
 		{
 			if( err )
 			{
