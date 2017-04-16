@@ -6,21 +6,23 @@ const PlayersInterface = require( '../PlayersInterface' );
 class App {
 	constructor()
 	{
+		this.maps = null;
+		this.weapons = null;
 		this.logger = new Logger();
+		this.players = new PlayersInterface();
 		this.resources = new ResourcesInterface( process.cwd() );
 		this.resources.download( this.loadResources.bind( this ) );
-		this.players = new PlayersInterface();
 	}
 
 	loadResources()
 	{
 		this.resources.loadMapsAPI( this.loadMapsList.bind( this ) );
-		this.resources.loadWeapons( this.loadWeaponsList.bind( this ) );
 	}
 
 	startServer()
 	{
-		this.gameServer = GameServer( { maxClients : 4 } );
+		this.logger.log( 'Creating GameServer socket' );
+		this.gameServer = new GameServer( this.logger, { maxClients : 4 } );
 		this.gameServer.on( 'connection', this.players.addPlayer.bind( this.players ) );
 	}
 
@@ -33,6 +35,7 @@ class App {
 		}
 		this.logger.log( 'Maps list successfully loaded' );
 		this.maps = data;
+		this.resources.loadWeapons( this.loadWeaponsList.bind( this ) );
 	}
 
 	loadWeaponsList( error, data )
@@ -44,6 +47,7 @@ class App {
 		}
 		this.logger.log( 'Weapons list successfully loaded' );
 		this.weapons = data;
+		this.startServer();
 	}
 }
 module.exports = App;
