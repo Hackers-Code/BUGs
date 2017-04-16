@@ -9,7 +9,7 @@ class Logger {
 
 	static formatData( data )
 	{
-		return '[' + new Date().toLocaleString() + '] ' + data + '\n';
+		return `[${new Date().toLocaleString()}] ${data}\n`;
 	}
 
 	log( data )
