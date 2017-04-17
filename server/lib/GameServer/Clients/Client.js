@@ -49,7 +49,7 @@ class Client extends EventEmitter {
 		return {
 			onData : this.handleData.bind( this ),
 			onClose : this.disconnect.bind( this ),
-			onError : null
+			onError : () => {}
 		};
 	}
 
