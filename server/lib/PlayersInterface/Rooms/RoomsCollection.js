@@ -69,7 +69,8 @@ class RoomsCollection extends Collection {
 
 	joinRoom( params, client )
 	{
-		if( typeof params.room !== 'undefined' && typeof params.password !== 'undefined' )
+		if( typeof params.room !== 'undefined' && Buffer.isBuffer(
+				params.room ) && typeof params.password === 'string' )
 		{
 			let room = this.find( params.room );
 			if( room !== -1 )

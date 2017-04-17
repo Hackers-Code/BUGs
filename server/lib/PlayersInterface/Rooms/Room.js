@@ -103,7 +103,7 @@ class Room extends Collection {
 
 	joinRoom( password, client )
 	{
-		if( this.isWaitingForPlayers === true && password === this.password )
+		if( this.isWaitingForPlayers && password === this.password )
 		{
 			this.admin.assignRoom( this, this.nextClientId++ );
 			this.players.push( client );
