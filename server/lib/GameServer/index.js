@@ -1,8 +1,8 @@
 'use strict';
 const EncodePacket = require( './Protocol/PacketEncoder' );
 const ClientsCollection = require( './Clients/ClientsCollection' );
-const startTCPSocket = require( './tcpSocket' );
-const startUDPSocket = require( './udpSocket' );
+const startTCP = require( './tcp' );
+const startUDP = require( './udp' );
 const EventEmitter = require( 'events' );
 const TCP_PORT = 31337;
 const UDP_PORT = 31337;
@@ -16,9 +16,9 @@ class GameServer extends EventEmitter {
 		let maxClients = options.maxClients || MAX_CLIENTS;
 		this.clientsCollection = new ClientsCollection();
 		this.logger = logger;
-		startTCPSocket( tcpPort, this.handleTCPConnection.bind( this ), this.handleError.bind( this ),
+		startTCP( tcpPort, this.handleTCPConnection.bind( this ), this.handleError.bind( this ),
 			this.handleListening.bind( this ) );
-		startUDPSocket( udpPort, this.handleUDPPacket.bind( this ), this.handleError.bind( this ),
+		startUDP( udpPort, this.handleUDPPacket.bind( this ), this.handleError.bind( this ),
 			this.handleListening.bind( this ) );
 	}
 
