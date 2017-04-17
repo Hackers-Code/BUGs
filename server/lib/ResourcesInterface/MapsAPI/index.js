@@ -73,7 +73,21 @@ class MapsAPI extends Collection {
 				{
 					throw new Error( 'Unexpected end of file' );
 				}
-				object[ element.name ] = map.slice( offset, offset += element.length );
+				let chunk = map.slice( offset, offset += element.length );
+				let result = chunk;
+				if( chunk.length === 1 )
+				{
+					result = chunk.readUInt8( 0 );
+				}
+				else if( chunk.length === 2 )
+				{
+					result = chunk.readUInt16BE( 0 );
+				}
+				else if( chunk.length === 4 )
+				{
+					result = chunk.readUInt32BE( 0 );
+				}
+				object[ element.name ] = result;
 			} );
 			mapStruct[ sectionName ].push( object );
 		}
