@@ -1,21 +1,24 @@
 'use strict';
 class Collection {
-	constructor()
+	constructor( array, property )
 	{
-		this.items = [];
+		this.collectionArrayName = array;
+		this.collectionProperty = property;
 	}
 }
 
 class UniqueKeyCollection extends Collection {
 	find( key )
 	{
+		let array = this[ this.collectionArrayName ];
+		let property = this.collectionProperty;
 		if( Buffer.isBuffer( key ) === false )
 		{
 			return -1;
 		}
-		for( let i = 0 ; i < this.items.length ; i++ )
+		for( let i = 0 ; i < array.length ; i++ )
 		{
-			if( Buffer.compare( id, this.items[ i ].getUniqueKey() ) === 0 )
+			if( Buffer.compare( id, array[ i ][ property ] ) === 0 )
 			{
 				return i;
 			}
@@ -27,9 +30,11 @@ class UniqueKeyCollection extends Collection {
 class NumericIdCollection extends Collection {
 	find( id )
 	{
-		for( let i = 0 ; i < this.items.length ; i++ )
+		let array = this[ this.collectionArrayName ];
+		let property = this.collectionProperty;
+		for( let i = 0 ; i < array.length ; i++ )
 		{
-			if( id === this.items[ i ].id )
+			if( id === array[ i ][ property ] )
 			{
 				return i;
 			}
