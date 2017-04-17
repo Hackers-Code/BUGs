@@ -10,5 +10,4 @@ class Weapons {
 		this._weaponsList = array;
 	}
 }
-
 module.exports = Weapons;
