@@ -1,7 +1,7 @@
 'use strict';
 const UniqueNameStorage = require( '../Helpers/UniqueNameStorage' );
-const Player = require( './Player' );
 const RoomsCollection = require( './Rooms/RoomsCollection' );
+const Player = require( './Player' );
 class PlayersInterface {
 	constructor()
 	{
