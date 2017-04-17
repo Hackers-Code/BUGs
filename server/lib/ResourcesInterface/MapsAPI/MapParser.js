@@ -3,29 +3,23 @@ const MapFormat = require( './MapFormat' );
 const MapParser = {
 	parse : function( map )
 	{
-		let mapStruct = { metadata : {} };
+		let mapStruct = {};
 		let offset = 0;
-		MapFormat.meta.values.forEach( ( element ) =>
-		{
-			if( offset + element.length > map.length )
-			{
-				throw new Error( 'Map file invalid' );
-			}
-			mapStruct.metadata[ element.name ] = map.slice( offset, offset += element.length );
-		} );
 		while( offset < map.length )
 		{
 			let opcode = map[ offset++ ];
 			let object = {};
-			if( typeof MapFormat[ opcode ] === 'undefined' )
+			let sectionData = MapFormat[ opcode ];
+			if( typeof sectionData !== 'object' )
 			{
 				throw new Error( 'Map file broken' );
 			}
-			if( typeof mapStruct[ MapFormat[ opcode ].name ] === 'undefined' )
+			let sectionName = sectionData.name;
+			if( typeof mapStruct[ sectionName ] === 'undefined' )
 			{
-				mapStruct[ MapFormat[ opcode ].name ] = [];
+				mapStruct[ sectionData.name ] = [];
 			}
-			MapFormat[ opcode ].values.forEach( ( element ) =>
+			sectionData.values.forEach( ( element ) =>
 			{
 				if( offset + element.length > map.length )
 				{
@@ -33,10 +27,9 @@ const MapParser = {
 				}
 				object[ element.name ] = map.slice( offset, offset += element.length );
 			} );
-			mapStruct[ MapFormat[ opcode ].name ].push( object );
+			mapStruct[ sectionName ].push( object );
 		}
 		return mapStruct;
 	}
 };
-
 module.exports = MapParser;

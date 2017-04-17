@@ -1,6 +1,7 @@
 'use strict';
 const MapFormat = {
-	'meta' : {
+	0x0 : {
+		name : 'metadata',
 		values : [
 			{
 				name : 'signature',
