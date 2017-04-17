@@ -85,6 +85,22 @@ class Room extends Collection {
 		return false;
 	}
 
+	getConfig()
+	{
+		if( this.isConfigured )
+		{
+			return {
+				map : this.mapID,
+				gravity : this.physics.gravity,
+				jumpHeight : this.physics.jumpHeight,
+				maxSpeedY : this.physics.maxSpeedY,
+				maxSpeedX : this.physics.maxSpeedX,
+				maxPlayers : this.maxPlayers
+			};
+		}
+		return false;
+	}
+
 	joinRoom( password, client )
 	{
 		if( this.isWaitingForPlayers === true && password === this.password )

@@ -41,9 +41,9 @@ class Player {
 		return {
 			lobbyID : this.lobbyID,
 			name : this.name,
-			colourR : this.color.R,
-			colourG : this.color.G,
-			colourB : this.color.B,
+			colorR : this.color.R,
+			colorG : this.color.G,
+			colorB : this.color.B,
 			mask : this.mask
 		};
 	}
@@ -73,8 +73,8 @@ class Player {
 		this.client.on( 'setGamePhysics', this.setPhysics.bind( this ) );
 		this.client.on( 'setRoomConfig', this.setRoomConfig.bind( this ) );
 		this.client.on( 'joinRoom', this.joinRoom.bind( this ) );
-		//this.client.on( 'getRoomConfig', this.setPhysics.bind( this ) );
-		//this.client.on( 'setPlayerProperties', this.setPhysics.bind( this ) );
+		this.client.on( 'getRoomConfig', this.getRoomConfig.bind( this ) );
+		this.client.on( 'setPlayerProperties', this.setPlayerProperties.bind( this ) );
 		this.client.on( 'switchReady', this.setReady.bind( this ) );
 		this.client.on( 'listPlayers', this.listPlayers.bind( this ) );
 	}
@@ -187,9 +187,43 @@ class Player {
 		}
 	}
 
+	setPlayerProperties( data, respond )
+	{
+		if( this.readyStatus === false )
+		{
+			[
+				this.color.R,
+				this.color.G,
+				this.color.B
+			] = [
+				data.colorR,
+				data.colorG,
+				data.colorB
+			];
+			this.mask = data.mask;
+			respond( { status : true } );
+		}
+		else
+		{
+			respond( { status : false } );
+		}
+	}
+
+	getRoomConfig( data, respond )
+	{
+		if( this.isInLobby )
+		{
+			let config = this.room.getConfig();
+			if( config !== false )
+			{
+				respond( config );
+			}
+		}
+	}
+
 	listPlayers( data, respond )
 	{
-		if( this.room !== null )
+		if( this.isInLobby )
 		{
 			respond( {
 				readyPlayers : this.room.getReadyPlayersCount(),
