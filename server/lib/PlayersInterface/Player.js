@@ -75,7 +75,7 @@ class Player {
 		//this.client.on( 'joinRoom', this.setPhysics.bind( this ) );
 		//this.client.on( 'getRoomConfig', this.setPhysics.bind( this ) );
 		//this.client.on( 'setPlayerProperties', this.setPhysics.bind( this ) );
-		//this.client.on( 'switchReady', this.setPhysics.bind( this ) );
+		this.client.on( 'switchReady', this.setReady.bind( this ) );
 		this.client.on( 'listPlayers', this.listPlayers.bind( this ) );
 	}
 
@@ -138,7 +138,7 @@ class Player {
 
 	setPhysics( data, respond )
 	{
-		if( this.isAdmin && this.room !== null )
+		if( this.isAdmin && this.isInLobby )
 		{
 			respond( { status : this.room.setPhysics( data ) } );
 		}
@@ -150,9 +150,22 @@ class Player {
 
 	setRoomConfig( data, respond )
 	{
-		if( this.isAdmin && this.room !== null )
+		if( this.isAdmin && this.isInLobby )
 		{
 			respond( { status : this.room.setConfig( data ) } );
+		}
+		else
+		{
+			respond( { status : false } );
+		}
+	}
+
+	setReady( data, respond )
+	{
+		if( this.isInLobby )
+		{
+			this.readyStatus = !this.readyStatus;
+			respond( { status : true } );
 		}
 		else
 		{
