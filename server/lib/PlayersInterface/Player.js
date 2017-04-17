@@ -28,7 +28,7 @@ class Player {
 		this.mask = 0;
 		this.isYourTurn = false;
 		this.canAttack = false;
-		this.world = null;
+		this.game = null;
 		this.currentWeapon = null;
 		this.readyStatus = false;
 		this.mapLoaded = false;
@@ -236,10 +236,11 @@ class Player {
 		}
 	}
 
-	startGame()
+	startGame( game )
 	{
 		this.isInLobby = false;
 		this.isInGame = true;
+		this.game = game;
 		this.client.send( {
 			opcode : 0x30
 		}, Sockets.tcp );
