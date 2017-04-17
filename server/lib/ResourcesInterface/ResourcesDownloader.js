@@ -34,7 +34,7 @@ class ResourcesDownloader {
 		{
 			let uri = resourcesToDownload[ i ];
 			let downloadPath = this._downloadDirectory + uri;
-			let dir = path.dirname( filename );
+			let dir = path.dirname( downloadPath );
 			mkdirp( dir, ( mkdirpError ) =>
 			{
 				if( !fs.existsSync( dir ) )
