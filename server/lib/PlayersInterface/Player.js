@@ -232,5 +232,13 @@ class Player {
 			} );
 		}
 	}
+
+	finishGame( leaderboard )
+	{
+		this.client.send( {
+			opcode : 0x3a,
+			players : leaderboard
+		}, Sockets.tcp );
+	}
 }
 module.exports = Player;
