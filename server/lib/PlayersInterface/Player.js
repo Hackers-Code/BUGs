@@ -165,6 +165,7 @@ class Player {
 	{
 		if( this.isInLobby )
 		{
+			this.room.notifyReadyStatusChange();
 			this.readyStatus = !this.readyStatus;
 			respond( { status : true } );
 		}
@@ -232,6 +233,13 @@ class Player {
 				players : this.room.getPlayersList()
 			} );
 		}
+	}
+
+	startGame()
+	{
+		this.client.send( {
+			opcode : 0x30
+		}, Sockets.tcp );
 	}
 
 	finishGame( leaderboard )

@@ -171,6 +171,23 @@ class Room extends Collection {
 			}
 		}
 	}
+
+	notifyReadyStatusChange()
+	{
+		let readyPlayers = this.getReadyPlayersCount();
+		if( readyPlayers === this.maxPlayers )
+		{
+			this.startGame();
+		}
+	}
+
+	startGame()
+	{
+		this.players.forEach( ( element ) =>
+		{
+			element.startGame();
+		} );
+	}
 }
 
 module.exports = Room;
