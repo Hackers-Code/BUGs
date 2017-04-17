@@ -100,9 +100,9 @@ module.exports = {
 			players : Array( {
 				lobbyID : U8,
 				name : BinaryString( 20 ),
-				colourR : U8,
-				colourG : U8,
-				colourB : U8,
+				colorR : U8,
+				colorG : U8,
+				colorB : U8,
 				mask : U8
 			} )
 		}

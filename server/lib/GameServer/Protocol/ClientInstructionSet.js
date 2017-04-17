@@ -80,9 +80,9 @@ module.exports = {
 	0x2a : {
 		socket : tcp,
 		params : {
-			colourR : U8,
-			colourG : U8,
-			colourB : U8,
+			colorR : U8,
+			colorG : U8,
+			colorB : U8,
 			mask : U8
 		},
 		event : 'setPlayerProperties',
