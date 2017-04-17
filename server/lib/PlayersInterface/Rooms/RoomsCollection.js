@@ -1,8 +1,8 @@
 'use strict';
+const Collection = require( '../../Collections' ).UniqueKeyCollection;
 const UniqueKeyGenerator = require( '../../Helpers/UniqueKeyGenerator' );
 const UniqueNameStorage = require( '../../Helpers/UniqueNameStorage' );
 const Room = require( './Room' );
-const Collection = require( '../../Collections' ).UniqueKeyCollection;
 class RoomsCollection extends Collection {
 	constructor()
 	{
