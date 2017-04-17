@@ -20,40 +20,39 @@ module.exports = ( buffer, type ) =>
 	let object = {};
 	let keys = Object.keys( instruction.params );
 	let offset = 1;
-	let errorFlag = false;
-	keys.forEach( ( element ) =>
+	for( let i = 0 ; i < keys.length ; i++ )
 	{
-		let rule = instruction.params[ element ];
+		let key = keys[ i ];
+		let rule = instruction.params[ key ];
+		let result;
 		if( rule.type === Types.buffer )
 		{
-			let result = parseBuffer( rule, buffer, offset );
-			offset += result.readBytes;
-			object[ element ] = result.value;
+			result = parseBuffer( rule, buffer, offset );
 		}
 		else if( rule.type === Types.string )
 		{
-			let result = parseString( rule, buffer, offset );
-			offset += result.readBytes;
-			object[ element ] = result.value;
+			result = parseString( rule, buffer, offset );
 		}
 		else if( rule.type === Types.unsigned )
 		{
-			let result = parseUnsigned( rule, buffer, offset );
-			offset += result.readBytes;
-			object[ element ] = result.value;
+			result = parseUnsigned( rule, buffer, offset );
 		}
 		else if( rule.type === Types.signed )
 		{
-			let result = parseSigned( rule, buffer, offset );
-			offset += result.readBytes;
-			object[ element ] = result.value;
+			result = parseSigned( rule, buffer, offset );
 		}
 		else
 		{
-			errorFlag = true;
+			return false;
 		}
-	} );
-	if( offset <= buffer.length && errorFlag === false )
+		if( result === false )
+		{
+			return false;
+		}
+		offset += result.readBytes;
+		object[ key ] = result.value;
+	}
+	if( offset <= buffer.length )
 	{
 		return {
 			instruction,
@@ -61,7 +60,10 @@ module.exports = ( buffer, type ) =>
 			offset
 		};
 	}
-	return false;
+	else
+	{
+		return false;
+	}
 };
 
 function parseBuffer( rule, buffer, offset )
@@ -107,7 +109,7 @@ function parseUnsigned( rule, buffer, offset )
 	let result = {};
 	if( length === 1 )
 	{
-		result.value = buffer.readUInt16BE( offset );
+		result.value = buffer.readUInt8( offset );
 	}
 	else if( length === 2 )
 	{
@@ -115,7 +117,7 @@ function parseUnsigned( rule, buffer, offset )
 	}
 	else if( length === 4 )
 	{
-		result.value = buffer.readUInt16BE( offset );
+		result.value = buffer.readUInt32BE( offset );
 	}
 	else
 	{
