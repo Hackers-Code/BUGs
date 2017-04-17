@@ -211,7 +211,7 @@ class Room extends Collection {
 		{
 			this.players.forEach( ( element ) =>
 			{
-				element.startGame();
+				element.startGame( this.game );
 			} );
 		}
 	}
