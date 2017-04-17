@@ -23,7 +23,7 @@ class UniqueKeyGenerator {
 	{
 		for( let i = 0 ; i < this.generatedKeys.length ; i++ )
 		{
-			if( key.compare( this.generatedKeys[ i ] ) === 0 )
+			if( Buffer.compare( key, this.generatedKeys[ i ] ) === 0 )
 			{
 				this.generatedKeys.splice( i, 1 );
 				break;
@@ -35,7 +35,7 @@ class UniqueKeyGenerator {
 	{
 		for( let i = 0 ; i < this.generatedKeys.length ; i++ )
 		{
-			if( key.compare( this.generatedKeys[ i ] ) === 0 )
+			if( Buffer.compare( key, this.generatedKeys[ i ] ) === 0 )
 			{
 				return true;
 			}
