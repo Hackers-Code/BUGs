@@ -31,7 +31,7 @@ class ResourcesDownloader {
 		}
 		let collectedURIs = [];
 		let downloadedItems = 0;
-		for( let i = 0 ; i <= resourcesToDownload.length ; i++ )
+		for( let i = 0 ; i < resourcesToDownload.length ; i++ )
 		{
 			let uri = resourcesToDownload[ i ];
 			let downloadPath = this._downloadDirectory + uri;
