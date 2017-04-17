@@ -58,19 +58,23 @@ function parseParam( rule, value )
 	{
 		return Buffer.from( [ !!value ] );
 	}
-	if( rule.type === Types.unsigned )
+	else if( rule.type === Types.unsigned )
 	{
 		return parseUnsigned( rule, value );
 	}
-	if( rule.type === Types.string )
+	else if( rule.type === Types.signed )
+	{
+		return parseSigned( rule, value );
+	}
+	else if( rule.type === Types.string )
 	{
 		return parseString( rule, value );
 	}
-	if( rule.type === Types.buffer )
+	else if( rule.type === Types.buffer )
 	{
 		return parseBuffer( rule, value );
 	}
-	if( rule.type === Types.array )
+	else if( rule.type === Types.array )
 	{
 		return parseArray( rule, value );
 	}
@@ -96,6 +100,33 @@ function parseUnsigned( rule, value )
 	else if( length === 4 )
 	{
 		buffer.writeUInt32BE( value, 0 );
+	}
+	else
+	{
+		return false;
+	}
+	return buffer;
+}
+
+function parseSigned( rule, value )
+{
+	if( typeof rule.length === 'undefined' || typeof value !== 'number' )
+	{
+		return false;
+	}
+	let length = rule.length;
+	let buffer = Buffer.alloc( length );
+	if( length === 1 )
+	{
+		buffer.writeInt8( value, 0 );
+	}
+	else if( length === 2 )
+	{
+		buffer.writeInt16BE( value, 0 );
+	}
+	else if( length === 4 )
+	{
+		buffer.writeInt32BE( value, 0 );
 	}
 	else
 	{
