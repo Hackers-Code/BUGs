@@ -1,16 +1,18 @@
 'use strict';
-class Room {
-	constructor( settings, admin, id, roomsStorage )
+const Collection = require( '../../Collections' ).NumericIdCollection;
+class Room extends Collection {
+	constructor( settings, admin, id, roomsCollection )
 	{
+		super();
 		this.nextClientId = 0;
 		this.name = settings.name;
 		this.password = settings.password;
 		this.admin = admin;
 		this.admin.assignRoom( this, this.nextClientId++, true );
-		this.players = [];
-		this.players.push( admin );
+		this.items.push( admin );
 		this.id = id;
-		this.roomsStorage = roomsStorage;
+		this.roomsCollection = roomsCollection;
+		this.mapAPI = roomsCollection.getMapAPI();
 		this.physics = {
 			gravity : 475,
 			jumpHeight : -300,
@@ -34,9 +36,9 @@ class Room {
 	getPlayersList()
 	{
 		let retval = [];
-		for( let i = 0 ; i < this.players.length ; i++ )
+		for( let i = 0 ; i < this.items.length ; i++ )
 		{
-			retval.push( this.players[ i ].getPublicData() );
+			retval.push( this.items[ i ].getPublicData() );
 		}
 		return retval;
 	}
@@ -44,9 +46,9 @@ class Room {
 	getReadyPlayersCount()
 	{
 		let retval = 0;
-		for( let i = 0 ; i < this.players.length ; i++ )
+		for( let i = 0 ; i < this.items.length ; i++ )
 		{
-			retval += this.players[ i ].isReady();
+			retval += this.items[ i ].isReady();
 		}
 		return retval;
 	}
@@ -69,7 +71,7 @@ class Room {
 			{
 				return false;
 			}
-			if( !MapInterface.mapExists( data.map ) )
+			if( !this.mapAPI.mapExists( data.map ) )
 			{
 				return false;
 			}
@@ -84,9 +86,9 @@ class Room {
 	{
 		if( this.isInGame )
 		{
-			if( this.admin.getId().compare( id ) === 0 )
+			if( Buffer.compare( this.admin.id, id ) )
 			{
-				this.roomsStorage.removeRoom( this.id );
+				this.roomsCollection.removeRoom( this.id );
 				this.players.splice( 0, 1 );
 				this.players.forEach( ( element ) =>
 				{
@@ -95,7 +97,7 @@ class Room {
 			}
 			else
 			{
-				let index = SearchEngine.findByUniqueID( id, this.players );
+				let index = this.find( id );
 				if( index !== -1 )
 				{
 					this.players.splice( index, 1 );
@@ -109,19 +111,19 @@ class Room {
 		}
 		else
 		{
-			let index = SearchEngine.findByUniqueID( id, this.players );
+			let index = this.find( id );
 			if( index !== -1 )
 			{
-				this.leaderboard.unshift( { id : this.players[ index ].getRoomClientId() } );
+				this.leaderboard.unshift( { id : this.players[ index ].id } );
 				this.players.splice( index, 1 );
 				if( this.players.length === 1 )
 				{
-					this.leaderboard.unshift( { id : this.players[ 0 ].getPlayerID() } );
+					this.leaderboard.unshift( { id : this.players[ 0 ].id } );
 					this.players[ 0 ].finishGame( this.leaderboard );
 				}
 				if( this.players.length === 0 )
 				{
-					this.roomsStorage.removeRoom( this.id );
+					this.roomsCollection.removeRoom( this.id );
 				}
 			}
 		}

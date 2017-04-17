@@ -4,12 +4,18 @@ const UniqueKeyGenerator = require( '../../Helpers/UniqueKeyGenerator' );
 const UniqueNameStorage = require( '../../Helpers/UniqueNameStorage' );
 const Room = require( './Room' );
 class RoomsCollection extends Collection {
-	constructor()
+	constructor( mapAPI )
 	{
 		super();
 		this.items = [];
+		this.mapAPI = mapAPI;
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, '' );
+	}
+
+	getMapAPI()
+	{
+		return this.mapAPI;
 	}
 
 	addRoom( settings, admin )

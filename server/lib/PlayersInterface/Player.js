@@ -36,11 +36,6 @@ class Player {
 		this.currentBug = 0;
 	}
 
-	getRoomClientId()
-	{
-		return this.id;
-	}
-
 	getPublicData()
 	{
 		return {

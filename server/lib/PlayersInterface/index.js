@@ -3,10 +3,22 @@ const UniqueNameStorage = require( '../Helpers/UniqueNameStorage' );
 const RoomsCollection = require( './Rooms/RoomsCollection' );
 const Player = require( './Player' );
 class PlayersInterface {
-	constructor()
+	constructor( mapAPI, weapons )
 	{
+		this.mapAPI = mapAPI;
+		this.weapons = weapons;
 		this.uniqueNameStorage = new UniqueNameStorage( 20, 'Anonymous' );
-		this.roomsCollection = new RoomsCollection();
+		this.roomsCollection = new RoomsCollection( mapAPI );
+	}
+
+	getMapAPI()
+	{
+		return this.mapAPI;
+	}
+
+	getWeapons()
+	{
+		return this.weapons;
 	}
 
 	getUniqueNameStorage()

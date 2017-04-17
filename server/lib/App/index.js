@@ -10,7 +10,6 @@ class App {
 		this.maps = null;
 		this.weapons = null;
 		this.logger = new Logger( this.projectDirectory, this.loggerCreated.bind( this ) );
-		this.players = new PlayersInterface();
 		this.resources = new ResourcesInterface( this.projectDirectory );
 	}
 
@@ -39,6 +38,7 @@ class App {
 	startServer()
 	{
 		this.logger.log( 'Creating GameServer socket' );
+		this.players = new PlayersInterface( this.maps, this.weapons );
 		this.gameServer = new GameServer( this.logger, { maxClients : 4 } );
 		this.gameServer.on( 'connection', this.players.addPlayer.bind( this.players ) );
 	}
