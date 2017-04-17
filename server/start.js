@@ -2,5 +2,5 @@
 const App = require( './lib/App' );
 (function()
 {
-	new App();
+	new App( __dirname );
 })();
