@@ -78,6 +78,7 @@ class Player {
 		this.client.on( 'setPlayerProperties', this.setPlayerProperties.bind( this ) );
 		this.client.on( 'switchReady', this.setReady.bind( this ) );
 		this.client.on( 'listPlayers', this.listPlayers.bind( this ) );
+		this.client.on( 'mapLoaded', this.setMapLoaded.bind( this ) );
 	}
 
 	setName( data, respond )
@@ -237,6 +238,8 @@ class Player {
 
 	startGame()
 	{
+		this.isInLobby = false;
+		this.isInGame = true;
 		this.client.send( {
 			opcode : 0x30
 		}, Sockets.tcp );
@@ -248,6 +251,20 @@ class Player {
 			opcode : 0x3a,
 			players : leaderboard
 		}, Sockets.tcp );
+	}
+
+	isMapLoaded()
+	{
+		return this.mapLoaded;
+	}
+
+	setMapLoaded()
+	{
+		if( this.isInGame )
+		{
+			this.mapLoaded = true;
+			this.room.notifyMapLoaded();
+		}
 	}
 }
 module.exports = Player;
