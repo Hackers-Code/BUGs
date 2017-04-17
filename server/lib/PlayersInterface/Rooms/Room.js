@@ -127,7 +127,7 @@ class Room extends Collection {
 
 	leave( id )
 	{
-		if( this.isInGame )
+		if( !this.isInGame )
 		{
 			if( Buffer.compare( this.admin.lobbyID, id ) )
 			{
