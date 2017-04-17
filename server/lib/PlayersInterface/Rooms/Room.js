@@ -129,7 +129,7 @@ class Room extends Collection {
 	{
 		if( !this.isInGame )
 		{
-			if( Buffer.compare( this.admin.lobbyID, id ) )
+			if( this.admin.lobbyID === id )
 			{
 				this.roomsCollection.removeRoom( this.id );
 				this.players.splice( 0, 1 );
