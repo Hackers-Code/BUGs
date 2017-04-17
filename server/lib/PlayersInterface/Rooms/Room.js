@@ -63,7 +63,7 @@ class Room extends Collection {
 	{
 		if( this.isConfigured === false )
 		{
-			this.game.setPhysics( this.physics );
+			this.game.setPhysics( data );
 			return true;
 		}
 		return false;
