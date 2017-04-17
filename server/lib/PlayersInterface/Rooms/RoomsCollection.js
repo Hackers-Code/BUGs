@@ -40,12 +40,11 @@ class RoomsCollection extends Collection {
 		let games = [];
 		for( let i = 0 ; i < this.rooms.length ; i++ )
 		{
-			let roomInfo = this.rooms[ i ].isAvailable();
-			if( roomInfo !== false )
+			if( this.rooms[ i ].isAvailable() !== false )
 			{
 				games.push( {
-					id : roomInfo.id,
-					name : roomInfo.name
+					id : this.rooms[ i ].id,
+					name : this.rooms[ i ].name
 				} );
 			}
 		}
