@@ -1,11 +1,13 @@
 'use strict';
+const Collection = require( '../../Collections/' ).UniqueKeyCollection;
 const Client = require( './Client' );
 const UniqueKeyGenerator = require( '../../Helpers/UniqueKeyGenerator' );
 const DecodePacket = require( '../Protocol/PacketDecoder' );
 const Sockets = require( '../Protocol/Types' ).Sockets;
-class ClientsStorage {
+class ClientsStorage extends Collection {
 	constructor()
 	{
+		super();
 		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 	}
@@ -42,7 +44,7 @@ class ClientsStorage {
 
 	removeClient( id )
 	{
-		let client = SearchEngine.findByUniqueID( id, this.clients );
+		let client = this.find( id );
 		if( client !== -1 )
 		{
 			this.uniqueKeyGenerator.freeKey( this.clients[ client ].id );
@@ -62,7 +64,7 @@ class ClientsStorage {
 			{
 				return false;
 			}
-			let index = SearchEngine.findByUniqueID( decodedPacket.object.id, this.clients );
+			let index = this.find( decodedPacket.object.id );
 			if( index === -1 )
 			{
 				return false;

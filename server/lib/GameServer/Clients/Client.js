@@ -11,7 +11,7 @@ class Client extends EventEmitter {
 		this.tcpSocketWrite = socketWrite;
 		this.udpSocketSend = null;
 		this.server = server;
-		this.clientsStorage = server.getClientsStorage();
+		this.clientsCollection = server.getClientsCollection();
 		this.logger = server.getLogger();
 		this.streamParser = new StreamParser();
 		this.rinfo = null;
@@ -42,11 +42,6 @@ class Client extends EventEmitter {
 			opcode : 0x5,
 			id : this.id
 		} );
-	}
-
-	getId()
-	{
-		return this.id;
 	}
 
 	getCallbacks()
@@ -159,7 +154,7 @@ class Client extends EventEmitter {
 		if( this.keepAliveUDP !== null )
 		{
 			clearInterval( this.keepAliveUDP );
-			this.clientsStorage.removeClient( this.id );
+			this.clientsCollection.removeClient( this.id );
 			this.emit( 'disconnect' );
 		}
 	}
