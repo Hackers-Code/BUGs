@@ -11,14 +11,12 @@ class GameServer extends EventEmitter {
 	constructor( logger, options )
 	{
 		super();
-		let tcpPort = options.tcpPort || TCP_PORT;
-		let udpPort = options.udpPort || UDP_PORT;
 		let maxClients = options.maxClients || MAX_CLIENTS;
 		this.clientsCollection = new ClientsCollection();
 		this.logger = logger;
-		startTCP( tcpPort, this.handleTCPConnection.bind( this ), this.handleError.bind( this ),
+		startTCP( TCP_PORT, this.handleTCPConnection.bind( this ), this.handleError.bind( this ),
 			this.handleListening.bind( this ) );
-		startUDP( udpPort, this.handleUDPPacket.bind( this ), this.handleError.bind( this ),
+		startUDP( UDP_PORT, this.handleUDPPacket.bind( this ), this.handleError.bind( this ),
 			this.handleListening.bind( this ) );
 	}
 
@@ -63,19 +61,19 @@ class GameServer extends EventEmitter {
 	handleTCPConnection( address, socketWrite )
 	{
 		this.logger.log( `Connection from ${address.remoteAddress}:${address.remotePort}` );
-		if( this.clientsStorage.getClientsCount() === this.maxClients )
+		if( this.clientsCollection.getClientsCount() === this.maxClients )
 		{
 			this.sendKickMessage( socketWrite );
 			return false;
 		}
-		let client = this.clientsStorage.addClient( socketWrite, this );
+		let client = this.clientsCollection.addClient( socketWrite, this );
 		this.emit( 'connection', client );
 		return client.getCallbacks();
 	}
 
 	handleUDPPacket( packet, rinfo, socketSend )
 	{
-		this.clientsStorage.passUDPPacket( packet, rinfo, socketSend );
+		this.clientsCollection.passUDPPacket( packet, rinfo, socketSend );
 	}
 
 	handleError( error )
