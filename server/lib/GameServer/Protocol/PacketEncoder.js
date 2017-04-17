@@ -89,6 +89,14 @@ function parseUnsigned( rule, value )
 	{
 		buffer.writeUInt8( value, 0 );
 	}
+	else if( length === 2 )
+	{
+		buffer.writeUInt16BE( value, 0 );
+	}
+	else if( length === 4 )
+	{
+		buffer.writeUInt32BE( value, 0 );
+	}
 	else
 	{
 		return false;
