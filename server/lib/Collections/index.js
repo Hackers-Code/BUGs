@@ -18,7 +18,7 @@ class UniqueKeyCollection extends Collection {
 		}
 		for( let i = 0 ; i < array.length ; i++ )
 		{
-			if( Buffer.compare( id, array[ i ][ property ] ) === 0 )
+			if( Buffer.compare( key, array[ i ][ property ] ) === 0 )
 			{
 				return i;
 			}
