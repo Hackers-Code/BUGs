@@ -27,6 +27,7 @@ class ResourcesDownloader {
 		if( resourcesToDownload.length === 0 )
 		{
 			callback( void 0 );
+			return;
 		}
 		let collectedURIs = [];
 		let downloadedItems = 0;
