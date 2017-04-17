@@ -4,13 +4,24 @@ const ResourcesInterface = require( '../ResourcesInterface' );
 const GameServer = require( '../GameServer' );
 const PlayersInterface = require( '../PlayersInterface' );
 class App {
-	constructor()
+	constructor( projectDirectory )
 	{
+		this.projectDirectory = projectDirectory;
 		this.maps = null;
 		this.weapons = null;
-		this.logger = new Logger();
+		this.logger = new Logger( this.projectDirectory, this.loggerCreated.bind( this ) );
 		this.players = new PlayersInterface();
-		this.resources = new ResourcesInterface( process.cwd() );
+		this.resources = new ResourcesInterface( this.projectDirectory );
+	}
+
+	loggerCreated( error )
+	{
+		if( error )
+		{
+			console.log( error );
+			process.exit( 1 );
+		}
+		this.logger.log( 'Logger successfully initialized' );
 		this.resources.download( this.loadResources.bind( this ) );
 	}
 
