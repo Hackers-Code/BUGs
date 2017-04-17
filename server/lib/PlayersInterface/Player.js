@@ -16,7 +16,7 @@ class Player {
 	setDefaults()
 	{
 		this.room = null;
-		this.id = -1;
+		this.lobbyID = -1;
 		this.isAdmin = false;
 		this.isInLobby = false;
 		this.isInGame = false;
@@ -39,7 +39,7 @@ class Player {
 	getPublicData()
 	{
 		return {
-			playerID : this.id,
+			lobbyID : this.lobbyID,
 			name : this.name,
 			colourR : this.color.R,
 			colourG : this.color.G,
@@ -130,8 +130,9 @@ class Player {
 
 	assignRoom( room, id, isAdmin = false )
 	{
+		this.isInLobby = true;
 		this.room = room;
-		this.id = id;
+		this.lobbyID = id;
 		this.isAdmin = isAdmin;
 	}
 

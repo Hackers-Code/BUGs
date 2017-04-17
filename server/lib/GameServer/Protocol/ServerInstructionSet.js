@@ -98,7 +98,7 @@ module.exports = {
 		params : {
 			readyPlayers : U8,
 			players : Array( {
-				playerID : U8,
+				lobbyID : U8,
 				name : BinaryString( 20 ),
 				colourR : U8,
 				colourG : U8,
