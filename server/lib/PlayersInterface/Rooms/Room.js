@@ -113,7 +113,7 @@ class Room extends Collection {
 					element.kickFromLobby( 'Too many disconnections!' );
 				} );
 			}
-			this.client.assignRoom( this, this.nextClientId++ );
+			client.assignRoom( this, this.nextClientId++ );
 			this.players.push( client );
 			if( this.maxPlayers === this.players.length )
 			{
