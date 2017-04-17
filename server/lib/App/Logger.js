@@ -1,10 +1,23 @@
 'use strict';
 const fs = require( 'fs' );
+const mkdirp = require( 'mkdirp' );
 class Logger {
-	constructor()
+	constructor( projectDirectory, callback )
 	{
-		this.logFile = fs.createWriteStream( process.cwd() + '/logs/log.txt' );
-		this.errorFile = fs.createWriteStream( process.cwd() + '/logs/error.txt' );
+		this.logsDirectory = projectDirectory + '/logs';
+		mkdirp( this.logsDirectory, ( mkdirpError ) =>
+		{
+			if( !fs.existsSync( projectDirectory ) )
+			{
+				callback( mkdirpError );
+			}
+			else
+			{
+				this.logFile = fs.createWriteStream( this.logsDirectory + '/log.txt' );
+				this.errorFile = fs.createWriteStream( this.logsDirectory + '/error.txt' );
+				callback();
+			}
+		} );
 	}
 
 	static formatData( data )
