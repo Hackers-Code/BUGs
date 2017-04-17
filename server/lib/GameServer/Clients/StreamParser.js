@@ -4,7 +4,6 @@ class StreamParser {
 	{
 		this.buffer = Buffer.alloc( 0 );
 	}
-
 	appendData( data )
 	{
 		if( Buffer.isBuffer( data ) )
@@ -17,17 +16,14 @@ class StreamParser {
 		}
 		return false;
 	}
-
 	getBuffer()
 	{
 		return this.buffer;
 	}
-
 	clearBuffer()
 	{
 		this.buffer = Buffer.alloc( 0 );
 	}
-
 	freeBufferToOffset( offset )
 	{
 		this.buffer = this.buffer.slice( offset );

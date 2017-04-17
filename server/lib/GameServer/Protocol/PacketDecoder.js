@@ -9,7 +9,6 @@ module.exports = ( buffer, type ) =>
 		return false;
 	}
 	let instruction = ClientInstructions[ buffer[ 0 ] ];
-
 	if( typeof instruction === 'undefined' )
 	{
 		throw new Error( 0xe0 );
@@ -18,7 +17,6 @@ module.exports = ( buffer, type ) =>
 	{
 		return false;
 	}
-
 	let object = {};
 	let keys = Object.keys( instruction.params );
 	let offset = 1;
