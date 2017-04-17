@@ -25,8 +25,14 @@ class App {
 		this.resources.download( this.loadResources.bind( this ) );
 	}
 
-	loadResources()
+	loadResources( error )
 	{
+		if( error )
+		{
+			this.logger.error( 'Downloading resources failed with message: %s', error.message );
+			process.exit( 1 );
+		}
+		this.logger.log( 'Successfully downloaded all resources' );
 		this.resources.loadMapsAPI( this.loadMapsList.bind( this ) );
 	}
 
