@@ -65,7 +65,7 @@ module.exports = {
 	0x26 : {
 		socket : tcp,
 		params : {
-			room : U32BE,
+			room : BinaryString( 4 ),
 			password : ShortString
 		},
 		event : 'joinRoom',
