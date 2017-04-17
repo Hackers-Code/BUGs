@@ -75,11 +75,7 @@ class RoomsCollection extends Collection {
 			let room = this.find( params.room );
 			if( room !== -1 )
 			{
-				if( this.rooms[ room ].joinRoom( params.password, client ) )
-				{
-					return this.rooms[ room ];
-				}
-				return false;
+				return this.rooms[ room ].joinRoom( params.password, client );
 			}
 			else
 			{

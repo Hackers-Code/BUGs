@@ -72,7 +72,7 @@ class Player {
 		this.client.on( 'createRoom', this.createRoom.bind( this ) );
 		this.client.on( 'setGamePhysics', this.setPhysics.bind( this ) );
 		this.client.on( 'setRoomConfig', this.setRoomConfig.bind( this ) );
-		//this.client.on( 'joinRoom', this.setPhysics.bind( this ) );
+		this.client.on( 'joinRoom', this.joinRoom.bind( this ) );
 		//this.client.on( 'getRoomConfig', this.setPhysics.bind( this ) );
 		//this.client.on( 'setPlayerProperties', this.setPhysics.bind( this ) );
 		this.client.on( 'switchReady', this.setReady.bind( this ) );
@@ -170,6 +170,20 @@ class Player {
 		else
 		{
 			respond( { status : false } );
+		}
+	}
+
+	joinRoom( data, respond )
+	{
+		if( this.isInLobby )
+		{
+			respond( { status : false } );
+		}
+		else
+		{
+			respond( {
+				status : this.roomsCollection.joinRoom( data, this )
+			} );
 		}
 	}
 

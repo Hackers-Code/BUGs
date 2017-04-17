@@ -20,7 +20,7 @@ class Room extends Collection {
 			maxSpeedY : 1024,
 			maxSpeedX : 160
 		};
-		this.playersCount = 0;
+		this.maxPlayers = 0;
 		this.mapID = 0;
 		this.isConfigured = false;
 		this.isWaitingForPlayers = false;
@@ -77,9 +77,24 @@ class Room extends Collection {
 				return false;
 			}
 			this.mapID = data.map;
-			this.playersCount = data.players;
+			this.maxPlayers = data.players;
 			this.isConfigured = true;
 			this.isWaitingForPlayers = true;
+			return true;
+		}
+		return false;
+	}
+
+	joinRoom( password, client )
+	{
+		if( this.isWaitingForPlayers === true && password === this.password )
+		{
+			this.players.push( client );
+			if( this.maxPlayers === this.players.length )
+			{
+				this.isWaitingForPlayers = false;
+				this.isWaitingForConfirming = true;
+			}
 			return true;
 		}
 		return false;
