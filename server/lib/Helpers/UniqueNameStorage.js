@@ -35,7 +35,7 @@ class UniqueNameStorage {
 	{
 		for( let i = 0 ; i < this.storedNames.length ; i++ )
 		{
-			if( name.compare( this.storedNames[ i ] ) === 0 )
+			if( Buffer.compare( name, this.storedNames[ i ] ) === 0 )
 			{
 				this.storedNames.splice( i, 1 );
 				return true;
@@ -46,13 +46,13 @@ class UniqueNameStorage {
 
 	isUnique( name )
 	{
-		if( name.compare( this.defaultName ) === 0 )
+		if( Buffer.compare( name, this.defaultName ) === 0 )
 		{
 			return false;
 		}
 		for( let i = 0 ; i < this.storedNames.length ; i++ )
 		{
-			if( name.compare( this.storedNames[ i ] ) === 0 )
+			if( Buffer.compare( name, this.storedNames[ i ] ) === 0 )
 			{
 				return false;
 			}
