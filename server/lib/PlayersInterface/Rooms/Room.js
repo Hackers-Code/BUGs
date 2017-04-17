@@ -105,7 +105,15 @@ class Room extends Collection {
 	{
 		if( this.isWaitingForPlayers && password === this.password )
 		{
-			this.admin.assignRoom( this, this.nextClientId++ );
+			if( this.nextClientId + 1 > 255 )
+			{
+				this.roomsCollection.removeRoom( this.id );
+				this.players.forEach( ( element ) =>
+				{
+					element.kickFromLobby( 'Too many disconnections!' );
+				} );
+			}
+			this.client.assignRoom( this, this.nextClientId++ );
 			this.players.push( client );
 			if( this.maxPlayers === this.players.length )
 			{
