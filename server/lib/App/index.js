@@ -18,7 +18,7 @@ class App {
 	{
 		if( error )
 		{
-			console.log( error );
+			console.error( 'Creating logger failed with message: %s', error.message );
 			process.exit( 1 );
 		}
 		this.logger.log( 'Logger successfully initialized' );
