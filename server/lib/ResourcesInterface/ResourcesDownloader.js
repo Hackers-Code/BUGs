@@ -12,66 +12,78 @@ class ResourcesDownloader {
 
 	download( callback )
 	{
-		mkdirp( this._downloadDirectory, ( err ) =>
+		mkdirp( this._downloadDirectory, ( mkdirpError ) =>
 		{
-			if( err )
+			if( mkdirpError )
 			{
-				throw err;
+				callback( mkdirpError );
 			}
 			this.downloadResources( [ '/resources.json' ], callback );
 		} );
 	}
 
-	downloadResources( uri, callback )
+	downloadResources( resourcesToDownload, callback )
 	{
-		if( uri.length === 0 )
+		if( resourcesToDownload.length === 0 )
 		{
-			callback();
+			callback( void 0 );
 		}
-		let uris = [];
-		let toDownload = uri.length;
-		uri.forEach( ( element ) =>
+		let collectedURIs = [];
+		let downloadedItems = 0;
+		for( let i = 0 ; i <= resourcesToDownload.length ; i++ )
 		{
-			http.get( {
-				host : this._host,
-				path : element
-			}, ( response ) =>
+			let uri = resourcesToDownload[ i ];
+			let downloadPath = this._downloadDirectory + uri;
+			let dir = path.dirname( filename );
+			mkdirp( dir, ( mkdirpError ) =>
 			{
-				let body = Buffer.alloc( 0 );
-				response.on( 'data', ( d ) =>
+				if( !fs.existsSync( dir ) )
 				{
-					body = Buffer.concat( [
-						body,
-						d
-					] );
-				} );
-				response.on( 'end', () =>
+					callback( mkdirpError );
+				}
+				else
 				{
-					if( element === '/resources.json' )
+					http.get( {
+						host : this._host,
+						path : uri
+					}, ( response ) =>
 					{
-						uris = ResourcesDownloader.getUrisFromResourcesJson( body.toString() );
-					}
-					else if( element === '/maps/list.json' )
-					{
-						uris = ResourcesDownloader.getUrisFromMapsJson( body.toString() );
-					}
-					let filename = this._downloadDirectory + element;
-					let dir = path.dirname( filename );
-					mkdirp( dir, ( err ) =>
-					{
-						if( !fs.existsSync( dir ) )
+						let body = Buffer.alloc( 0 );
+						response.on( 'data', ( data ) =>
 						{
-							throw err;
-						}
-						fs.writeFileSync( filename, body );
-						if( --toDownload === 0 )
+							body = Buffer.concat( [
+								body,
+								data
+							] );
+						} );
+						response.on( 'end', () =>
 						{
-							this.downloadResources( uris, callback );
-						}
+							if( uri === '/resources.json' )
+							{
+								try
+								{
+									collectedURIs = ResourcesDownloader.getUrisFromResourcesJson( body.toString() );
+								}
+								catch( error )
+								{
+									callback( error );
+									return;
+								}
+							}
+							else if( uri === '/maps/list.json' )
+							{
+								collectedURIs = ResourcesDownloader.getUrisFromMapsJson( body.toString() );
+							}
+							fs.writeFileSync( downloadPath, body );
+							if( ++downloadedItems === resourcesToDownload.length )
+							{
+								this.downloadResources( collectedURIs, callback );
+							}
+						} );
 					} );
-				} );
+				}
 			} );
-		} );
+		}
 	}
 
 	static getUrisFromResourcesJson( body )
@@ -93,9 +105,9 @@ class ResourcesDownloader {
 		let uris = [];
 		parsed.forEach( ( element ) =>
 		{
-			if( typeof element.map_file === 'string' )
+			if( typeof element[ "map_file" ] === 'string' )
 			{
-				uris.push( element.map_file );
+				uris.push( element[ "map_file" ] );
 			}
 		} );
 		return uris;
