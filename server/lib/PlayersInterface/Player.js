@@ -16,7 +16,7 @@ class Player {
 	setDefaults()
 	{
 		this.room = null;
-		this.lobbyID = -1;
+		this.lobbyID = 0;
 		this.isAdmin = false;
 		this.isInLobby = false;
 		this.isInGame = false;
