@@ -78,6 +78,8 @@ class Room extends Collection {
 			}
 			this.mapID = data.map;
 			this.playersCount = data.players;
+			this.isConfigured = true;
+			this.isWaitingForPlayers = true;
 			return true;
 		}
 		return false;
