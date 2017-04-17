@@ -1,10 +1,8 @@
 'use strict';
 const Sockets = require( './Types' ).Sockets;
 const DataTypes = require( './Types' ).DataTypes;
-
 const tcp = Sockets.tcp;
 const udp = Sockets.udp;
-
 const BinaryString = DataTypes.buffer;
 const ShortString = DataTypes.shortString;
 const U8 = DataTypes.u8;

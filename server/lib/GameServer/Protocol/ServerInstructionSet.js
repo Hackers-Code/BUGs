@@ -1,7 +1,6 @@
 'use strict';
 const Sockets = require( './Types' ).Sockets;
 const DataTypes = require( './Types' ).DataTypes;
-
 const tcp = Sockets.tcp;
 const udp = Sockets.udp;
 const BinaryString = DataTypes.buffer;
@@ -13,7 +12,6 @@ const U32BE = DataTypes.u32be;
 const I8 = DataTypes.i8;
 const I16BE = DataTypes.i16be;
 const Bool = DataTypes.bool;
-
 module.exports = {
 	0x00 : {
 		socket : tcp,

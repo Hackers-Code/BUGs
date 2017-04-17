@@ -76,7 +76,6 @@ const Sockets = {
 	tcp : 1,
 	udp : 2
 };
-
 module.exports.Sockets = Sockets;
 module.exports.Encoding = Encoding;
 module.exports.Attributes = Attributes;
