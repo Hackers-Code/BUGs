@@ -1,11 +1,11 @@
 'use strict';
 const Sockets = require( '../GameServer/Protocol/Types' ).Sockets;
 class Player {
-	constructor( client, playersStorage )
+	constructor( client, playersInterface )
 	{
-		this.playersStorage = playersStorage;
-		this.uniqueNameStorage = playersStorage.getUniqueNameStorage();
-		this.roomsStorage = playersStorage.getRoomsStorage();
+		this.players = playersInterface;
+		this.uniqueNameStorage = this.players.getUniqueNameStorage();
+		this.roomsCollection = this.players.getRoomsCollection();
 		this.name = this.uniqueNameStorage.getDefault();
 		this.client = client;
 		this.hasCustomName = false;
@@ -16,7 +16,7 @@ class Player {
 	setDefaults()
 	{
 		this.room = null;
-		this.roomClientId = -1;
+		this.id = -1;
 		this.isAdmin = false;
 		this.isInLobby = false;
 		this.isInGame = false;
@@ -38,13 +38,13 @@ class Player {
 
 	getRoomClientId()
 	{
-		return this.roomClientId;
+		return this.id;
 	}
 
 	getPublicData()
 	{
 		return {
-			playerID : this.roomClientId,
+			playerID : this.id,
 			name : this.name,
 			colourR : this.color.R,
 			colourG : this.color.G,
@@ -125,18 +125,18 @@ class Player {
 
 	listGames( data, respond )
 	{
-		respond( { games : this.roomsStorage.listAvailableGames() } );
+		respond( { games : this.roomsCollection.listAvailableGames() } );
 	}
 
 	createRoom( data, respond )
 	{
-		respond( { status : this.roomsStorage.addRoom( data, this ) } );
+		respond( { status : this.roomsCollection.addRoom( data, this ) } );
 	}
 
-	assignRoom( room, roomClientId, isAdmin = false )
+	assignRoom( room, id, isAdmin = false )
 	{
 		this.room = room;
-		this.roomClientId = roomClientId;
+		this.id = id;
 		this.isAdmin = isAdmin;
 	}
 
