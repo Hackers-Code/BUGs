@@ -182,7 +182,8 @@ class Player {
 		else
 		{
 			respond( {
-				status : this.roomsCollection.joinRoom( data, this )
+				status : this.roomsCollection.joinRoom( data, this ),
+				player_id : this.lobbyID
 			} );
 		}
 	}

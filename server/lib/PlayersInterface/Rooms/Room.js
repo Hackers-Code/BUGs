@@ -105,6 +105,7 @@ class Room extends Collection {
 	{
 		if( this.isWaitingForPlayers === true && password === this.password )
 		{
+			this.admin.assignRoom( this, this.nextClientId++ );
 			this.players.push( client );
 			if( this.maxPlayers === this.players.length )
 			{
