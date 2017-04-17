@@ -61,6 +61,7 @@ class Player {
 			{
 				this.uniqueNameStorage.removeName( this.name );
 			}
+			this.leaveRoom();
 		} );
 		this.client.on( 'error', ( error ) =>
 		{
@@ -102,7 +103,7 @@ class Player {
 
 	leaveRoom()
 	{
-		if( this.room !== null )
+		if( this.isInLobby )
 		{
 			this.room.leave( this.lobbyID );
 			this.setDefaults();
