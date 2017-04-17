@@ -129,7 +129,7 @@ class Room extends Collection {
 	{
 		if( this.isInGame )
 		{
-			if( Buffer.compare( this.admin.id, id ) )
+			if( Buffer.compare( this.admin.lobbyID, id ) )
 			{
 				this.roomsCollection.removeRoom( this.id );
 				this.players.splice( 0, 1 );
@@ -157,11 +157,11 @@ class Room extends Collection {
 			let index = this.find( id );
 			if( index !== -1 )
 			{
-				this.leaderboard.unshift( { id : this.players[ index ].id } );
+				this.leaderboard.unshift( { id : this.players[ index ].lobbyID } );
 				this.players.splice( index, 1 );
 				if( this.players.length === 1 )
 				{
-					this.leaderboard.unshift( { id : this.players[ 0 ].id } );
+					this.leaderboard.unshift( { id : this.players[ 0 ].lobbyID } );
 					this.players[ 0 ].finishGame( this.leaderboard );
 				}
 				if( this.players.length === 0 )

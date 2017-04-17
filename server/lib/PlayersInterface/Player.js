@@ -104,7 +104,7 @@ class Player {
 	{
 		if( this.room !== null )
 		{
-			this.room.leave();
+			this.room.leave( this.lobbyID );
 			this.setDefaults();
 		}
 	}
