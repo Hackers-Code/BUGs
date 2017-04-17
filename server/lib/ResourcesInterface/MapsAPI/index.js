@@ -5,8 +5,8 @@ const Collection = require( '../../Collections' ).NumericIdCollection;
 class MapsAPI extends Collection {
 	constructor( array, resourcesPath )
 	{
-		super();
-		this.items = array;
+		super( 'maps', 'id' );
+		this.maps = array;
 		this.resourcesPath = resourcesPath;
 	}
 
@@ -22,7 +22,7 @@ class MapsAPI extends Collection {
 			callback( new Error( `Map with id ${id} does not exist` ) );
 			return;
 		}
-		let mapPath = this.resourcesPath + this.items[ index ][ "map_file" ];
+		let mapPath = this.resourcesPath + this.maps[ index ][ "map_file" ];
 		fs.readFile( mapPath, ( loadMapError, data ) =>
 		{
 			if( loadMapError )

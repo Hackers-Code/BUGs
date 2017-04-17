@@ -3,13 +3,14 @@ const Collection = require( '../../Collections' ).NumericIdCollection;
 class Room extends Collection {
 	constructor( settings, admin, id, roomsCollection )
 	{
-		super();
+		super( 'players', 'lobbyID' );
 		this.nextClientId = 0;
 		this.name = settings.name;
 		this.password = settings.password;
 		this.admin = admin;
 		this.admin.assignRoom( this, this.nextClientId++, true );
-		this.items.push( admin );
+		this.players = [];
+		this.players.push( admin );
 		this.id = id;
 		this.roomsCollection = roomsCollection;
 		this.mapAPI = roomsCollection.getMapAPI();
@@ -36,9 +37,9 @@ class Room extends Collection {
 	getPlayersList()
 	{
 		let retval = [];
-		for( let i = 0 ; i < this.items.length ; i++ )
+		for( let i = 0 ; i < this.players.length ; i++ )
 		{
-			retval.push( this.items[ i ].getPublicData() );
+			retval.push( this.players[ i ].getPublicData() );
 		}
 		return retval;
 	}
@@ -46,9 +47,9 @@ class Room extends Collection {
 	getReadyPlayersCount()
 	{
 		let retval = 0;
-		for( let i = 0 ; i < this.items.length ; i++ )
+		for( let i = 0 ; i < this.players.length ; i++ )
 		{
-			retval += this.items[ i ].isReady();
+			retval += this.players[ i ].isReady();
 		}
 		return retval;
 	}

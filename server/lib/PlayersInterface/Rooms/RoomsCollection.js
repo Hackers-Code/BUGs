@@ -6,8 +6,8 @@ const Room = require( './Room' );
 class RoomsCollection extends Collection {
 	constructor( mapAPI )
 	{
-		super();
-		this.items = [];
+		super( 'rooms', 'id' );
+		this.rooms = [];
 		this.mapAPI = mapAPI;
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 		this.uniqueNameStorage = new UniqueNameStorage( 20, '' );
@@ -29,7 +29,7 @@ class RoomsCollection extends Collection {
 		{
 			let id = this.uniqueKeyGenerator.generateKey();
 			let room = new Room( settings, admin, id, this );
-			this.items.push( room );
+			this.rooms.push( room );
 			return true;
 		}
 		return false;
@@ -38,9 +38,9 @@ class RoomsCollection extends Collection {
 	listAvailableGames()
 	{
 		let games = [];
-		for( let i = 0 ; i < this.items.length ; i++ )
+		for( let i = 0 ; i < this.rooms.length ; i++ )
 		{
-			let roomInfo = this.items[ i ].isAvailable();
+			let roomInfo = this.rooms[ i ].isAvailable();
 			if( roomInfo !== false )
 			{
 				games.push( {
@@ -57,9 +57,9 @@ class RoomsCollection extends Collection {
 		let room = this.find( id );
 		if( room !== -1 )
 		{
-			this.uniqueKeyGenerator.freeKey( this.items[ room ].id );
-			this.uniqueNameStorage.removeName( this.items[ room ].name );
-			this.items.splice( room, 1 );
+			this.uniqueKeyGenerator.freeKey( this.rooms[ room ].id );
+			this.uniqueNameStorage.removeName( this.rooms[ room ].name );
+			this.rooms.splice( room, 1 );
 			return true;
 		}
 		else
@@ -75,9 +75,9 @@ class RoomsCollection extends Collection {
 			let room = this.find( params.room );
 			if( room !== -1 )
 			{
-				if( this.items[ room ].joinRoom( params.password, client ) )
+				if( this.rooms[ room ].joinRoom( params.password, client ) )
 				{
-					return this.items[ room ];
+					return this.rooms[ room ];
 				}
 				return false;
 			}

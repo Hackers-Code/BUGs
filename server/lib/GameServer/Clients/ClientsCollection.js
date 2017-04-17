@@ -7,7 +7,7 @@ const Sockets = require( '../Protocol/Types' ).Sockets;
 class ClientsStorage extends Collection {
 	constructor()
 	{
-		super();
+		super( 'clients', 'id' );
 		this.clients = [];
 		this.uniqueKeyGenerator = new UniqueKeyGenerator( 4 );
 	}
