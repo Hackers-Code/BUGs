@@ -1,5 +1,6 @@
 'use strict';
 const Collection = require( '../../Collections' ).NumericIdCollection;
+const Game = require( '../../Game' );
 class Room extends Collection {
 	constructor( settings, admin, id, roomsCollection )
 	{
@@ -14,19 +15,13 @@ class Room extends Collection {
 		this.id = id;
 		this.roomsCollection = roomsCollection;
 		this.mapAPI = roomsCollection.getMapAPI();
-		this.physics = {
-			gravity : 475,
-			jumpHeight : -300,
-			maxSpeedY : 1024,
-			maxSpeedX : 160
-		};
 		this.maxPlayers = 0;
-		this.mapID = 0;
 		this.isConfigured = false;
 		this.isWaitingForPlayers = false;
 		this.isWaitingForConfirming = false;
 		this.isInGame = false;
 		this.leaderboard = [];
+		this.game = new Game( this.mapAPI );
 	}
 
 	isAvailable()
@@ -54,11 +49,21 @@ class Room extends Collection {
 		return retval;
 	}
 
+	getMapLoadedPlayersCount()
+	{
+		let retval = 0;
+		for( let i = 0 ; i < this.players.length ; i++ )
+		{
+			retval += this.players[ i ].isMapLoaded();
+		}
+		return retval;
+	}
+
 	setPhysics( data )
 	{
 		if( this.isConfigured === false )
 		{
-			this.physics = data;
+			this.game.setPhysics( this.physics );
 			return true;
 		}
 		return false;
@@ -76,7 +81,8 @@ class Room extends Collection {
 			{
 				return false;
 			}
-			this.mapID = data.map;
+			this.game.setMapID( data.map );
+			this.game.setPlayersCount( data.players );
 			this.maxPlayers = data.players;
 			this.isConfigured = true;
 			this.isWaitingForPlayers = true;
@@ -89,12 +95,14 @@ class Room extends Collection {
 	{
 		if( this.isConfigured )
 		{
+			let map = this.game.getMapID();
+			let physics = this.game.getPhysics();
 			return {
-				map : this.mapID,
-				gravity : this.physics.gravity,
-				jumpHeight : this.physics.jumpHeight,
-				maxSpeedY : this.physics.maxSpeedY,
-				maxSpeedX : this.physics.maxSpeedX,
+				map,
+				gravity : physics.gravity,
+				jumpHeight : physics.jumpHeight,
+				maxSpeedY : physics.maxSpeedY,
+				maxSpeedX : physics.maxSpeedX,
 				maxPlayers : this.maxPlayers
 			};
 		}
@@ -181,12 +189,36 @@ class Room extends Collection {
 		}
 	}
 
+	notifyMapLoaded()
+	{
+		let mapLoadedPlayers = this.getMapLoadedPlayersCount();
+		if( mapLoadedPlayers === this.maxPlayers )
+		{
+			this.runGame();
+		}
+	}
+
 	startGame()
 	{
-		this.players.forEach( ( element ) =>
+		if( this.game.canStart() === false )
 		{
-			element.startGame();
-		} );
+			this.players.forEach( ( element ) =>
+			{
+				element.kickFromLobby( 'Server could not read this map. Try another one or contact developer' );
+			} );
+		}
+		else
+		{
+			this.players.forEach( ( element ) =>
+			{
+				element.startGame();
+			} );
+		}
+	}
+
+	runGame()
+	{
+		this.game.delayedStart( 3 );
 	}
 }
 
