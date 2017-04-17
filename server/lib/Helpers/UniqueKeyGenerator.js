@@ -43,5 +43,4 @@ class UniqueKeyGenerator {
 		return false;
 	}
 }
-
 module.exports = UniqueKeyGenerator;

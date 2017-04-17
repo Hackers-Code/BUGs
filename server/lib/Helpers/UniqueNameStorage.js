@@ -60,5 +60,4 @@ class UniqueNameStorage {
 		return true;
 	}
 }
-
 module.exports = UniqueNameStorage;
