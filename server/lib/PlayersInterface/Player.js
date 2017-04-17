@@ -165,8 +165,8 @@ class Player {
 	{
 		if( this.isInLobby )
 		{
-			this.room.notifyReadyStatusChange();
 			this.readyStatus = !this.readyStatus;
+			this.room.notifyReadyStatusChange();
 			respond( { status : true } );
 		}
 		else
