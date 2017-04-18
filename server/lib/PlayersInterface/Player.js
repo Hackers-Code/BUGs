@@ -104,7 +104,7 @@ class Player {
 
 	leaveRoom()
 	{
-		if( this.isInLobby )
+		if( this.isInLobby || this.isInGame )
 		{
 			this.room.leave( this.lobbyID );
 			this.setDefaults();
