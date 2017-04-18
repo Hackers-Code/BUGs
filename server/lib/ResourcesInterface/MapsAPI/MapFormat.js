@@ -5,7 +5,7 @@ const MapFormat = {
 		values : [
 			{
 				name : 'signature',
-				length : 4
+				length : 3
 			},
 			{
 				name : 'version',
