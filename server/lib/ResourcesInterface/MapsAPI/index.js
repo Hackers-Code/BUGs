@@ -8,6 +8,12 @@ class MapsAPI extends Collection {
 		super( 'maps', 'id' );
 		this.maps = array;
 		this.resourcesPath = resourcesPath;
+		this.errors = [];
+	}
+
+	addError( error )
+	{
+		this.errors.push( error );
 	}
 
 	loadMap( id, callback )
@@ -91,7 +97,41 @@ class MapsAPI extends Collection {
 			} );
 			mapStruct[ sectionName ].push( object );
 		}
+		if( !this.validateMap( mapStruct ) )
+		{
+			throw new Error( 'Map file is invalid' );
+		}
 		return mapStruct;
+	}
+
+	validateMap( mapStruct )
+	{
+		if( mapStruct.metadata.length !== 1 )
+		{
+			this.addError( 'Metadata section appeared more than once' );
+			return false;
+		}
+		else if( Buffer.compare( mapStruct.metadata[ 0 ][ "signature" ], Buffer.from( '6d6170', 'hex' ) ) !== 0 )
+		{
+			this.addError( 'Map signature is not correct' );
+			return false;
+		}
+		else if( mapStruct.metadata[ 0 ][ "version" ] !== 1 )
+		{
+			this.addError( 'Only map format version 1 is supported' );
+			return false;
+		}
+		else if( mapStruct.metadata[ 0 ][ "compression" ] !== 0 )
+		{
+			this.addError( 'Map format currently does not support any compression types yet' );
+			return false;
+		}
+		else if( mapStruct.metadata[ 0 ][ "reserved" ] !== 0 )
+		{
+			this.addError( 'This fields are reserved for future use and must be equal 0' );
+			return false;
+		}
+		return true;
 	}
 }
 module.exports = MapsAPI;
