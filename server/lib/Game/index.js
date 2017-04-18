@@ -1,4 +1,5 @@
 'use strict';
+const World = require( './World' );
 class Game {
 	constructor( mapAPI )
 	{
@@ -11,6 +12,7 @@ class Game {
 			maxSpeedY : 1024,
 			maxSpeedX : 160
 		};
+		this.world = null;
 	}
 
 	setMapID( mapID )
@@ -61,6 +63,7 @@ class Game {
 
 	delayedStart( seconds )
 	{
+		this.world = new World( this.map );
 		setTimeout( this.start.bind( this ), seconds * 1000 );
 	}
 
