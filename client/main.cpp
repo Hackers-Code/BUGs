@@ -495,7 +495,7 @@ bool colide(sf::Vector2f pixelin, sf::Image &imagein){
 #include "protocols.cpp"
 
 class metamap{public:
-    string ids, author, name, thumbnail, map_file, version, last_update, created;
+    string author, name, thumbnail, map_file, version, last_update, created;
     int id;
     sf::Texture thumbnailt;
 
@@ -538,20 +538,19 @@ bool getMapsFromServer(){
         vector<json> mapvector=jslist.get<vector<json>>();
         for(int i=0; i<mapvector.size(); i++){
             metamaps.push_back(metamap());
-            auto vdfjnkfdj=mapvector[i].find("id");          if(vdfjnkfdj!=mapvector[i].end()) metamaps[i].ids=        mapvector[i]["id"].get<string>();        else{cout<<"map list invalid, id not set\n"; return 0;}
-            metamaps[i].id=atoi(metamaps[i].ids.c_str());
-            auto sfhgjftdf=mapvector[i].find("author");      if(sfhgjftdf!=mapvector[i].end()) metamaps[i].author=     mapvector[i]["author"].get<string>();    else cout<<metamaps[i].ids<<"'s map author not set\n";
-            auto bhfdcvbgh=mapvector[i].find("name");        if(bhfdcvbgh!=mapvector[i].end()) metamaps[i].name=       mapvector[i]["name"].get<string>();      else cout<<"map "<<metamaps[i].ids<<" hasn't got a name\n";
-            auto adgfhdgvc=mapvector[i].find("thumbnail");   if(adgfhdgvc!=mapvector[i].end()) metamaps[i].thumbnail=  mapvector[i]["thumbnail"].get<string>(); else cout<<"map "<<metamaps[i].ids<<" hasn't got a thumbnail\n";
-            auto cghdtghvn=mapvector[i].find("map_file");    if(cghdtghvn!=mapvector[i].end()) metamaps[i].map_file=   mapvector[i]["map_file"].get<string>();  else{cout<<"map "<<metamaps[i].ids<<" invalid, filename does not exist\n"; continue;}
-            auto uhdr5rdfc=mapvector[i].find("version");     if(uhdr5rdfc!=mapvector[i].end()) metamaps[i].version=    mapvector[i]["version"].get<string>();   else cout<<"map "<<metamaps[i].ids<<" hasn't got a version\n";
+            auto vdfjnkfdj=mapvector[i].find("id");          if(vdfjnkfdj!=mapvector[i].end()) metamaps[i].id=        mapvector[i]["id"].get<int>();        else{cout<<"map list invalid, id not set\n"; return 0;}
+            auto sfhgjftdf=mapvector[i].find("author");      if(sfhgjftdf!=mapvector[i].end()) metamaps[i].author=     mapvector[i]["author"].get<string>();    else cout<<metamaps[i].id<<"'s map author not set\n";
+            auto bhfdcvbgh=mapvector[i].find("name");        if(bhfdcvbgh!=mapvector[i].end()) metamaps[i].name=       mapvector[i]["name"].get<string>();      else cout<<"map "<<metamaps[i].id<<" hasn't got a name\n";
+            auto adgfhdgvc=mapvector[i].find("thumbnail");   if(adgfhdgvc!=mapvector[i].end()) metamaps[i].thumbnail=  mapvector[i]["thumbnail"].get<string>(); else cout<<"map "<<metamaps[i].id<<" hasn't got a thumbnail\n";
+            auto cghdtghvn=mapvector[i].find("map_file");    if(cghdtghvn!=mapvector[i].end()) metamaps[i].map_file=   mapvector[i]["map_file"].get<string>();  else{cout<<"map "<<metamaps[i].id<<" invalid, filename does not exist\n"; continue;}
+            auto uhdr5rdfc=mapvector[i].find("version");     if(uhdr5rdfc!=mapvector[i].end()) metamaps[i].version=    mapvector[i]["version"].get<string>();   else cout<<"map "<<metamaps[i].id<<" hasn't got a version\n";
             auto bfsdcersv=mapvector[i].find("last_update"); if(bfsdcersv!=mapvector[i].end()) metamaps[i].last_update=mapvector[i]["last_update"].get<string>();
             auto uktrzbnxf=mapvector[i].find("created");     if(uktrzbnxf!=mapvector[i].end()) metamaps[i].created=    mapvector[i]["created"].get<string>();
             metamaps[i].loadFromHTTP();
-            if(!i){
-                mapthumb.setTexture(metamaps[0].thumbnailt, 1);
-                mapnamet.setString(metamaps[0].name);
-            }
+        }
+        if(!metamaps.empty()){
+            mapthumb.setTexture(metamaps[0].thumbnailt, 1);
+            mapnamet.setString(metamaps[0].name);
         }
         return 1;
     }else{
@@ -1846,7 +1845,8 @@ int main(){
                         mode=connectroom;
                         wormpointers.clear();
                         players.clear();
-                        turntime=playersready=ready=playersamount=0;
+                        turntime=playersready=ready=0;
+                        playersamount=2;
                         currentworm=0;
                         protbuffers[0]="";
                         i++;
