@@ -2,10 +2,7 @@
 class Object {
 	constructor( element )
 	{
-		this.x = element.x || 0;
-		this.y = element.y || 0;
-		this.width = element.width || 0;
-		this.height = element.height || 0;
+		this.hitbox = new SAT.Box( new SAT.Vector( element.x, element.y ), element.width, element.height ).toPolygon();
 	}
 }
 module.exports = Object;
