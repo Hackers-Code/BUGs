@@ -115,7 +115,7 @@ module.exports = {
 		socket : udp,
 		params : {
 			tick : U32BE,
-			worms : Array( {
+			bugs : Array( {
 				owner : U8,
 				angle : U8,
 				x : U32BE,

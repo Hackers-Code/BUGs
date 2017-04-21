@@ -259,6 +259,17 @@ class Player {
 		return this.mapLoaded;
 	}
 
+	addWorm( bug )
+	{
+		this.bugs.push( bug );
+	}
+
+	sendGameState( state )
+	{
+		state.opcode = 0x32;
+		this.client.send( state );
+	}
+
 	setMapLoaded()
 	{
 		if( this.isInGame )

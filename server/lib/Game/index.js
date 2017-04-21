@@ -1,5 +1,8 @@
 'use strict';
 const World = require( './World' );
+const Bug = require( './World/Objects/Bug' );
+const MAX_TICKS = 16;
+const WORMS_PER_PLAYER = 5;
 class Game {
 	constructor( mapAPI )
 	{
@@ -13,6 +16,9 @@ class Game {
 			maxSpeedX : 160
 		};
 		this.world = null;
+		this.players = [];
+		this.bugs = [];
+		this.tick = 0;
 	}
 
 	setMapID( mapID )
@@ -59,6 +65,56 @@ class Game {
 	canStart()
 	{
 		return this.map !== false;
+	}
+
+	init( players )
+	{
+		this.spawnWorms();
+		this.players = players;
+		for( let i = 0 ; i < this.bugs.length ; i++ )
+		{
+			let playerIndex = i % this.players.length;
+			let playerLobbyID = this.players[ playerIndex ].lobbyID;
+			this.players[ playerIndex ].addWorm( this.bugs[ i ] );
+			this.bugs[ i ].assignOwnerId( playerLobbyID );
+		}
+		this.sendGameStateToPlayers();
+	}
+
+	serializeBugs()
+	{
+		let retval = [];
+		this.bugs.forEach( ( element ) =>
+		{
+			retval.push( element.getData() );
+		} );
+		return retval;
+	}
+
+	getState()
+	{
+		return {
+			tick : this.tick,
+			bugs : this.serializeBugs()
+		}
+	}
+
+	sendGameStateToPlayers()
+	{
+		let state = this.getState();
+		this.players.forEach( ( element ) =>
+		{
+			element.sendGameState( state );
+		} );
+		setTimeout( this.sendGameStateToPlayers.bind( this ), 1000 / MAX_TICKS );
+	}
+
+	spawnWorms()
+	{
+		for( let i = 0 ; i < WORMS_PER_PLAYER * this.playersCount ; i++ )
+		{
+			this.bugs.push( new Bug( this.world.popRandomSpawn(), i ) );
+		}
 	}
 
 	delayedStart( seconds )
