@@ -1,7 +1,7 @@
 'use strict';
 const ServerInstructions = require( './ServerInstructionSet' );
 const Types = require( './Types' ).Attributes;
-module.exports = ( object ) =>
+module.exports = ( object, type ) =>
 {
 	if( typeof object.opcode !== 'number' )
 	{
@@ -9,6 +9,10 @@ module.exports = ( object ) =>
 	}
 	let instruction = ServerInstructions[ object.opcode ];
 	if( typeof instruction === 'undefined' )
+	{
+		return false;
+	}
+	if( type !== instruction.socket )
 	{
 		return false;
 	}

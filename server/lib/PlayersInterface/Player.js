@@ -267,7 +267,7 @@ class Player {
 	sendGameState( state )
 	{
 		state.opcode = 0x32;
-		this.client.send( state );
+		this.client.send( state, Sockets.udp );
 	}
 
 	setMapLoaded()

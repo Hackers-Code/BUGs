@@ -133,7 +133,7 @@ class Client extends EventEmitter {
 
 	send( data, type = Sockets.tcp )
 	{
-		let encodedPacket = EncodePacket( data );
+		let encodedPacket = EncodePacket( data, type );
 		if( encodedPacket === false )
 		{
 			this.server.sendServerErrorMessage( this.tcpSocketWrite );
