@@ -27,7 +27,7 @@ class Bug {
 			hp : this.hp,
 			x : this.hitbox.calcPoints[ 0 ].x,
 			y : this.hitbox.calcPoints[ 0 ].y,
-			angle : this.angle,
+			angle : parseInt( this.angle / 2 ),
 			owner : this.owner,
 			id : this.id
 		};
