@@ -96,7 +96,7 @@ class Game {
 		return {
 			tick : this.tick,
 			bugs : this.serializeBugs()
-		}
+		};
 	}
 
 	sendGameStateToPlayers()
@@ -117,9 +117,10 @@ class Game {
 		}
 	}
 
-	delayedStart( seconds )
+	delayedStart( players, seconds )
 	{
 		this.world = new World( this.map );
+		this.init( players );
 		setTimeout( this.start.bind( this ), seconds * 1000 );
 	}
 

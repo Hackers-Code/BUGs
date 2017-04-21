@@ -218,8 +218,7 @@ class Room extends Collection {
 
 	runGame()
 	{
-		this.game.init( this.players );
-		this.game.delayedStart( 3 );
+		this.game.delayedStart( this.players, 3 );
 	}
 }
 
