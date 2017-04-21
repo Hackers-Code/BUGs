@@ -1,4 +1,5 @@
 'use strict';
+const SAT = require( 'sat' );
 class Object {
 	constructor( element )
 	{

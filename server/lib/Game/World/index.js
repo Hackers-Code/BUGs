@@ -24,5 +24,17 @@ class World {
 			} );
 		}
 	}
+
+	popRandomSpawn()
+	{
+		if( this.spawns.length === 0 )
+		{
+			throw new Error( 'There is no spawn on map' );
+		}
+		let randomIndex = Math.floor( Math.random() * this.spawns.length );
+		let retval = this.spawns[ randomIndex ];
+		this.spawns.splice( randomIndex, 1 );
+		return retval;
+	}
 }
 module.exports = World;
