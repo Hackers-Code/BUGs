@@ -182,7 +182,7 @@ class Room extends Collection {
 
 	notifyReadyStatusChange()
 	{
-		if( this.isConfigured === false )
+		if( this.isConfigured )
 		{
 			let readyPlayers = this.getReadyPlayersCount();
 			if( readyPlayers === this.maxPlayers )
