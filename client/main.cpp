@@ -774,11 +774,11 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
                 uintbuffer[1]+=char_to_uint(&buffer[i+5]);//<5;8>
                 uintbuffer[2]+=char_to_uint(&buffer[i+9]);//<9;12>
                 uintbuffer[3]+=char_to_uint(&buffer[i+13]);//<13;16>
-                for(int k=0; k<uintbuffer[0]; k++)
-                    if(k+uintbuffer[3]<width){
-                        for(int j=0; j<uintbuffer[1]; j++)
-                            if(j+uintbuffer[2]<height){
-                                output.setPixel(k+uintbuffer[3], j+uintbuffer[2], solid);
+                for(int k=uintbuffer[0]; k<uintbuffer[0]+uintbuffer[2]; k++)
+                    if(k<width){
+                        for(int j=uintbuffer[1]; j<uintbuffer[1]+uintbuffer[4]; j++)
+                            if(j<height){
+                                output.setPixel(k, j, solid);
                             }else break;
                     }else break;
                 i+=16;
@@ -1845,7 +1845,7 @@ int main(){
                         mode=connectroom;
                         wormpointers.clear();
                         players.clear();
-                        turntime=playersready=ready=0;
+                        changingsettings=turntime=playersready=ready=0;
                         playersamount=2;
                         currentworm=0;
                         protbuffers[0]="";
@@ -1927,11 +1927,10 @@ int main(){
                                 receiving=0x27;
                                 deltareceive=i+1;
                                 to_receive=2;
-                                protbufferi[2]=0;
+                                changingsettings=fnotexist=protbufferi[2]=0;
                                 lobbyname=(*j).name;
                                 lobbynamet.setString(lobbyname);
                                 passwordinput.setString(protbuffers[0]);
-                                fnotexist=0;
                                 break;
                             }
                         }
