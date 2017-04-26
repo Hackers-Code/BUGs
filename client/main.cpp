@@ -3295,4 +3295,5 @@ void exitting(){
 /*
 -"To jaką animację mam dać na poddanie się?"
 -"Nie wiem, wbij to w ziemię i napisz "mały krok dla worma, duży dla wormsowości"..." Michał Marczewski
+//"To uczucie kiedy gra się tak popsuła, że aż fizyka przestaje działać, i kable zaczynają źle przewofdckhjdgsfkjaghsdvflkjashdfcv kalusdgfuk lASDGUAYSDF GAUJSFYDG" Jakub "Gandalf" Olszewski
 */
