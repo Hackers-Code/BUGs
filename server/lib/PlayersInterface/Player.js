@@ -270,6 +270,12 @@ class Player {
 		this.client.send( state, Sockets.udp );
 	}
 
+	sendTimeLeft( time )
+	{
+		state.opcode = 0x35;
+		this.client.send( time, Sockets.udp );
+	}
+
 	setMapLoaded()
 	{
 		if( this.isInGame )
@@ -277,6 +283,17 @@ class Player {
 			this.mapLoaded = true;
 			this.room.notifyMapLoaded();
 		}
+	}
+
+	notifyRoundStart( turn )
+	{
+		if( turn.player_id === this.lobbyID )
+		{
+			this.isYourTurn = true;
+			this.canAttack = true;
+		}
+		turn.opcode = 0x33;
+		this.client.send( turn, Sockets.tcp );
 	}
 }
 module.exports = Player;

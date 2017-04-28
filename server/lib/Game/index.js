@@ -17,8 +17,10 @@ class Game {
 		};
 		this.world = null;
 		this.players = [];
+		this.currentPlayer = 0;
 		this.bugs = [];
 		this.tick = 0;
+		this.roundTimeLeft = 60;
 	}
 
 	setMapID( mapID )
@@ -79,6 +81,7 @@ class Game {
 			this.bugs[ i ].assignOwnerId( playerLobbyID );
 		}
 		this.sendGameStateToPlayers();
+		this.sendTimeLeftToPlayers();
 	}
 
 	serializeBugs()
@@ -109,6 +112,19 @@ class Game {
 		setTimeout( this.sendGameStateToPlayers.bind( this ), 1000 / MAX_TICKS );
 	}
 
+	sendTimeLeftToPlayers()
+	{
+		let time = {
+			tick : this.tick,
+			seconds : this.roundTimeLeft
+		};
+		this.players.forEach( ( element ) =>
+		{
+			element.sendTimeLeft( time );
+		} );
+		setTimeout( this.sendTimeLeftToPlayers.bind( this ), 1000 / MAX_TICKS );
+	}
+
 	spawnWorms()
 	{
 		for( let i = 0 ; i < WORMS_PER_PLAYER * this.playersCount ; i++ )
@@ -126,7 +142,14 @@ class Game {
 
 	start()
 	{
-
+		let turn = {
+			player_id : this.players[ this.currentPlayer ].lobbyID,
+			bug_id : this.players[ this.currentPlayer ].currentBug
+		};
+		this.players.forEach( ( element ) =>
+		{
+			element.notifyRoundStart( turn );
+		} );
 	}
 }
 

@@ -130,7 +130,7 @@ module.exports = {
 	0x33 : {
 		socket : tcp,
 		params : {
-			worm_id : U8,
+			bug_id : U8,
 			player_id : U8
 		}
 	},
