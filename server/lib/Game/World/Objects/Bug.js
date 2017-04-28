@@ -1,11 +1,20 @@
 'use strict';
 const SAT = require( 'sat' );
+const Object = require( './Object' );
 const BUG_WIDTH = 40;
 const BUG_HEIGHT = 45;
-class Bug {
+class Bug extends Object {
 	constructor( spawn, id )
 	{
-		this.hitbox = new SAT.Box( new SAT.Vector( spawn.x, spawn.y ), BUG_WIDTH, BUG_HEIGHT ).toPolygon();
+		super( {
+			x : spawn.x,
+			y : spawn.y,
+			width : BUG_WIDTH,
+			height : BUG_HEIGHT
+		}, {
+			affectedByGravity : true,
+			destroyable : false
+		} );
 		this.speedX = 0;
 		this.speedY = 0;
 		this.hp = 200;

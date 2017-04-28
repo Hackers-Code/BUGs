@@ -36,5 +36,10 @@ class World {
 		this.spawns.splice( randomIndex, 1 );
 		return retval;
 	}
+
+	simulate()
+	{
+		//TODO:Implement
+	}
 }
 module.exports = World;
