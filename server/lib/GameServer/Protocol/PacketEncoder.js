@@ -19,11 +19,7 @@ module.exports = ( object, type ) =>
 	let buffer = Buffer.alloc( 1 );
 	buffer.writeUInt8( object.opcode, 0 );
 	let result = parseParams( instruction.params, object );
-	if( result === false )
-	{
-		return false;
-	}
-	return Buffer.concat( [
+	return result === false ? false : Buffer.concat( [
 		buffer,
 		result
 	] );
