@@ -56,17 +56,17 @@ class Client extends EventEmitter {
 	handleData( data, type = Sockets.tcp )
 	{
 		let buffer;
-		if( type === Sockets.tcp )
+		if( type !== Sockets.tcp )
+		{
+			buffer = data;
+		}
+		else
 		{
 			if( typeof data !== 'undefined' )
 			{
 				this.streamParser.appendData( data );
 			}
 			buffer = this.streamParser.getBuffer();
-		}
-		else
-		{
-			buffer = data;
 		}
 		let decoded;
 		try
