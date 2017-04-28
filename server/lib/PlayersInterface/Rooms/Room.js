@@ -1,7 +1,8 @@
 'use strict';
 const Collection = require( '../../Collections' ).NumericIdCollection;
 const Game = require( '../../Game' );
-class Room extends Collection {
+const EventEmitter = require( 'events' );
+class Room extends Collection, EventEmitter {
 	constructor( settings, admin, id, roomsCollection )
 	{
 		super( 'players', 'lobbyID' );
