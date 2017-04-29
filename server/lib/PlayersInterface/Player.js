@@ -272,7 +272,7 @@ class Player {
 
 	sendTimeLeft( time )
 	{
-		state.opcode = 0x35;
+		time.opcode = 0x35;
 		this.client.send( time, Sockets.udp );
 	}
 
