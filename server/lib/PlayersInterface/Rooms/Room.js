@@ -2,7 +2,7 @@
 const Collection = require( '../../Collections' ).NumericIdCollection;
 const Game = require( '../../Game' );
 const EventEmitter = require( 'events' );
-class Room extends Collection, EventEmitter {
+class Room extends Collection {
 	constructor( settings, admin, id, roomsCollection )
 	{
 		super( 'players', 'lobbyID' );
