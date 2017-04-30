@@ -186,17 +186,20 @@ class Game {
 
 	startRound()
 	{
-		this.roundTimeLeft = 60;
-		this.currentPlayer = (this.currentPlayer + 1 ) % this.players.length;
-		let bug_id = this.players[ this.currentPlayer ].chooseBug();
-		let turn = {
-			player_id : this.players[ this.currentPlayer ].lobbyID,
-			bug_id
-		};
-		this.players.forEach( ( element ) =>
+		if( this.players.length > 0 )
 		{
-			element.notifyRoundStart( turn );
-		} );
+			this.roundTimeLeft = 60;
+			this.currentPlayer = (this.currentPlayer + 1 ) % this.players.length;
+			let bug_id = this.players[ this.currentPlayer ].chooseBug();
+			let turn = {
+				player_id : this.players[ this.currentPlayer ].lobbyID,
+				bug_id
+			};
+			this.players.forEach( ( element ) =>
+			{
+				element.notifyRoundStart( turn );
+			} );
+		}
 	}
 
 	endRound()
