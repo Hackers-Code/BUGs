@@ -11,25 +11,39 @@ module.exports = ( object, type ) =>
 {
 	if( typeof object.opcode !== 'number' )
 	{
-		return false;
+		return {
+			success : false,
+			error : `Opcode is not a number`,
+			result : null
+		};
 	}
 	let instruction = ServerInstructions[ object.opcode ];
 	if( typeof instruction === 'undefined' )
 	{
-		return false;
+		return {
+			success : false,
+			error : `Undefined instruction: ${object.opcode}`,
+			result : null
+		};
 	}
 	if( type !== instruction.socket )
 	{
-		return false;
+		return {
+			success : false,
+			error : `Invalid socket type for packet: ${object.opcode}`,
+			result : null
+		};
 	}
 	let buffer = Buffer.alloc( 1 );
 	buffer.writeUInt8( object.opcode, 0 );
 	let result = parseParams( instruction.params, object );
 	return result === false ? {
 		success : false,
-		error : getLastError()
+		error : getLastError(),
+		result : null
 	} : {
 		success : true,
+		error : null,
 		result : Buffer.concat( [
 			buffer,
 			result
