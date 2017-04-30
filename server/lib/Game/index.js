@@ -143,14 +143,7 @@ class Game {
 
 	start()
 	{
-		let turn = {
-			player_id : this.players[ this.currentPlayer ].lobbyID,
-			bug_id : this.players[ this.currentPlayer ].currentBug
-		};
-		this.players.forEach( ( element ) =>
-		{
-			element.notifyRoundStart( turn );
-		} );
+		this.startRound();
 		this.lastTickTime = new Date().getTime();
 		this.gameLoop();
 	}
@@ -158,14 +151,43 @@ class Game {
 	gameLoop()
 	{
 		let now = new Date().getTime();
-		if( now - this.lastTickTime >= 1000 / MAX_TICKS )
+		let diff = (now - this.lastTickTime) / 1000;
+		if( diff >= 1 / MAX_TICKS )
 		{
-			this.roundTimeLeft -= (now - this.lastTickTime) / 1000;
+			if( this.roundTimeLeft - diff < 0 )
+			{
+				this.endRound();
+			}
+			else
+			{
+				this.roundTimeLeft -= diff;
+			}
+
 			this.lastTickTime = now;
 			this.tick++;
-			console.log( this.roundTimeLeft );
 		}
 		setImmediate( this.gameLoop.bind( this ) );
+	}
+
+	startRound()
+	{
+		this.roundTimeLeft = 60;
+		this.currentPlayer = (this.currentPlayer + 1 ) % this.players.length;
+		let bug_id = this.players[ this.currentPlayer ].chooseBug();
+		let turn = {
+			player_id : this.players[ this.currentPlayer ].lobbyID,
+			bug_id
+		};
+		this.players.forEach( ( element ) =>
+		{
+			element.notifyRoundStart( turn );
+		} );
+	}
+
+	endRound()
+	{
+		this.players[ this.currentPlayer ].notifyRoundEnd();
+		this.startRound();
 	}
 }
 

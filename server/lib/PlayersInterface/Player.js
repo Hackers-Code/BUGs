@@ -298,6 +298,13 @@ class Player {
 		this.client.send( turn, Sockets.tcp );
 	}
 
+	notifyRoundEnd()
+	{
+		this.isYourTurn = false;
+		this.canAttack = false;
+		this.client.send( { opcode : 0x36 }, Sockets.tcp );
+	}
+
 	getWeaponsList( data, respond )
 	{
 		let weapons = [];
@@ -309,6 +316,12 @@ class Player {
 			} );
 		} );
 		respond( { weapons }, Sockets.udp );
+	}
+
+	chooseBug()
+	{
+		this.currentBug = ( this.currentBug + 1) % this.bugs.length;
+		return this.bugs[ this.currentBug ].id;
 	}
 }
 module.exports = Player;
