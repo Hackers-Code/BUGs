@@ -13,7 +13,8 @@ class Bug extends Object {
 			height : BUG_HEIGHT
 		}, {
 			affectedByGravity : true,
-			destroyable : false
+			destroyable : false,
+			collidable : false
 		} );
 		this.world = world;
 		this.physics = this.world.getPhysics();

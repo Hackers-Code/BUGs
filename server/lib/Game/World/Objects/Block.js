@@ -5,7 +5,8 @@ class Block extends Object {
 	{
 		super( element, {
 			affectedByGravity : false,
-			destroyable : true
+			destroyable : true,
+			collidable : true
 		} );
 	}
 }
