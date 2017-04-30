@@ -92,9 +92,9 @@ class World {
 	{
 		for( let i = 0 ; i <= this.bugs ; i++ )
 		{
-			if( this.bugs.isMoving() )
+			let bug = this.bugs[ i ];
+			if( bug.isMoving() )
 			{
-				let bug = this.bugs[ i ];
 				let hitbox = bug.hitbox;
 				let speedX = bug.speedX;
 				let speedY = bug.speedY;
