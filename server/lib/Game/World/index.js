@@ -58,12 +58,14 @@ class World {
 
 	isOnTheGround( hitbox )
 	{
-		for( let i = 0 ; i < this.blocks ; i++ )
+		for( let i = 0 ; i < this.blocks.length ; i++ )
 		{
 			let response = new SAT.Response();
 			let isCollision = SAT.testPolygonPolygon( this.blocks[ i ].hitbox, hitbox, response );
+			console.log( isCollision );
 			if( isCollision )
 			{
+				console.log( response );
 				return response.overlap === 0;
 			}
 		}
@@ -93,12 +95,16 @@ class World {
 		for( let i = 0 ; i < bugs.length ; i++ )
 		{
 			let bug = bugs[ i ];
+			console.log( `Bug ${i}` );
 			if( bug.isMoving() )
 			{
+				console.log( 'is moving' );
 				let hitbox = bug.hitbox;
 				let speedX = bug.speedX;
 				let speedY = bug.speedY;
-				hitbox.translate( bug.speedX, bug.speedY );
+				let translateX = speedX * diffTime;
+				let translateY = speedY * diffTime;
+				hitbox.translate( translateX, translateY );
 				let canMoveHere = this.canMoveHere( hitbox );
 				if( canMoveHere !== true )
 				{
