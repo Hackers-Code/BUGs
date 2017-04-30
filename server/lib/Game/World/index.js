@@ -112,7 +112,10 @@ class World {
 				}
 				else
 				{
-					bug.speedY -= this.physics.gravity;
+					if( bug.speedY + this.physics.gravity * diffTime < this.physics.maxSpeedY )
+					{
+						bug.speedY += this.physics.gravity * diffTime;
+					}
 				}
 			}
 		}
