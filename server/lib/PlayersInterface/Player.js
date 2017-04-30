@@ -300,15 +300,15 @@ class Player {
 
 	getWeaponsList( data, respond )
 	{
-		let response = [];
+		let weapons = [];
 		this.weaponsList.forEach( ( element ) =>
 		{
-			response.push( {
+			weapons.push( {
 				id : element.id,
 				usages : element.usages
 			} );
 		} );
-		respond( response, Sockets.udp );
+		respond( { weapons }, Sockets.udp );
 	}
 }
 module.exports = Player;
