@@ -62,10 +62,8 @@ class World {
 		{
 			let response = new SAT.Response();
 			let isCollision = SAT.testPolygonPolygon( this.blocks[ i ].hitbox, hitbox, response );
-			console.log( isCollision );
 			if( isCollision )
 			{
-				console.log( response );
 				return response.overlap === 0;
 			}
 		}
@@ -95,10 +93,8 @@ class World {
 		for( let i = 0 ; i < bugs.length ; i++ )
 		{
 			let bug = bugs[ i ];
-			console.log( `Bug ${i}` );
 			if( bug.isMoving() )
 			{
-				console.log( 'is moving' );
 				let hitbox = bug.hitbox;
 				let speedX = bug.speedX;
 				let speedY = bug.speedY;
