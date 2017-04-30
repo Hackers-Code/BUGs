@@ -1,6 +1,7 @@
 'use strict';
 const ServerInstructions = require( './ServerInstructionSet' );
 const Types = require( './Types' ).Attributes;
+const Errors = [];
 module.exports = ( object, type ) =>
 {
 	if( typeof object.opcode !== 'number' )
@@ -23,6 +24,11 @@ module.exports = ( object, type ) =>
 		buffer,
 		result
 	] );
+};
+
+module.exports.getLastError = () =>
+{
+	return Errors.length > 0 ? Errors[ Errors.length - 1 ] : `No errors yer`;
 };
 
 function parseParams( rules, values )
@@ -52,6 +58,7 @@ function parseParam( rule, value )
 {
 	if( typeof value === 'undefined' )
 	{
+		Errors.push( `Value to parse is undefined` );
 		return false;
 	}
 	if( rule.type === Types.boolean )
@@ -78,6 +85,7 @@ function parseParam( rule, value )
 	{
 		return parseArray( rule, value );
 	}
+	Errors.push( `Rule has unknown or unsupported type` );
 	return false;
 }
 
@@ -85,6 +93,7 @@ function parseUnsigned( rule, value )
 {
 	if( typeof rule.length === 'undefined' || typeof value !== 'number' )
 	{
+		Errors.push( `[UNSIGNED] Required number size not set or value is not number` );
 		return false;
 	}
 	let length = rule.length;
@@ -103,6 +112,7 @@ function parseUnsigned( rule, value )
 	}
 	else
 	{
+		Errors.push( `[UNSIGNED] Only 1,2,4 bytes integers are supported` );
 		return false;
 	}
 	return buffer;
@@ -112,6 +122,7 @@ function parseSigned( rule, value )
 {
 	if( typeof rule.length === 'undefined' || typeof value !== 'number' )
 	{
+		Errors.push( `[SIGNED] Required number size not set or value is not number` );
 		return false;
 	}
 	let length = rule.length;
@@ -130,6 +141,7 @@ function parseSigned( rule, value )
 	}
 	else
 	{
+		Errors.push( `[SIGNED] Only 1,2,4 bytes integers are supported` );
 		return false;
 	}
 	return buffer;
@@ -139,6 +151,7 @@ function parseString( rule, value )
 {
 	if( typeof rule.metadata === 'undefined' || typeof rule.metadata.length === 'undefined' || typeof value !== 'string' )
 	{
+		Errors.push( `[STRING] Required string length not set or value is not string` );
 		return false;
 	}
 	let length = rule.metadata.length;
@@ -146,6 +159,7 @@ function parseString( rule, value )
 	{
 		if( value.length > 255 )
 		{
+			Errors.push( `[STRING] String length does not match length field` );
 			return false;
 		}
 		let buffer = Buffer.alloc( length + value.length );
@@ -153,6 +167,7 @@ function parseString( rule, value )
 		buffer.write( value, 1 );
 		return buffer;
 	}
+	Errors.push( `[STRING] Only 1 byte string length is supported` );
 	return false;
 }
 
@@ -160,6 +175,7 @@ function parseBuffer( rule, value )
 {
 	if( typeof rule.length === 'undefined' || Buffer.isBuffer( value ) === false || value.length !== rule.length )
 	{
+		Errors.push( `[BUFFER] Required length not set or value is not buffer with correct size` );
 		return false;
 	}
 	return value;
@@ -169,6 +185,7 @@ function parseArray( rule, value )
 {
 	if( typeof rule.metadata === 'undefined' || typeof rule.metadata.size === 'undefined' || typeof rule.item !== 'object' || value instanceof Array === false )
 	{
+		Errors.push( `[ARRAY] Rule is broken or value is not an array` );
 		return false;
 	}
 	let size = rule.metadata.size;
@@ -176,6 +193,7 @@ function parseArray( rule, value )
 	{
 		if( value.length > Math.pow( 2, 32 ) )
 		{
+			Errors.push( `[ARRAY] Maximum array size is 2^32` );
 			return false;
 		}
 		let buffer = Buffer.alloc( 4 );
@@ -187,11 +205,13 @@ function parseArray( rule, value )
 			let result = parseParams( rule.item, value[ i ] );
 			if( result === false )
 			{
+				Errors.push( `[ARRAY] Could not parse single param` );
 				return false;
 			}
 			subBuffers.push( result );
 		}
 		return Buffer.concat( subBuffers );
 	}
+	Errors.push( `[ARRAY] Only 4 bytes size array are supported` );
 	return false;
 }
