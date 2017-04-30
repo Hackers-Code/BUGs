@@ -6,7 +6,6 @@ class World {
 	constructor( game )
 	{
 		this.game = game;
-		this.bugs = game.getBugs();
 		this.parsedMap = game.getMap();
 		this.physics = game.getPhysics();
 		this.spawns = this.parsedMap.spawns || [];
@@ -79,7 +78,7 @@ class World {
 			response.clear();
 			for( let i = 0 ; i < this.blocks.length ; i++ )
 			{
-				if( SAT.testPolygonPolygon( hitbox, this.blocks[ i ], response ) )
+				if( SAT.testPolygonPolygon( hitbox, this.blocks[ i ].hitbox, response ) )
 				{
 					return response;
 				}
@@ -90,9 +89,10 @@ class World {
 
 	simulate( diffTime )
 	{
-		for( let i = 0 ; i <= this.bugs ; i++ )
+		let bugs = this.game.getBugs();
+		for( let i = 0 ; i < bugs.length ; i++ )
 		{
-			let bug = this.bugs[ i ];
+			let bug = bugs[ i ];
 			if( bug.isMoving() )
 			{
 				let hitbox = bug.hitbox;
