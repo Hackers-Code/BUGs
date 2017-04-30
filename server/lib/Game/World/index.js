@@ -85,7 +85,7 @@ class World {
 			}
 			return true;
 		}
-		return response;
+		return false;
 	}
 
 	simulate( diffTime )
@@ -106,8 +106,11 @@ class World {
 				{
 					bug.speedX = 0;
 					bug.speedY = 0;
-					hitbox.pos.x -= canMoveHere.overlapV.x;
-					hitbox.pos.y -= canMoveHere.overlapV.y;
+					if( canMoveHere !== false )
+					{
+						hitbox.pos.x -= canMoveHere.overlapV.x;
+						hitbox.pos.y -= canMoveHere.overlapV.y;
+					}
 				}
 				if( this.isOnTheGround( hitbox ) )
 				{
