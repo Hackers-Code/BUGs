@@ -25,12 +25,14 @@ class Logger {
 		return `[${new Date().toLocaleString()}] ${data}\n`;
 	}
 
-	static checkLogSize( path )
+	checkLogSize( path )
 	{
 		let stats = fs.statSync( path );
 		let fileSizeInBytes = stats.size;
 		if( fileSizeInBytes >= 1024 * 64 )
 		{
+			this.logFile.end();
+			this.errorFile.end();
 			console.error( 'Log file has exceeded the maximum limit: %s bytes', 1024 * 64 );
 			process.exit( 1 );
 		}
@@ -38,13 +40,13 @@ class Logger {
 
 	log( data )
 	{
-		Logger.checkLogSize( this.logsDirectory + '/log.txt' );
+		this.checkLogSize( this.logsDirectory + '/log.txt' );
 		this.logFile.write( Logger.formatData( data ) );
 	}
 
 	error( data )
 	{
-		Logger.checkLogSize( this.logsDirectory + '/error.txt' );
+		this.checkLogSize( this.logsDirectory + '/error.txt' );
 		this.errorFile.write( Logger.formatData( data ) );
 	}
 }
