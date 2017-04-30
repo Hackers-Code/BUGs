@@ -21,6 +21,7 @@ class Game {
 		this.bugs = [];
 		this.tick = 0;
 		this.roundTimeLeft = 60;
+		this.lastTickTime = 0;
 	}
 
 	setMapID( mapID )
@@ -150,6 +151,19 @@ class Game {
 		{
 			element.notifyRoundStart( turn );
 		} );
+		this.gameLoop();
+	}
+
+	gameLoop()
+	{
+		let now = new Date().getTime();
+		if( now - this.lastTickTime > 1000 / MAX_TICKS )
+		{
+			this.lastTickTime = now;
+			this.tick++;
+			this.roundTimeLeft -= (now - this.lastTickTime);
+		}
+		setImmediate( this.gameLoop.bind( this ) );
 	}
 }
 
