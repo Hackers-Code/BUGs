@@ -61,7 +61,6 @@ function parseParams( rules, values )
 		let result = parseParam( rules[ requiredProperty ], values[ requiredProperty ] );
 		if( result === false )
 		{
-			Errors.push( `Could not parse single param` );
 			return false;
 		}
 		else
@@ -226,7 +225,6 @@ function parseArray( rule, value )
 			let result = parseParams( rule.item, value[ i ] );
 			if( result === false )
 			{
-				Errors.push( `[ARRAY] Could not parse single param` );
 				return false;
 			}
 			subBuffers.push( result );
