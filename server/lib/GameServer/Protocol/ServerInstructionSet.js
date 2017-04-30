@@ -13,32 +13,32 @@ const I8 = DataTypes.i8;
 const I16BE = DataTypes.i16be;
 const Bool = DataTypes.bool;
 module.exports = {
-	0x00 : {
+	0x0 : {
 		socket : tcp,
 		params : {
 			error : ShortString
 		}
 	},
-	0x02 : {
+	0x2 : {
 		socket : tcp,
 		params : { status : Bool }
 
 	},
-	0x04 : {
+	0x4 : {
 		socket : tcp,
 		params : {
 			reason : ShortString
 		}
 	},
-	0x05 : {
+	0x5 : {
 		socket : tcp,
 		params : { id : BinaryString( 4 ) }
 	},
-	0x07 : {
+	0x7 : {
 		socket : udp,
 		params : {}
 	},
-	0x08 : {
+	0x8 : {
 		socket : udp,
 		params : {}
 	},
