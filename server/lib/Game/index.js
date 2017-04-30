@@ -24,6 +24,11 @@ class Game {
 		this.lastTickTime = 0;
 	}
 
+	getMap()
+	{
+		return this.map;
+	}
+
 	setMapID( mapID )
 	{
 		this.mapID = mapID;
@@ -130,13 +135,13 @@ class Game {
 	{
 		for( let i = 0 ; i < WORMS_PER_PLAYER * this.playersCount ; i++ )
 		{
-			this.bugs.push( new Bug( this.world.popRandomSpawn(), i ) );
+			this.bugs.push( new Bug( this.world, this.world.popRandomSpawn(), i ) );
 		}
 	}
 
 	delayedStart( players, seconds )
 	{
-		this.world = new World( this.map );
+		this.world = new World( this );
 		this.init( players );
 		setTimeout( this.start.bind( this ), seconds * 1000 );
 	}

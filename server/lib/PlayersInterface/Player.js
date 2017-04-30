@@ -80,6 +80,9 @@ class Player {
 		this.client.on( 'switchReady', this.setReady.bind( this ) );
 		this.client.on( 'listPlayers', this.listPlayers.bind( this ) );
 		this.client.on( 'mapLoaded', this.setMapLoaded.bind( this ) );
+		this.client.on( 'jump', this.jump.bind( this ) );
+		this.client.on( 'switchMoveLeft', this.moveLeft.bind( this ) );
+		this.client.on( 'switchMoveRight', this.moveRight.bind( this ) );
 		this.client.on( 'getWeaponsList', this.getWeaponsList.bind( this ) );
 	}
 
@@ -300,6 +303,7 @@ class Player {
 
 	notifyRoundEnd()
 	{
+		this.bugs[ this.currentBug ].stopMoving();
 		this.isYourTurn = false;
 		this.canAttack = false;
 		this.client.send( { opcode : 0x36 }, Sockets.tcp );
@@ -322,6 +326,30 @@ class Player {
 	{
 		this.currentBug = ( this.currentBug + 1) % this.bugs.length;
 		return this.bugs[ this.currentBug ].id;
+	}
+
+	jump()
+	{
+		if( this.isYourTurn )
+		{
+			this.bugs[ this.currentBug ].jump();
+		}
+	}
+
+	moveLeft()
+	{
+		if( this.isYourTurn )
+		{
+			this.bugs[ this.currentBug ].moveLeft();
+		}
+	}
+
+	moveRight()
+	{
+		if( this.isYourTurn )
+		{
+			this.bugs[ this.currentBug ].moveRight();
+		}
 	}
 }
 module.exports = Player;

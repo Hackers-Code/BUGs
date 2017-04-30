@@ -3,24 +3,43 @@ const SAT = require( 'sat' );
 const Block = require( './Objects/Block' );
 const KillingZone = require( './Objects/KillingZone' );
 class World {
-	constructor( parsedMap )
+	constructor( game )
 	{
-		this.parsedMap = parsedMap;
-		this.spawns = parsedMap.spawns || [];
-		this.bounds = new SAT.Box( new SAT.Vector( 0, 0 ), parsedMap.metadata[ 0 ].width,
-			parsedMap.metadata[ 0 ].height ).toPolygon();
-		this.addObjects( 'blocks', Block );
-		this.addObjects( 'killingZones', KillingZone );
+		this.game = game;
+		this.parsedMap = game.getMap();
+		this.physics = game.getPhysics();
+		this.spawns = this.parsedMap.spawns || [];
+		this.blocks = [];
+		this.killingZones = [];
+		this.bounds = new SAT.Box( new SAT.Vector( 0, 0 ), this.parsedMap.metadata[ 0 ].width,
+			this.parsedMap.metadata[ 0 ].height ).toPolygon();
+		this.addBlocks();
+		this.addKillingZones();
 	}
 
-	addObjects( property, _class )
+	getPhysics()
 	{
-		if( typeof this.parsedMap[ property ] !== 'undefined' )
+		return this.physics;
+	}
+
+	addBlocks()
+	{
+		if( typeof this.parsedMap[ 'blocks' ] !== 'undefined' )
 		{
-			this[ property ] = [];
-			this.parsedMap[ property ].forEach( ( element ) =>
+			this.parsedMap[ 'blocks' ].forEach( ( element ) =>
 			{
-				this[ property ].push( new _class( element ) );
+				this[ 'blocks' ].push( new Block( element ) );
+			} );
+		}
+	}
+
+	addKillingZones()
+	{
+		if( typeof this.parsedMap[ 'killingZones' ] !== 'undefined' )
+		{
+			this.parsedMap[ 'killingZones' ].forEach( ( element ) =>
+			{
+				this[ 'killingZones' ].push( new KillingZone( element ) );
 			} );
 		}
 	}
@@ -35,6 +54,20 @@ class World {
 		let retval = this.spawns[ randomIndex ];
 		this.spawns.splice( randomIndex, 1 );
 		return retval;
+	}
+
+	isOnTheGround( hitbox )
+	{
+		for( let i = 0 ; i < this.blocks ; i++ )
+		{
+			let response = new SAT.Response();
+			let isCollision = SAT.testPolygonPolygon( this.blocks[ i ].hitbox, hitbox, response );
+			if( isCollision )
+			{
+				return response.overlap === 0;
+			}
+		}
+		return false;
 	}
 
 	simulate()

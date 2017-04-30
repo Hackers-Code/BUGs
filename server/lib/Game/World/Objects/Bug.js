@@ -4,7 +4,7 @@ const Object = require( './Object' );
 const BUG_WIDTH = 40;
 const BUG_HEIGHT = 45;
 class Bug extends Object {
-	constructor( spawn, id )
+	constructor( world, spawn, id )
 	{
 		super( {
 			x : spawn.x,
@@ -15,12 +15,57 @@ class Bug extends Object {
 			affectedByGravity : true,
 			destroyable : false
 		} );
+		this.world = world;
+		this.physics = this.world.getPhysics();
 		this.speedX = 0;
 		this.speedY = 0;
 		this.hp = 200;
 		this.angle = 90;
 		this.id = id;
 		this.owner = 0;
+	}
+
+	jump()
+	{
+		if( this.world.isOnTheGround( this.hitbox ) )
+		{
+			this.speedY = this.physics.jumpHeight;
+		}
+	}
+
+	moveRight()
+	{
+		if( this.world.isOnTheGround( this.hitbox ) )
+		{
+			if( this.speedX === this.physics.maxSpeedX )
+			{
+				this.speedX = 0;
+			}
+			else
+			{
+				this.speedX = this.physics.maxSpeedX;
+			}
+		}
+	}
+
+	moveLeft()
+	{
+		if( this.world.isOnTheGround( this.hitbox ) )
+		{
+			if( this.speedX === -this.physics.maxSpeedX )
+			{
+				this.speedX = 0;
+			}
+			else
+			{
+				this.speedX = -this.physics.maxSpeedX;
+			}
+		}
+	}
+
+	stopMoving()
+	{
+		this.speedX = 0;
 	}
 
 	assignOwnerId( id )
