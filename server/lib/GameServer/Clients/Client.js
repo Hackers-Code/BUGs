@@ -98,7 +98,8 @@ class Client extends EventEmitter {
 		}
 		if( decoded.instruction.event === 'undefined' )
 		{
-			this.server.sendServerErrorMessage( this.tcpSocketWrite );
+			this.server.sendServerErrorMessage( this.tcpSocketWrite,
+				`No event is specified for instruction ${decoded.instruction.opcode}` );
 		}
 		else
 		{
@@ -114,7 +115,8 @@ class Client extends EventEmitter {
 			}
 			if( hasListeners === false )
 			{
-				this.server.sendServerErrorMessage( this.tcpSocketWrite );
+				this.server.sendServerErrorMessage( this.tcpSocketWrite,
+					`No listener for event ${decoded.instruction.event}` );
 				this.emit( 'error', new Error( `No listener for event ${decoded.instruction.event}` ) );
 			}
 		}
@@ -136,7 +138,7 @@ class Client extends EventEmitter {
 		let encodedPacket = EncodePacket( data, type );
 		if( encodedPacket === false )
 		{
-			this.server.sendServerErrorMessage( this.tcpSocketWrite );
+			this.server.sendServerErrorMessage( this.tcpSocketWrite, `Could not encode packet: ${data.opcode}` );
 			return;
 		}
 		if( type === Sockets.tcp )

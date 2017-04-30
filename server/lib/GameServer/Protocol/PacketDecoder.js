@@ -8,7 +8,8 @@ module.exports = ( buffer, type ) =>
 	{
 		return false;
 	}
-	let instruction = ClientInstructions[ buffer[ 0 ] ];
+	let opcode = buffer[ 0 ];
+	let instruction = ClientInstructions[ opcode ];
 	if( typeof instruction === 'undefined' )
 	{
 		throw new Error( 0xe0 );
@@ -55,6 +56,7 @@ module.exports = ( buffer, type ) =>
 	if( offset <= buffer.length )
 	{
 		return {
+			opcode,
 			instruction,
 			object,
 			offset

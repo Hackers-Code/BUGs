@@ -30,7 +30,7 @@ class GameServer extends EventEmitter {
 		return this.logger;
 	}
 
-	sendServerErrorMessage( socketWrite )
+	sendServerErrorMessage( socketWrite, error )
 	{
 		let encodedPacket = EncodePacket( {
 			opcode : 0xe2,
@@ -42,6 +42,7 @@ class GameServer extends EventEmitter {
 			return;
 		}
 		socketWrite( encodedPacket );
+		this.logger.error( `Internal server error occurred. Message: ${error}` );
 	}
 
 	sendKickMessage( socketWrite )
@@ -52,7 +53,7 @@ class GameServer extends EventEmitter {
 		} );
 		if( encodedPacket === false )
 		{
-			this.sendServerErrorMessage( socketWrite );
+			this.sendServerErrorMessage( socketWrite, `Could not encode 'no free slots' packet` );
 			return;
 		}
 		socketWrite( encodedPacket );
