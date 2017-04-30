@@ -6,6 +6,7 @@ class Player {
 		this.players = playersInterface;
 		this.uniqueNameStorage = this.players.getUniqueNameStorage();
 		this.roomsCollection = this.players.getRoomsCollection();
+		this.weaponsList = this.players.getWeaponsList();
 		this.name = this.uniqueNameStorage.getDefault();
 		this.client = client;
 		this.hasCustomName = false;
@@ -79,6 +80,7 @@ class Player {
 		this.client.on( 'switchReady', this.setReady.bind( this ) );
 		this.client.on( 'listPlayers', this.listPlayers.bind( this ) );
 		this.client.on( 'mapLoaded', this.setMapLoaded.bind( this ) );
+		this.client.on( 'getWeaponsList', this.getWeaponsList.bind( this ) );
 	}
 
 	setName( data, respond )
@@ -294,6 +296,11 @@ class Player {
 		}
 		turn.opcode = 0x33;
 		this.client.send( turn, Sockets.tcp );
+	}
+
+	getWeaponsList( data, respond )
+	{
+		respond( this.weaponsList );
 	}
 }
 module.exports = Player;

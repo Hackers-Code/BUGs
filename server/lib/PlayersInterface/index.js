@@ -16,9 +16,9 @@ class PlayersInterface {
 		return this.mapAPI;
 	}
 
-	getWeapons()
+	getWeaponsList()
 	{
-		return this.weapons;
+		return this.weapons.getWeaponsList();
 	}
 
 	getUniqueNameStorage()
