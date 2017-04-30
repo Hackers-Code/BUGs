@@ -98,15 +98,15 @@ class World {
 				let hitbox = bug.hitbox;
 				let speedX = bug.speedX;
 				let speedY = bug.speedY;
-				bug.pos.x += speedX * diffTime;
-				bug.pos.y += speedY * diffTime;
+				hitbox.pos.x += speedX * diffTime;
+				hitbox.pos.y += speedY * diffTime;
 				let canMoveHere = this.canMoveHere( hitbox );
 				if( canMoveHere !== true )
 				{
 					bug.speedX = 0;
 					bug.speedY = 0;
-					bug.pos.x -= canMoveHere.overlapV.x;
-					bug.pos.y -= canMoveHere.overlapV.y;
+					hitbox.pos.x -= canMoveHere.overlapV.x;
+					hitbox.pos.y -= canMoveHere.overlapV.y;
 				}
 				if( this.isOnTheGround( hitbox ) )
 				{
