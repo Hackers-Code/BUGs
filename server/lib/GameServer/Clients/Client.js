@@ -2,6 +2,7 @@
 const Sockets = require( '../Protocol/Types' ).Sockets;
 const StreamParser = require( './StreamParser' );
 const EncodePacket = require( '../Protocol/PacketEncoder' );
+const getEncodePacketError = require( '../Protocol/PacketEncoder' ).getLastError;
 const DecodePacket = require( '../Protocol/PacketDecoder' );
 const EventEmitter = require( 'events' );
 class Client extends EventEmitter {
@@ -139,6 +140,7 @@ class Client extends EventEmitter {
 		if( encodedPacket === false )
 		{
 			this.server.sendServerErrorMessage( this.tcpSocketWrite, `Could not encode packet: ${data.opcode}` );
+			this.logger.error( getEncodePacketError() );
 			return;
 		}
 		if( type === Sockets.tcp )
