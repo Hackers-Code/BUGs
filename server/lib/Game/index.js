@@ -207,12 +207,13 @@ class Game {
 
 	notifyRemovePlayer( index )
 	{
-		if( index <= this.currentPlayer )
+		if( index < this.currentPlayer )
 		{
 			this.currentPlayer--;
 		}
 		if( index === this.currentPlayer )
 		{
+			this.currentPlayer--;
 			this.startRound();
 		}
 	}
