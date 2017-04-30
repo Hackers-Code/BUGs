@@ -22,6 +22,7 @@ class Game {
 		this.tick = 0;
 		this.roundTimeLeft = 60;
 		this.lastTickTime = 0;
+		this.isRunning = false;
 	}
 
 	getBugs()
@@ -155,6 +156,7 @@ class Game {
 	{
 		this.startRound();
 		this.lastTickTime = new Date().getTime();
+		this.isRunning = true;
 		this.gameLoop();
 	}
 
@@ -176,7 +178,10 @@ class Game {
 			this.lastTickTime = now;
 			this.tick++;
 		}
-		setImmediate( this.gameLoop.bind( this ) );
+		if( this.isRunning )
+		{
+			setImmediate( this.gameLoop.bind( this ) );
+		}
 	}
 
 	startRound()
@@ -198,6 +203,18 @@ class Game {
 	{
 		this.players[ this.currentPlayer ].notifyRoundEnd();
 		this.startRound();
+	}
+
+	notifyRemovePlayer( index )
+	{
+		if( index <= this.currentPlayer )
+		{
+			this.currentPlayer--;
+		}
+		if( index === this.currentPlayer )
+		{
+			this.startRound();
+		}
 	}
 }
 

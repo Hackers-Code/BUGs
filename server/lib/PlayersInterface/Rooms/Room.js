@@ -167,14 +167,17 @@ class Room extends Collection {
 			if( index !== -1 )
 			{
 				this.leaderboard.unshift( { id : this.players[ index ].lobbyID } );
+				this.game.notifyRemovePlayer( index );
 				this.players.splice( index, 1 );
 				if( this.players.length === 1 )
 				{
+					this.game.isRunning = false;
 					this.leaderboard.unshift( { id : this.players[ 0 ].lobbyID } );
 					this.players[ 0 ].finishGame( this.leaderboard );
 				}
 				if( this.players.length === 0 )
 				{
+					this.game.isRunning = false;
 					this.roomsCollection.removeRoom( this.id );
 				}
 			}
