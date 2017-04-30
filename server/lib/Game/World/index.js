@@ -83,8 +83,9 @@ class World {
 					return response;
 				}
 			}
+			return true;
 		}
-		return true;
+		return response;
 	}
 
 	simulate( diffTime )
