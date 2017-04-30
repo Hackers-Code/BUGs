@@ -2,7 +2,7 @@
 const World = require( './World' );
 const Bug = require( './World/Objects/Bug' );
 const MAX_TICKS = 16;
-const WORMS_PER_PLAYER = 5;
+const BUGS_PER_PLAYER = 5;
 class Game {
 	constructor( mapAPI )
 	{
@@ -22,6 +22,11 @@ class Game {
 		this.tick = 0;
 		this.roundTimeLeft = 60;
 		this.lastTickTime = 0;
+	}
+
+	getBugs()
+	{
+		return this.bugs;
 	}
 
 	getMap()
@@ -77,7 +82,7 @@ class Game {
 
 	init( players )
 	{
-		this.spawnWorms();
+		this.spawnBugs();
 		this.players = players;
 		for( let i = 0 ; i < this.bugs.length ; i++ )
 		{
@@ -131,9 +136,9 @@ class Game {
 		setTimeout( this.sendTimeLeftToPlayers.bind( this ), 1000 / MAX_TICKS );
 	}
 
-	spawnWorms()
+	spawnBugs()
 	{
-		for( let i = 0 ; i < WORMS_PER_PLAYER * this.playersCount ; i++ )
+		for( let i = 0 ; i < BUGS_PER_PLAYER * this.playersCount ; i++ )
 		{
 			this.bugs.push( new Bug( this.world, this.world.popRandomSpawn(), i ) );
 		}
@@ -167,7 +172,7 @@ class Game {
 			{
 				this.roundTimeLeft -= diff;
 			}
-
+			this.world.simulate( diff );
 			this.lastTickTime = now;
 			this.tick++;
 		}

@@ -6,6 +6,7 @@ class World {
 	constructor( game )
 	{
 		this.game = game;
+		this.bugs = game.getBugs();
 		this.parsedMap = game.getMap();
 		this.physics = game.getPhysics();
 		this.spawns = this.parsedMap.spawns || [];
@@ -70,9 +71,47 @@ class World {
 		return false;
 	}
 
-	simulate()
+	canMoveHere( hitbox )
 	{
-		//TODO:Implement
+		let response = new SAT.Response();
+		if( SAT.testPolygonPolygon( hitbox, this.bounds, response ) && response.aInB === true )
+		{
+			response.clear();
+			for( let i = 0 ; i < this.blocks.length ; i++ )
+			{
+				if( SAT.testPolygonPolygon( hitbox, this.blocks[ i ], response ) )
+				{
+					return response;
+				}
+			}
+		}
+		return true;
+	}
+
+	simulate( diffTime )
+	{
+		for( let i = 0 ; i <= this.bugs ; i++ )
+		{
+			if( this.bugs.isMoving() )
+			{
+				let bug = this.bugs[ i ];
+				let hitbox = bug.hitbox;
+				let speedX = bug.speedX;
+				let speedY = bug.speedY;
+				hitbox.translate( bug.speedX, bug.speedY );
+				let canMoveHere = this.canMoveHere( hitbox );
+				if( canMoveHere !== true )
+				{
+					bug.speedX = 0;
+					bug.speedY = 0;
+					hitbox.translate( -canMoveHere.overlapV.x, -canMoveHere.overlapV.y );
+				}
+				if( this.isOnTheGround( hitbox ) )
+				{
+					bug.isOnTheGround = true;
+				}
+			}
+		}
 	}
 }
 module.exports = World;

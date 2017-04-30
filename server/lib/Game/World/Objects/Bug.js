@@ -23,11 +23,17 @@ class Bug extends Object {
 		this.angle = 90;
 		this.id = id;
 		this.owner = 0;
+		this.isOnTheGround = this.world.isOnTheGround( this.hitbox );
+	}
+
+	isMoving()
+	{
+		return this.speedX !== 0 && this.speedY !== 0 && !this.isOnTheGround;
 	}
 
 	jump()
 	{
-		if( this.world.isOnTheGround( this.hitbox ) )
+		if( this.isOnTheGround )
 		{
 			this.speedY = this.physics.jumpHeight;
 		}
@@ -35,7 +41,7 @@ class Bug extends Object {
 
 	moveRight()
 	{
-		if( this.world.isOnTheGround( this.hitbox ) )
+		if( this.isOnTheGround )
 		{
 			if( this.speedX === this.physics.maxSpeedX )
 			{
@@ -50,7 +56,7 @@ class Bug extends Object {
 
 	moveLeft()
 	{
-		if( this.world.isOnTheGround( this.hitbox ) )
+		if( this.isOnTheGround )
 		{
 			if( this.speedX === -this.physics.maxSpeedX )
 			{
