@@ -2,6 +2,11 @@
 const ServerInstructions = require( './ServerInstructionSet' );
 const Types = require( './Types' ).Attributes;
 const Errors = [];
+function getLastError()
+{
+	return Errors.length > 0 ? Errors[ Errors.length - 1 ] : `No errors yet`;
+}
+
 module.exports = ( object, type ) =>
 {
 	if( typeof object.opcode !== 'number' )
@@ -20,15 +25,16 @@ module.exports = ( object, type ) =>
 	let buffer = Buffer.alloc( 1 );
 	buffer.writeUInt8( object.opcode, 0 );
 	let result = parseParams( instruction.params, object );
-	return result === false ? false : Buffer.concat( [
-		buffer,
-		result
-	] );
-};
-
-module.exports.getLastError = () =>
-{
-	return Errors.length > 0 ? Errors[ Errors.length - 1 ] : `No errors yer`;
+	return result === false ? {
+		success : false,
+		error : getLastError()
+	} : {
+		success : true,
+		result : Buffer.concat( [
+			buffer,
+			result
+		] )
+	};
 };
 
 function parseParams( rules, values )
@@ -41,6 +47,7 @@ function parseParams( rules, values )
 		let result = parseParam( rules[ requiredProperty ], values[ requiredProperty ] );
 		if( result === false )
 		{
+			Errors.push( `Could not parse single param` );
 			return false;
 		}
 		else
