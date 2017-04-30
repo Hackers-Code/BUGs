@@ -110,6 +110,10 @@ class World {
 				{
 					bug.isOnTheGround = true;
 				}
+				else
+				{
+					bug.speedY -= this.physics.gravity;
+				}
 			}
 		}
 	}
