@@ -32,17 +32,18 @@ class GameServer extends EventEmitter {
 
 	sendServerErrorMessage( socketWrite, error )
 	{
+		this.logger.error( `Internal server error occurred. Message: ${error}` );
 		let encodedPacket = EncodePacket( {
 			opcode : 0xe2,
 			error : 'Internal server error'
 		} );
-		if( encodedPacket === false )
+		if( encodedPacket.success === false )
 		{
-			this.logger.error( `Server was unable to form error message packet` );
+			this.logger.error( `Server was unable to form error message packet: ${encodedPacket.error}` );
 			return;
 		}
-		socketWrite( encodedPacket );
-		this.logger.error( `Internal server error occurred. Message: ${error}` );
+		socketWrite( encodedPacket.result );
+
 	}
 
 	sendKickMessage( socketWrite )
@@ -51,12 +52,12 @@ class GameServer extends EventEmitter {
 			opcode : 0x00,
 			error : 'No free slots on server'
 		} );
-		if( encodedPacket === false )
+		if( encodedPacket.success === false )
 		{
 			this.sendServerErrorMessage( socketWrite, `Could not encode 'no free slots' packet` );
 			return;
 		}
-		socketWrite( encodedPacket );
+		socketWrite( encodedPacket.result );
 	}
 
 	handleTCPConnection( address, socketWrite )

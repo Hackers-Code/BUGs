@@ -2,7 +2,6 @@
 const Sockets = require( '../Protocol/Types' ).Sockets;
 const StreamParser = require( './StreamParser' );
 const EncodePacket = require( '../Protocol/PacketEncoder' );
-const getEncodePacketError = require( '../Protocol/PacketEncoder' ).getLastError;
 const DecodePacket = require( '../Protocol/PacketDecoder' );
 const EventEmitter = require( 'events' );
 class Client extends EventEmitter {
@@ -137,19 +136,19 @@ class Client extends EventEmitter {
 	send( data, type = Sockets.tcp )
 	{
 		let encodedPacket = EncodePacket( data, type );
-		if( encodedPacket === false )
+		if( encodedPacket.success === false )
 		{
 			this.server.sendServerErrorMessage( this.tcpSocketWrite, `Could not encode packet: ${data.opcode}` );
-			this.logger.error( getEncodePacketError() );
+			this.logger.error( encodedPacket.error );
 			return;
 		}
 		if( type === Sockets.tcp )
 		{
-			this.tcpSocketWrite( encodedPacket );
+			this.tcpSocketWrite( encodedPacket.result );
 		}
 		else
 		{
-			this.udpSocketSend( encodedPacket, this.rinfo.port, this.rinfo.address );
+			this.udpSocketSend( encodedPacket.result, this.rinfo.port, this.rinfo.address );
 		}
 	}
 
