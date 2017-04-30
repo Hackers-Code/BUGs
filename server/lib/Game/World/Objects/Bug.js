@@ -29,7 +29,7 @@ class Bug extends Object {
 
 	isMoving()
 	{
-		return this.speedX !== 0 && this.speedY !== 0 && !this.isOnTheGround;
+		return this.speedX !== 0 || this.speedY !== 0 || !this.isOnTheGround;
 	}
 
 	jump()
