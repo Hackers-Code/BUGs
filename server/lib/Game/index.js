@@ -151,6 +151,7 @@ class Game {
 		{
 			element.notifyRoundStart( turn );
 		} );
+		this.lastTickTime = new Date().getTime();
 		this.gameLoop();
 	}
 
@@ -162,6 +163,7 @@ class Game {
 			this.roundTimeLeft -= (now - this.lastTickTime) / 1000;
 			this.lastTickTime = now;
 			this.tick++;
+			console.log( this.roundTimeLeft );
 		}
 		setImmediate( this.gameLoop.bind( this ) );
 	}
