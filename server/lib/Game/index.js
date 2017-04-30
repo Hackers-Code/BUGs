@@ -159,7 +159,7 @@ class Game {
 		let now = new Date().getTime();
 		if( now - this.lastTickTime >= 1000 / MAX_TICKS )
 		{
-			this.roundTimeLeft -= (now - this.lastTickTime);
+			this.roundTimeLeft -= (now - this.lastTickTime) / 1000;
 			this.lastTickTime = now;
 			this.tick++;
 		}
