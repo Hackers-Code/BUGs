@@ -2,9 +2,9 @@
 const ServerInstructions = require( './ServerInstructionSet' );
 const Types = require( './Types' ).Attributes;
 const Errors = [];
-function getLastError()
+function getErrors()
 {
-	return Errors.length > 0 ? Errors[ Errors.length - 1 ] : `No errors yet`;
+	return Errors.join( "\n" );
 }
 
 module.exports = ( object, type ) =>
@@ -39,7 +39,7 @@ module.exports = ( object, type ) =>
 	let result = parseParams( instruction.params, object );
 	return result === false ? {
 		success : false,
-		error : getLastError(),
+		error : getErrors(),
 		result : null
 	} : {
 		success : true,
@@ -70,6 +70,7 @@ function parseParams( rules, values )
 		}
 		if( result === false )
 		{
+			Errors.push( `Invalid property: ${requiredProperty}` );
 			return false;
 		}
 		else
