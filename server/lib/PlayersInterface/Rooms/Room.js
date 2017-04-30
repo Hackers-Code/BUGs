@@ -213,6 +213,7 @@ class Room extends Collection {
 		}
 		else
 		{
+			this.isInGame = true;
 			this.players.forEach( ( element ) =>
 			{
 				element.startGame( this.game );
