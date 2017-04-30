@@ -33,8 +33,8 @@ class Logger {
 		{
 			this.logFile.end();
 			this.errorFile.end();
-			console.error( 'Log file has exceeded the maximum limit: %s bytes', 1024 * 64 );
-			process.exit( 1 );
+			process.exitCode = 1;
+			throw new Error( 'Log file has exceeded the maximum limit: 64 kilobytes' );
 		}
 	}
 
