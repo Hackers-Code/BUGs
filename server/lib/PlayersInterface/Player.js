@@ -300,7 +300,15 @@ class Player {
 
 	getWeaponsList( data, respond )
 	{
-		respond( this.weaponsList );
+		let response = [];
+		this.weaponsList.forEach( ( element ) =>
+		{
+			response.push( {
+				id : element.id,
+				usages : element.usages
+			} );
+		} );
+		respond( response );
 	}
 }
 module.exports = Player;
