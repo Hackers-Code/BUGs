@@ -6,7 +6,6 @@ class Player {
 		this.players = playersInterface;
 		this.uniqueNameStorage = this.players.getUniqueNameStorage();
 		this.roomsCollection = this.players.getRoomsCollection();
-		this.weaponsList = this.players.getWeaponsList();
 		this.name = this.uniqueNameStorage.getDefault();
 		this.client = client;
 		this.hasCustomName = false;
@@ -16,6 +15,7 @@ class Player {
 
 	setDefaults()
 	{
+		this.weaponsList = this.players.getWeaponsList();
 		this.room = null;
 		this.lobbyID = 0;
 		this.isAdmin = false;
