@@ -157,11 +157,11 @@ class Game {
 	gameLoop()
 	{
 		let now = new Date().getTime();
-		if( now - this.lastTickTime > 1000 / MAX_TICKS )
+		if( now - this.lastTickTime >= 1000 / MAX_TICKS )
 		{
+			this.roundTimeLeft -= (now - this.lastTickTime);
 			this.lastTickTime = now;
 			this.tick++;
-			this.roundTimeLeft -= (now - this.lastTickTime);
 		}
 		setImmediate( this.gameLoop.bind( this ) );
 	}
