@@ -125,18 +125,38 @@ function parseUnsigned( rule, value )
 		Errors.push( `[UNSIGNED] Required number size not set or value is not number` );
 		return false;
 	}
+	if( value < 0 )
+	{
+		Errors.push( `[UNSIGNED] Value can't be less than 0` );
+		return false;
+	}
 	let length = rule.length;
 	let buffer = Buffer.alloc( length );
 	if( length === 1 )
 	{
+		if( value > 255 )
+		{
+			Errors.push( `[UNSIGNED] Value can't be greater than 255` );
+			return false;
+		}
 		buffer.writeUInt8( value, 0 );
 	}
 	else if( length === 2 )
 	{
+		if( value > 65536 )
+		{
+			Errors.push( `[UNSIGNED] Value can't be greater than 65536` );
+			return false;
+		}
 		buffer.writeUInt16BE( value, 0 );
 	}
 	else if( length === 4 )
 	{
+		if( value > Math.pow( 2, 32 ) )
+		{
+			Errors.push( `[UNSIGNED] Value can't be greater than 2^32` );
+			return false;
+		}
 		buffer.writeUInt32BE( value, 0 );
 	}
 	else
