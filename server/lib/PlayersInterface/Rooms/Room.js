@@ -167,8 +167,8 @@ class Room extends Collection {
 			if( index !== -1 )
 			{
 				this.leaderboard.unshift( { id : this.players[ index ].lobbyID } );
-				this.game.notifyRemovePlayer( index );
 				this.players.splice( index, 1 );
+				this.game.notifyRemovePlayer( index );
 				if( this.players.length === 1 )
 				{
 					this.game.isRunning = false;
