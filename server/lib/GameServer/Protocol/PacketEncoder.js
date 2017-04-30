@@ -58,7 +58,16 @@ function parseParams( rules, values )
 	for( let i = 0 ; i < requiredProperties.length ; i++ )
 	{
 		let requiredProperty = requiredProperties[ i ];
-		let result = parseParam( rules[ requiredProperty ], values[ requiredProperty ] );
+		let result;
+		try
+		{
+			result = parseParam( rules[ requiredProperty ], values[ requiredProperty ] );
+		}
+		catch( e )
+		{
+			Errors.push( `Exception caught in parser: ${e.message}` );
+			return false;
+		}
 		if( result === false )
 		{
 			return false;
