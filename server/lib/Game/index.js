@@ -121,7 +121,6 @@ class Game {
 		{
 			element.sendGameState( state );
 		} );
-		setTimeout( this.sendGameStateToPlayers.bind( this ), 1000 / MAX_TICKS );
 	}
 
 	sendTimeLeftToPlayers()
@@ -134,7 +133,6 @@ class Game {
 		{
 			element.sendTimeLeft( time );
 		} );
-		setTimeout( this.sendTimeLeftToPlayers.bind( this ), 1000 / MAX_TICKS );
 	}
 
 	spawnBugs()
@@ -175,6 +173,8 @@ class Game {
 				this.roundTimeLeft -= diff;
 			}
 			this.world.simulate( diff );
+			this.sendTimeLeftToPlayers();
+			this.sendGameStateToPlayers();
 			this.lastTickTime = now;
 			this.tick++;
 		}
