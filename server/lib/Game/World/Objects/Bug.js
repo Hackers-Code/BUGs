@@ -36,6 +36,7 @@ class Bug extends Object {
 	{
 		if( this.isOnTheGround )
 		{
+			this.isOnTheGround = false;
 			this.speedY = this.physics.jumpHeight;
 		}
 	}

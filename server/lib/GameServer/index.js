@@ -43,7 +43,6 @@ class GameServer extends EventEmitter {
 			return;
 		}
 		socketWrite( encodedPacket.result );
-
 	}
 
 	sendKickMessage( socketWrite )
