@@ -18,6 +18,11 @@ class World {
 		this.addKillingZones();
 	}
 
+	getGame()
+	{
+		return this.game;
+	}
+
 	getPhysics()
 	{
 		return this.physics;

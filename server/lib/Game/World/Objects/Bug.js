@@ -18,6 +18,7 @@ class Bug extends Object {
 			collidable : false
 		} );
 		this.world = world;
+		this.game = world.getGame();
 		this.physics = this.world.getPhysics();
 		this.speedX = 0;
 		this.speedY = 0;
@@ -116,6 +117,11 @@ class Bug extends Object {
 	decreaseHP( damage )
 	{
 		this.hp -= damage;
+	}
+
+	removeYourself()
+	{
+		this.game.removeBug( this.id );
 	}
 }
 module.exports = Bug;

@@ -215,6 +215,18 @@ class Game {
 			this.startRound();
 		}
 	}
+
+	removeBug( id )
+	{
+		for( let i = 0 ; i < this.bugs.length ; i++ )
+		{
+			if( this.bugs[ i ].id === id )
+			{
+				this.bugs.splice( i, 1 );
+				break;
+			}
+		}
+	}
 }
 
 module.exports = Game;

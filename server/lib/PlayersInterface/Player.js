@@ -112,6 +112,13 @@ class Player {
 	{
 		if( this.isInLobby || this.isInGame )
 		{
+			if( this.isInGame )
+			{
+				this.bugs.forEach( ( element ) =>
+				{
+					element.removeYourself();
+				} );
+			}
 			this.room.leave( this.lobbyID );
 			this.setDefaults();
 		}
