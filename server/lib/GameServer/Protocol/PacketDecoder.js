@@ -181,11 +181,11 @@ function parseSigned( rule, buffer, offset )
 	{
 		result.value = buffer.readInt8( offset );
 	}
-	if( length === 2 )
+	else if( length === 2 )
 	{
 		result.value = buffer.readInt16BE( offset );
 	}
-	if( length === 4 )
+	else if( length === 4 )
 	{
 		result.value = buffer.readInt32BE( offset );
 	}
