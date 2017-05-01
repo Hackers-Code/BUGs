@@ -85,6 +85,7 @@ class Player {
 		this.client.on( 'switchMoveRight', this.moveRight.bind( this ) );
 		this.client.on( 'setAngle', this.setAngle.bind( this ) );
 		this.client.on( 'getWeaponsList', this.getWeaponsList.bind( this ) );
+		this.client.on( 'selectWeapon', this.selectWeapon.bind( this ) );
 	}
 
 	setName( data, respond )
@@ -328,6 +329,21 @@ class Player {
 			} );
 		} );
 		respond( { weapons }, Sockets.udp );
+	}
+
+	selectWeapon( data )
+	{
+		if( typeof this.weaponsList[ data.id ] && this.weaponsList[ data.id ].usages !== 0 )
+		{
+			this.currentWeapon = this.weaponsList[ data.id ];
+			this.game.sendSelectWeaponToAll( data );
+		}
+	}
+
+	sendSelectWeapon( data )
+	{
+		data.opcode = 0x44;
+		this.client.send( data, Sockets.udp );
 	}
 
 	chooseBug()

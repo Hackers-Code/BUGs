@@ -227,6 +227,14 @@ class Game {
 			}
 		}
 	}
+
+	sendSelectWeaponToAll( data )
+	{
+		this.players.forEach( ( element ) =>
+		{
+			element.sendSelectWeapon( data );
+		} );
+	}
 }
 
 module.exports = Game;
