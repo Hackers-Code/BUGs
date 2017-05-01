@@ -95,13 +95,13 @@ class Bug extends Object {
 		};
 	}
 
-	rotateBy2Degrees( direction )
+	rotateBy2Degrees( data )
 	{
-		if( direction !== 1 && direction !== -1 )
+		if( data.angle !== 1 && data.angle !== -1 )
 		{
 			return;
 		}
-		this.angle += 2 * direction;
+		this.angle += 2 * data.angle;
 		if( this.angle > 360 )
 		{
 			this.angle -= 360;
