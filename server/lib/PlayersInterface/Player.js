@@ -378,12 +378,12 @@ class Player {
 			}
 			if( typeof this.currentWeapon.notEndRound === 'undefined' )
 			{
-				this.endTurn();
+				this.endTurn( data );
 			}
 		}
 	}
 
-	endTurn()
+	endTurn( data )
 	{
 		this.game.sendUseWeaponToAll( data );
 		this.canAttack = false;
