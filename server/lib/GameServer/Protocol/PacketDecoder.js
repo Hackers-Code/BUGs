@@ -81,10 +81,14 @@ module.exports = ( buffer, type ) =>
 	if( offset <= buffer.length )
 	{
 		return {
-			opcode,
-			instruction,
-			object,
-			offset
+			success : true,
+			error : null,
+			result : {
+				opcode,
+				instruction,
+				object,
+				offset
+			}
 		};
 	}
 	else
