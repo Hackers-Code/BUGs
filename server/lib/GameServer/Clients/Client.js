@@ -86,6 +86,7 @@ class Client extends EventEmitter {
 			{
 				this.logger.error( decoded.error )
 			}
+			return;
 		}
 		if( decoded.result.instruction.event === 'undefined' )
 		{
