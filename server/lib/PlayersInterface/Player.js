@@ -83,6 +83,7 @@ class Player {
 		this.client.on( 'jump', this.jump.bind( this ) );
 		this.client.on( 'switchMoveLeft', this.moveLeft.bind( this ) );
 		this.client.on( 'switchMoveRight', this.moveRight.bind( this ) );
+		this.client.on( 'setAngle', this.setAngle.bind( this ) );
 		this.client.on( 'getWeaponsList', this.getWeaponsList.bind( this ) );
 	}
 
@@ -350,6 +351,11 @@ class Player {
 		{
 			this.bugs[ this.currentBug ].moveRight();
 		}
+	}
+
+	setAngle()
+	{
+		//TODO:Implement
 	}
 }
 module.exports = Player;

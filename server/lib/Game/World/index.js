@@ -106,15 +106,19 @@ class World {
 				let canMoveHere = this.canMoveHere( hitbox );
 				if( canMoveHere !== true )
 				{
-					bug.speedX = 0;
 					bug.speedY = 0;
 					if( canMoveHere !== false )
 					{
+						if( canMoveHere.overlapV.x !== 0 )
+						{
+							bug.speedX = 0;
+						}
 						hitbox.pos.x -= canMoveHere.overlapV.x;
 						hitbox.pos.y -= canMoveHere.overlapV.y;
 					}
 					else
 					{
+						bug.speedX = 0;
 						hitbox.pos.x = oldX;
 						hitbox.pos.y = oldY;
 					}
