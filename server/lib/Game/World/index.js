@@ -147,5 +147,31 @@ class World {
 			}
 		}
 	}
+
+	getEnemyBugs( owner )
+	{
+		let bugs = this.game.getBugs();
+		let enemies = [];
+		bugs.forEach( ( element ) =>
+		{
+			if( element.owner !== owner )
+			{
+				enemies.push( element );
+			}
+		} );
+		return enemies;
+	}
+
+	meleeAttack( weapon, owner )
+	{
+		let enemies = this.getEnemyBugs( owner );
+		enemies.forEach( ( element ) =>
+		{
+			if( SAT.testPolygonPolygon( weapon, element ) )
+			{
+				element.decreaseHP( weapon.dmg );
+			}
+		} );
+	}
 }
 module.exports = World;

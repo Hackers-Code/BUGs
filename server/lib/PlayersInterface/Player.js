@@ -360,6 +360,10 @@ class Player {
 			{
 				return;
 			}
+			if( this.currentWeapon.id === 0 || this.currentWeapon === 6 )
+			{
+				this.bugs[ this.currentBug ].meleeAttack( this.currentWeapon );
+			}
 			if( this.currentWeapon.id === 1 )
 			{
 				for( let i = 0 ; i < this.bugs.length ; i++ )
@@ -372,7 +376,7 @@ class Player {
 					}
 				}
 			}
-			if( this.currentWeapon.id === 0 || this.currentWeapon.id === 3 || this.currentWeapon.id === 4 || this.currentWeapon.id === 5 || this.currentWeapon.id === 6 || this.currentWeapon.id === 7 || this.currentWeapon.id === 8 || this.currentWeapon.id === 9 )
+			if( this.currentWeapon.id === 3 || this.currentWeapon.id === 4 || this.currentWeapon.id === 5 || this.currentWeapon.id === 7 || this.currentWeapon.id === 8 || this.currentWeapon.id === 9 )
 			{
 				return;
 			}
