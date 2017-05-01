@@ -71,7 +71,7 @@ class Client extends EventEmitter {
 		let decoded = DecodePacket( buffer, type );
 		if( decoded.success === false )
 		{
-			if( decoded.error === '0xe0' )
+			if( decoded.error === 0xe0 )
 			{
 				this.send( {
 					opcode : 0xe0,
@@ -81,10 +81,6 @@ class Client extends EventEmitter {
 				{
 					this.streamParser.clearBuffer();
 				}
-			}
-			else
-			{
-				this.logger.error( decoded.error )
 			}
 			return;
 		}
@@ -131,7 +127,6 @@ class Client extends EventEmitter {
 		if( encodedPacket.success === false )
 		{
 			this.server.sendServerErrorMessage( this.tcpSocketWrite, `Could not encode packet: ${data.opcode}` );
-			this.logger.error( encodedPacket.error );
 			return;
 		}
 		if( type === Sockets.tcp )

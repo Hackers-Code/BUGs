@@ -13,7 +13,8 @@ module.exports = ( buffer, type ) =>
 	{
 		return {
 			success : false,
-			error : `Buffer is not valid buffer or has 0 length`,
+			message : `Buffer is not valid buffer or has 0 length`,
+			error : null,
 			result : null
 		};
 	}
@@ -23,7 +24,8 @@ module.exports = ( buffer, type ) =>
 	{
 		return {
 			success : false,
-			error : `0xe0`,
+			error : 0xe0,
+			message : null,
 			result : null
 		};
 	}
@@ -31,7 +33,8 @@ module.exports = ( buffer, type ) =>
 	{
 		return {
 			success : false,
-			error : `Invalid socket type for: ${opcode}`,
+			error : null,
+			message : `Invalid socket type for: ${opcode}`,
 			result : null
 		};
 	}
@@ -63,7 +66,8 @@ module.exports = ( buffer, type ) =>
 		{
 			return {
 				success : false,
-				error : `Unknown rule type`,
+				error : null,
+				message : `Unknown rule type`,
 				result : null
 			};
 		}
@@ -71,7 +75,8 @@ module.exports = ( buffer, type ) =>
 		{
 			return {
 				success : false,
-				error : getErrors(),
+				error : null,
+				message : getErrors(),
 				result : null
 			};
 		}
