@@ -3,6 +3,7 @@ const SAT = require( 'sat' );
 const Object = require( './Object' );
 const BUG_WIDTH = 40;
 const BUG_HEIGHT = 45;
+const START_HP = 200;
 class Bug extends Object {
 	constructor( world, spawn, id )
 	{
@@ -20,7 +21,7 @@ class Bug extends Object {
 		this.physics = this.world.getPhysics();
 		this.speedX = 0;
 		this.speedY = 0;
-		this.hp = 200;
+		this.hp = START_HP;
 		this.angle = 90;
 		this.id = id;
 		this.owner = 0;
@@ -111,5 +112,11 @@ class Bug extends Object {
 			this.angle += 360;
 		}
 	}
+
+	decreaseHP( damage )
+	{
+		this.hp -= damage;
+	}
 }
 module.exports = Bug;
+module.exports.START_HP = START_HP;

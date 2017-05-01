@@ -2,6 +2,7 @@
 const SAT = require( 'sat' );
 const Block = require( './Objects/Block' );
 const KillingZone = require( './Objects/KillingZone' );
+const START_BUG_HP = require( './Objects/Bug' ).START_HP;
 class World {
 	constructor( game )
 	{
@@ -125,6 +126,10 @@ class World {
 				}
 				if( this.isOnTheGround( hitbox ) )
 				{
+					if( speedY >= this.physics.maxSpeedY / 2 )
+					{
+						bug.decreaseHP( START_BUG_HP * (speedY / this.physics.maxSpeedY) );
+					}
 					bug.isOnTheGround = true;
 				}
 				else
