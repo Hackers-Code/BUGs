@@ -353,9 +353,12 @@ class Player {
 		}
 	}
 
-	setAngle()
+	setAngle( data )
 	{
-		//TODO:Implement
+		if( this.isYourTurn )
+		{
+			this.bugs[ this.currentBug ].rotateBy2Degrees( data );
+		}
 	}
 }
 module.exports = Player;

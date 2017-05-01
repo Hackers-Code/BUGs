@@ -94,5 +94,22 @@ class Bug extends Object {
 			id : this.id
 		};
 	}
+
+	rotateBy2Degrees( direction )
+	{
+		if( direction !== 1 && direction !== -1 )
+		{
+			return;
+		}
+		this.angle += 2 * direction;
+		if( this.angle > 360 )
+		{
+			this.angle -= 360;
+		}
+		else if( this.angle < 0 )
+		{
+			this.angle += 360;
+		}
+	}
 }
 module.exports = Bug;
