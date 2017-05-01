@@ -197,6 +197,14 @@ class Game {
 		}
 	}
 
+	endTurn()
+	{
+		if( this.roundTimeLeft > 5 )
+		{
+			this.roundTimeLeft = 5;
+		}
+	}
+
 	endRound()
 	{
 		this.players[ this.currentPlayer ].notifyRoundEnd();
@@ -233,6 +241,14 @@ class Game {
 		this.players.forEach( ( element ) =>
 		{
 			element.sendSelectWeapon( data );
+		} );
+	}
+
+	sendUseWeaponToAll( data )
+	{
+		this.players.forEach( ( element ) =>
+		{
+			element.sendUseWeapon( data );
 		} );
 	}
 }

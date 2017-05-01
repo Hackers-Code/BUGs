@@ -30,7 +30,7 @@ class Player {
 		this.isYourTurn = false;
 		this.canAttack = false;
 		this.game = null;
-		this.currentWeapon = null;
+		this.currentWeapon = this.weaponsList[ 0 ];
 		this.readyStatus = false;
 		this.mapLoaded = false;
 		this.bugs = [];
@@ -86,6 +86,7 @@ class Player {
 		this.client.on( 'setAngle', this.setAngle.bind( this ) );
 		this.client.on( 'getWeaponsList', this.getWeaponsList.bind( this ) );
 		this.client.on( 'selectWeapon', this.selectWeapon.bind( this ) );
+		this.client.on( 'useWeapon', this.useWeapon.bind( this ) );
 	}
 
 	setName( data, respond )
@@ -313,6 +314,7 @@ class Player {
 	notifyRoundEnd()
 	{
 		this.bugs[ this.currentBug ].stopMoving();
+		this.currentWeapon = this.weaponsList[ 0 ];
 		this.isYourTurn = false;
 		this.canAttack = false;
 		this.client.send( { opcode : 0x36 }, Sockets.tcp );
@@ -333,7 +335,7 @@ class Player {
 
 	selectWeapon( data )
 	{
-		if( typeof this.weaponsList[ data.id ] && this.weaponsList[ data.id ].usages !== 0 )
+		if( this.isYourTurn && typeof this.weaponsList[ data.id ] && this.weaponsList[ data.id ].usages !== 0 )
 		{
 			this.currentWeapon = this.weaponsList[ data.id ];
 			this.game.sendSelectWeaponToAll( data );
@@ -343,6 +345,54 @@ class Player {
 	sendSelectWeapon( data )
 	{
 		data.opcode = 0x44;
+		this.client.send( data, Sockets.udp );
+	}
+
+	useWeapon( data )
+	{
+		if( this.isYourTurn && this.currentWeapon !== null && this.canAttack )
+		{
+			if( this.currentWeapon.usages > 0 )
+			{
+				this.currentWeapon.usages--;
+			}
+			else if( this.currentWeapon.usages === 0 )
+			{
+				return;
+			}
+			if( this.currentWeapon.id === 1 )
+			{
+				for( let i = 0 ; i < this.bugs.length ; i++ )
+				{
+					if( data.param === this.bugs[ i ].id )
+					{
+						this.currentBug = i;
+						this.game.sendUseWeaponToAll( data );
+						break;
+					}
+				}
+			}
+			if( this.currentWeapon.id === 0 || this.currentWeapon.id === 3 || this.currentWeapon.id === 4 || this.currentWeapon.id === 5 || this.currentWeapon.id === 6 || this.currentWeapon.id === 7 || this.currentWeapon.id === 8 || this.currentWeapon.id === 9 )
+			{
+				return;
+			}
+			if( typeof this.currentWeapon.notEndRound === 'undefined' )
+			{
+				this.endTurn();
+			}
+		}
+	}
+
+	endTurn()
+	{
+		this.game.sendUseWeaponToAll( data );
+		this.canAttack = false;
+		this.game.endTurn();
+	}
+
+	sendUseWeapon( data )
+	{
+		data.opcode = 0x45;
 		this.client.send( data, Sockets.udp );
 	}
 
