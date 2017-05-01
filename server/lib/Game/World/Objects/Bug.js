@@ -117,6 +117,10 @@ class Bug extends Object {
 	decreaseHP( damage )
 	{
 		this.hp -= damage;
+		if( this.hp <= 0 )
+		{
+			this.removeYourself();
+		}
 	}
 
 	removeYourself()
