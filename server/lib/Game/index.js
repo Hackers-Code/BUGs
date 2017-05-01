@@ -106,17 +106,12 @@ class Game {
 		return retval;
 	}
 
-	getState()
+	sendGameStateToPlayers()
 	{
-		return {
+		let state = {
 			tick : this.tick,
 			bugs : this.serializeBugs()
 		};
-	}
-
-	sendGameStateToPlayers()
-	{
-		let state = this.getState();
 		this.players.forEach( ( element ) =>
 		{
 			element.sendGameState( state );
