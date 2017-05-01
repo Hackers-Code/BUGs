@@ -68,14 +68,10 @@ class Client extends EventEmitter {
 			}
 			buffer = this.streamParser.getBuffer();
 		}
-		let decoded;
-		try
+		let decoded = DecodePacket( buffer, type );
+		if( decoded.success === false )
 		{
-			decoded = DecodePacket( buffer, type );
-		}
-		catch( e )
-		{
-			if( e.message === 0xe0 )
+			if( decoded.error === '0xe0' )
 			{
 				this.send( {
 					opcode : 0xe0,
@@ -88,41 +84,36 @@ class Client extends EventEmitter {
 			}
 			else
 			{
-				this.logger.error( e.message )
+				this.logger.error( decoded.error )
 			}
-			return;
 		}
-		if( decoded === false )
-		{
-			return;
-		}
-		if( decoded.instruction.event === 'undefined' )
+		if( decoded.result.instruction.event === 'undefined' )
 		{
 			this.server.sendServerErrorMessage( this.tcpSocketWrite,
-				`No event is specified for instruction ${decoded.instruction.opcode}` );
+				`No event is specified for instruction ${decoded.result.instruction.opcode}` );
 		}
 		else
 		{
 			let hasListeners;
-			if( decoded.instruction.response )
+			if( decoded.result.instruction.response )
 			{
-				hasListeners = this.emit( decoded.instruction.event, decoded.object,
-					this.respond.bind( this, decoded.instruction.response ) );
+				hasListeners = this.emit( decoded.result.instruction.event, decoded.result.object,
+					this.respond.bind( this, decoded.result.instruction.response ) );
 			}
 			else
 			{
-				hasListeners = this.emit( decoded.instruction.event, decoded.object );
+				hasListeners = this.emit( decoded.result.instruction.event, decoded.result.object );
 			}
 			if( hasListeners === false )
 			{
 				this.server.sendServerErrorMessage( this.tcpSocketWrite,
-					`No listener for event ${decoded.instruction.event}` );
-				this.emit( 'error', new Error( `No listener for event ${decoded.instruction.event}` ) );
+					`No listener for event ${decoded.result.instruction.event}` );
+				this.emit( 'error', new Error( `No listener for event ${decoded.result.instruction.event}` ) );
 			}
 		}
 		if( type === Sockets.tcp )
 		{
-			this.streamParser.freeBufferToOffset( decoded.offset );
+			this.streamParser.freeBufferToOffset( decoded.result.offset );
 			this.handleData();
 		}
 	}

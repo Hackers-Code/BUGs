@@ -60,11 +60,11 @@ class ClientsStorage extends Collection {
 		if( result === -1 )
 		{
 			let decodedPacket = DecodePacket( packet, Sockets.udp );
-			if( decodedPacket === false || typeof decodedPacket.object.id === 'undefined' )
+			if( decodedPacket.success === false || typeof decodedPacket.result.object.id === 'undefined' )
 			{
 				return false;
 			}
-			let index = this.find( decodedPacket.object.id );
+			let index = this.find( decodedPacket.result.object.id );
 			if( index === -1 )
 			{
 				return false;
