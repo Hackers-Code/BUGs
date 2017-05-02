@@ -100,7 +100,8 @@ module.exports = ( buffer, type ) =>
 	{
 		return {
 			success : false,
-			error : `Message too short`,
+			error : null,
+			message : `Message too short`,
 			result : null
 		};
 	}
