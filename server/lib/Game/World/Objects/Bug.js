@@ -132,7 +132,7 @@ class Bug extends Object {
 	{
 		let weaponHitbox = new SAT.Box( new SAT.Vector( this.hitbox.pos.x, this.hitbox.pos.y + BUG_HEIGHT / 2 ), 1,
 			weapon.radius ).toPolygon();
-		weaponHitbox.rotate( this.angle * Math.PI / 180 );
+		weaponHitbox.rotate( (360 - this.angle) * Math.PI / 180 );
 		this.world.meleeAttack( weaponHitbox, this.owner );
 	}
 }
