@@ -9,7 +9,22 @@
       <h1>Protocol</h1>
     </header>
     <main>
-      
+      <table>
+        <tr>
+          <th>Opcode</th>
+          <th>Description</th>
+          <th>Socket</th>
+          <th>Sender</th>
+          <th>Parameters</th>
+        </tr>
+        <tr>
+          <td>0x00</td>
+          <td>Kick user from server</td>
+          <td>TCP</td>
+          <td>Server</td>
+          <td>uint8 - length + $length bytes string - reason</td>
+        </tr>
+      </table>
     </main>
     <footer>
       Hackers-Code &#169; 2017
