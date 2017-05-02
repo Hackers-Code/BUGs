@@ -132,6 +132,7 @@ sf::Sprite  backgrounds, clocks, aimers, backpacks;
 sf::Image backgroundi;
 sf::Vector2f deltabg(0,0);
 sf::Text turntimet;
+sf::Clock moveclock;
 float mapscale=0.2;
 unsigned int turntime=0, clockframe=0, no18delta=0, force=0, currentplayer=0;
 int choosedworm=0;
@@ -468,6 +469,15 @@ void weapon::draw(sf::RenderWindow &window){
     }
 }
 
+weapon* getWeaponFromId(unsigned int idin){
+    if((idin<weapons.size())&&(weapons[idin].id==idin))return &weapons[idin];
+    for(int i=0; i<weapons.size(); i++){
+        if(weapons[idin].id==idin)return &weapons[idin];
+    }
+    cout<<"wrong weapon id, prepare for crash\n";
+    return 0;
+}
+
 void placek(sf::Image &image, int x, int y,unsigned int r){
     sf::Vector2f margins;
     margins.x=image.getSize().x;
@@ -514,6 +524,12 @@ class metamap{public:
             if(!thumbnailt.loadFromMemory(&buffer[0], buffer.length())){
                 cout<<"\nthumbnail:\n"<<buffer<<"\n";
                 return 0;
+            }else{
+                if((thumbnailt.getSize().x>800)||(thumbnailt.getSize().y>600)){
+                    cout<<"Too big thumbnail ("<<thumbnail<<"), so 1/0 is...\n";
+                    int awfcbawhbf=1, asdbhkeardvbh=0;
+                    cout<<(awfcbawhbf=awfcbawhbf/asdbhkeardvbh);
+                }
             }
         }else{
             cout<<"map HTTP Error\n";
@@ -724,8 +740,8 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
     sf::Http::Response::Status httpstatus=response.getStatus();
     if(httpstatus==sf::Http::Response::Ok){
         buffer=response.getBody();
-        int signature=0, version=0, compression=0, width=0, height=0, uintbuffer[8];
-        sf::Color solid(80, 100, 0);
+        unsigned int signature=0, version=0, compression=0, width=0, height=0, uintbuffer[8];
+        sf::Color solid(80, 100, 0, 255);
         //-------------------------------------------------------    metadata   -------------------------------------------
         signature=char_to_uint(&buffer[0]);//<0;3>
         version=                buffer[4];
@@ -770,13 +786,13 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
                     cout<<"loadmap(); lost rest of block, i="<<i<<"\n";
                     return output;
                 }
-                uintbuffer[0]+=char_to_uint(&buffer[i+1]);//<1;4>
-                uintbuffer[1]+=char_to_uint(&buffer[i+5]);//<5;8>
-                uintbuffer[2]+=char_to_uint(&buffer[i+9]);//<9;12>
-                uintbuffer[3]+=char_to_uint(&buffer[i+13]);//<13;16>
+                uintbuffer[0]=char_to_uint(&buffer[i+1]);//<1;4>
+                uintbuffer[1]=char_to_uint(&buffer[i+5]);//<5;8>
+                uintbuffer[2]=char_to_uint(&buffer[i+9]);//<9;12>
+                uintbuffer[3]=char_to_uint(&buffer[i+13]);//<13;16>
                 for(int k=uintbuffer[0]; k<uintbuffer[0]+uintbuffer[2]; k++)
                     if(k<width){
-                        for(int j=uintbuffer[1]; j<uintbuffer[1]+uintbuffer[4]; j++)
+                        for(int j=uintbuffer[1]; j<uintbuffer[1]+uintbuffer[3]; j++)
                             if(j<height){
                                 output.setPixel(k, j, solid);
                             }else break;
@@ -788,10 +804,10 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
                     cout<<"loadmap(); lost rest of killing zone, i="<<i<<"\n";
                     return output;
                 }
-                uintbuffer[0]+=char_to_uint(&buffer[i+1]);//<1;4>
-                uintbuffer[1]+=char_to_uint(&buffer[i+5]);//<5;8>
-                uintbuffer[2]+=char_to_uint(&buffer[i+9]);//<9;12>
-                uintbuffer[3]+=char_to_uint(&buffer[i+13]);//<13;16>
+                uintbuffer[0]=char_to_uint(&buffer[i+1]);//<1;4>
+                uintbuffer[1]=char_to_uint(&buffer[i+5]);//<5;8>
+                uintbuffer[2]=char_to_uint(&buffer[i+9]);//<9;12>
+                uintbuffer[3]=char_to_uint(&buffer[i+13]);//<13;16>
                 i+=16;
             }else{
                 cout<<"loadmap(); invalid structure, i="<<i<<", buffer[i]="<<buffer[i]<<"\n";
@@ -807,7 +823,7 @@ sf::Image loadMap(string track, list<sf::Vector2u> &spawnpoints){
     return output;
 }
 
-void createmap(unsigned int seed){
+void createmap(unsigned int seed){//not used
     if(seed==1){
         backgroundt.loadFromImage(loadMap(metamaps[choosedmap].map_file, spawnpoints));
         backgrounds.setTexture(backgroundt);
@@ -816,7 +832,7 @@ void createmap(unsigned int seed){
         backgroundi.create(6000, 3600, sf::Color(0,0,0,0));
         for(int i=0; i<6000; i++){
             for(int j=3580; j<3600; j++){
-                backgroundi.setPixel(i,j, sf::Color(255,0,0));
+                backgroundi.setPixel(i,j, sf::Color(255,0,0,255));
             }
         }
         {
@@ -830,7 +846,7 @@ void createmap(unsigned int seed){
                 else                  j2=fabs(rand()%8-3)-1;
                 for(int k=i; k<i+5; k++){
                     for(int n=j+j2/-(k-i-5); ((n<3600)&&(n>=0)); n++){
-                        backgroundi.setPixel(k, n, sf::Color(80, 100, 0));
+                        backgroundi.setPixel(k, n, sf::Color(80, 100, 0, 255));
                     }
                 }
                 j+=j2;
@@ -1038,6 +1054,7 @@ int main(){
         info[9].setPosition(20,128);
         info[10].setString("4");
         info[10].setPosition(20,158);
+        moveclock.restart();
         fstream plik;
         plik.open("physic.cfg", ios::in | ios::binary);
         if(plik.good()){
@@ -1207,33 +1224,48 @@ int main(){
                     }else
                     if((event.text.unicode==119)&&(players[currentplayer].choosenweapon!=1)&&(players[currentplayer].choosenweapon!=2)){
                         if(currentworm){
-                            if((*currentworm).direction==1)
-                                protocol3b(-1);
-                            else
-                            if((*currentworm).direction==-1)
-                                protocol3b(1);
-                            else cout<<"wrong direction\n";
+                            if((*currentworm).direction==1){
+                                if((*currentworm).angle<2)
+                                    (*currentworm).angle+=358;
+                                else
+                                    (*currentworm).angle-=2;
+                                protocol3b((*currentworm).angle/2);
+                            }else
+                            if((*currentworm).direction==-1){
+                                (*currentworm).angle=((*currentworm).angle+2)%360;
+                                protocol3b((*currentworm).angle/2);
+                            }else cout<<"wrong direction\n";
                         }
                     }else
                     if((event.text.unicode==115)&&(players[currentplayer].choosenweapon!=1)&&(players[currentplayer].choosenweapon!=2)){
                         if(currentworm){
-                            if((*currentworm).direction==1)
-                                protocol3b(1);
-                            else
-                            if((*currentworm).direction==-1)
-                                protocol3b(-1);
-                            else cout<<"wrong direction\n";
+                            if((*currentworm).direction==1){
+                                (*currentworm).angle=((*currentworm).angle+2)%360;
+                                protocol3b((*currentworm).angle/2);
+                            }else
+                            if((*currentworm).direction==-1){
+                                if((*currentworm).angle<2)
+                                    (*currentworm).angle+=358;
+                                else
+                                    (*currentworm).angle-=2;
+                                protocol3b((*currentworm).angle/2);
+                            }else cout<<"wrong direction\n";
                         }
                     }
                 }else
                 if((event.type==sf::Event::KeyPressed)||(event.type==sf::Event::KeyReleased)){
                     if(event.key.code==sf::Keyboard::A){
-                        if((currentworm)&&((*currentworm).team==userid)&&((*currentworm).V.x<=0)&&(((event.type==sf::Event::KeyPressed)&&((*currentworm).V.x!=-vxmax))||((event.type==sf::Event::KeyReleased)&&((*currentworm).V.x==-vxmax)))){
+                        if((currentworm)&&((*currentworm).team==userid)&&((*currentworm).V.x<=0)&&(((event.type==sf::Event::KeyPressed)&&((*currentworm).V.x!=-vxmax)&&(moveclock.getElapsedTime().asSeconds()>1))||((event.type==sf::Event::KeyReleased)&&((*currentworm).V.x==-vxmax)))){
                             if(protocol38()){
                                 if((*currentworm).V.x!=-vxmax){
                                     (*currentworm).walking=1;
                                     (*currentworm).V.x=-vxmax;
                                     (*currentworm).direction=-1;
+                                    if((*currentworm).angle<180){
+                                        (*currentworm).angle=360-(*currentworm).angle;
+                                        protocol3b((*currentworm).angle/2);
+                                    }
+                                    moveclock.restart();
                                 }else{
                                     (*currentworm).walking=0;
                                     (*currentworm).V.x=0;
@@ -1250,6 +1282,10 @@ int main(){
                                     (*currentworm).V.x=vxmax;
                                     (*currentworm).walking=1;
                                     (*currentworm).direction=1;
+                                    if((*currentworm).angle>180){
+                                        (*currentworm).angle=360-(*currentworm).angle;
+                                        protocol3b((*currentworm).angle/2);
+                                    }
                                 }else{
                                     (*currentworm).walking=0;
                                     (*currentworm).V.x=0;
@@ -1263,7 +1299,7 @@ int main(){
                         if(event.key.code==sf::Keyboard::F)
                             choosingweapon=!choosingweapon;
                         else
-                        if(players[currentplayer].choosenweapon==1){
+                        if((players[currentplayer].choosenweapon==1)&&((*(getWeaponFromId(players[currentplayer].choosenweapon))).usages)){
                             if(event.key.code==sf::Keyboard::W){
                                 choosedworm++;
                                 if(choosedworm>4)
@@ -1300,8 +1336,11 @@ int main(){
                                 }
                             }
                         }else
-                        if(players[currentplayer].choosenweapon==2){
-                            if(event.key.code==sf::Keyboard::Return){
+                        if(event.key.code==sf::Keyboard::Return){
+                            if((players[currentplayer].choosenweapon==2)&&((*(getWeaponFromId(players[currentplayer].choosenweapon))).usages)){
+                                protocol43(0);
+                            }else
+                            if((players[currentplayer].choosenweapon==6)&&((*(getWeaponFromId(players[currentplayer].choosenweapon))).usages)){
                                 protocol43(0);
                             }
                         }
@@ -1586,6 +1625,7 @@ int main(){
                     }else
                     if((event.mouseButton.x>=readys.getPosition().x)&&(event.mouseButton.x<=readys.getPosition().x+readys.getLocalBounds().width)&&(event.mouseButton.y>=readys.getPosition().y)&&(event.mouseButton.y<=readys.getPosition().y+readys.getLocalBounds().height)){
                         protocol2c();
+                        cout<<"end of 2c\n";
                     }else
                     if((event.mouseButton.x>=soundpointers.getPosition().x)&&(event.mouseButton.x<=soundpointers.getPosition().x+soundpointers.getLocalBounds().width)&&(event.mouseButton.y>=soundpointers.getPosition().y)&&(event.mouseButton.y<=soundpointers.getPosition().y+soundpointers.getLocalBounds().height)){
                         soundpointerpressed=1;
@@ -1807,7 +1847,6 @@ int main(){
             }
         }
 
-
         if(clientsocket.receive(data, 1024, received)==sf::Socket::Done){
             if(!receiving)
             for(int i=0; i<received; i++){
@@ -1986,7 +2025,6 @@ int main(){
                         backgrounds.setTexture(backgroundt, 1);
                         backgrounds.setScale(0.2,0.2);
                         mode=ingame;
-                        started=1;
                         protocol31();
                         break;
                     }
@@ -2224,6 +2262,7 @@ int main(){
                     userid=protbufferi[2];
                     cout<<"your id="<<userid<<"\n";
                     receiving=0;
+                    protocol2e();
                 }
             }else
             if(receiving==0x29){
@@ -2457,7 +2496,7 @@ int main(){
                         receiving=0x32;
                         udpdeltareceive=i+1;
                         udpto_receive=8;
-                        protbufferi[0]=1;
+                        protbufferi[1]=protbufferi[0]=1;
                         for(int j=1; j<7; j++)
                             protbufferi[j]=0;
                         break;
@@ -2532,7 +2571,14 @@ int main(){
                     if(protbufferi[0]){
                         protbufferi[1]=protbufferi[1]<<8;
                         protbufferi[1]+=data[i];
-                    }else{
+                        if(udpto_receive==5){
+                            if(protbufferi[1])
+                                started=1;
+                            else
+                                started=0;
+                        }
+                    }
+                    else{
                         if(!(udpto_receive%16)){
                             if(players.size()>protbufferi[1]){
                                 if(players[protbufferi[1]].addworm(worm(sf::Vector2f(protbufferi[2], protbufferi[3]), protbufferi[1], protbufferi[4], protbufferi[5], protbufferi[6]))){
@@ -2685,7 +2731,7 @@ int main(){
                                 bool fnotexists=1;
                                 for(int j=0; j<weapons.size(); j++){
                                     if(weapons[j].id==protbufferi[2]){
-                                        weapons[j].setUsages(protbuffersh[0]);
+                                        weapons[j].setUsages(static_cast<signed char>(protbuffersh[0]));
                                         fnotexists=0;
                                         break;
                                     }
@@ -2745,7 +2791,7 @@ int main(){
                 clocks.setTexture(clockt[clockframe]);
             }
         }
-        if(!(frame%60)){
+        if(!(frame%10)){
             if((mode==lobby)&&(connected)){
                 protocol2e();
             }
@@ -3149,7 +3195,6 @@ int main(){
                 }
             }
         }
-
         window.clear(bgcolor);{
         if(mode==ingame){
             window.draw(backgrounds);
@@ -3167,6 +3212,7 @@ int main(){
             }
             window.draw(clocks);
             window.draw(turntimet);
+            if(players.size()<2)cout<<"possible crash, "<<players.size()<<" players\n";
             weapons[players[currentplayer].choosenweapon].draw(window);
             if(choosingweapon){
                 window.draw(backpacks);
@@ -3287,6 +3333,10 @@ void exitting(){
     }
 }
 
+void uselessFunction(){
+string asd="This is a virus, do not run it or it will destroy your eyes";
+}
+
 //"Mo¿liwe, ¿e bêdzie dzia³aæ, ale prawdopodobnie nie." Micha³ Marczewski
 //"Obawiam się, że będziemy się na spawnie spawnić." Jakub Olszewski
 //"Internet zawsze jest, chyba, że go nie ma." Michał Marczewski
@@ -3295,6 +3345,4 @@ void exitting(){
 /*
 -"To jaką animację mam dać na poddanie się?"
 -"Nie wiem, wbij to w ziemię i napisz "mały krok dla worma, duży dla wormsowości"..." Michał Marczewski
-//"To uczucie kiedy gra się tak popsuła, że aż fizyka przestaje działać, i kable zaczynają źle przewofdckhjdgsfkjaghsdvflkjashdfcv kalusdgfuk lASDGUAYSDF GAUJSFYDG" Jakub "Gandalf" Olszewski
-//"To uczucie, kiedy kod jest taki zły, że aż działa."
 */

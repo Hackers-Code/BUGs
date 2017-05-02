@@ -21,6 +21,11 @@ bool protocol3(){
         if(clientsocket.send(to_send, 1)==sf::Socket::Done){
             cout<<"room leaved\n";
             mode=connectroom;
+            if(ready){
+                ready=0;
+                readys.setTexture(ready2);
+                cout<<"unready\n"<<char(7);
+            }
             return 1;
         }else cout<<"sending error 0x3\n";
     }else cout<<"not connected, cannot leave room\n";
@@ -198,7 +203,7 @@ bool protocol39(){
     }else cout<<"not connected, can not move\n";
     return 0;
 }
-bool protocol3b(signed char input=0){
+bool protocol3b(unsigned char input=0){
     if(connected){
         unsigned char to_send[2];
         to_send[0]=0x3b;
