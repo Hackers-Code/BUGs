@@ -170,7 +170,7 @@ class World {
 			if( SAT.testPolygonPolygon( weapon, element.hitbox ) )
 			{
 				element.decreaseHP( data.dmg );
-				element.setHitVelocity( data.power );
+				element.setHitVelocity( data.angle, data.power );
 			}
 		} );
 	}

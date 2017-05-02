@@ -115,11 +115,11 @@ class Bug extends Object {
 		}
 	}
 
-	setHitVelocity( power )
+	setHitVelocity( angle, power )
 	{
 		let powerSpeed = power * 1000 / 255;
-		this.speedX = Math.sin( this.angle ) * powerSpeed;
-		this.speedY = Math.cos( this.angle ) * powerSpeed;
+		this.speedX = Math.sin( angle ) * powerSpeed;
+		this.speedY = Math.cos( angle ) * powerSpeed;
 	}
 
 	removeYourself()
@@ -140,7 +140,8 @@ class Bug extends Object {
 		this.world.meleeAttack( weaponHitbox, {
 			dmg : weapon.dmg,
 			owner : this.owner,
-			power
+			power,
+			angle : this.angle
 		} );
 	}
 }
