@@ -361,7 +361,6 @@ class Player {
 		let index = this.getWeaponIndexById( data.id );
 		if( this.isYourTurn && index !== -1 && this.weaponsList[ index ].usages !== 0 )
 		{
-			this.currentWeapon = this.weaponsList[ index ];
 			this.game.sendSelectWeaponToAll( data );
 		}
 	}
