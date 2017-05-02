@@ -162,20 +162,14 @@ class World {
 		return enemies;
 	}
 
-	meleeAttack( weapon, owner )
+	meleeAttack( weapon, data )
 	{
-		let enemies = this.getEnemyBugs( owner );
-		console.log( '---THIS_IS_WEAPON---' );
-		console.log( weapon );
-		console.log( '---END_OF_WEAPON---' );
+		let enemies = this.getEnemyBugs( data.owner );
 		enemies.forEach( ( element ) =>
 		{
-			console.log( '---THIS_IS_ENEMY---' );
-			console.log( element.hitbox );
-			console.log( '---END_OF_ENEMY---' );
 			if( SAT.testPolygonPolygon( weapon, element.hitbox ) )
 			{
-				element.decreaseHP( weapon.dmg );
+				element.decreaseHP( data.dmg );
 			}
 		} );
 	}
