@@ -167,7 +167,7 @@ class World {
 		let enemies = this.getEnemyBugs( owner );
 		enemies.forEach( ( element ) =>
 		{
-			if( SAT.testPolygonPolygon( weapon, element ) )
+			if( SAT.testPolygonPolygon( weapon, element.hitbox ) )
 			{
 				element.decreaseHP( weapon.dmg );
 			}
