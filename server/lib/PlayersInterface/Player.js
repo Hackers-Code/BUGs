@@ -373,7 +373,7 @@ class Player {
 			{
 				return;
 			}
-			if( this.currentWeapon.id === 0 || this.currentWeapon === 6 )
+			if( this.currentWeapon.id === 0 || this.currentWeapon.id === 6 )
 			{
 				this.bugs[ this.currentBug ].meleeAttack( this.currentWeapon );
 			}
@@ -383,6 +383,7 @@ class Player {
 				{
 					if( data.param === this.bugs[ i ].id )
 					{
+						this.bugs[ this.currentBug ].stopMoving();
 						this.currentBug = i;
 						this.game.sendUseWeaponToAll( data );
 						break;
