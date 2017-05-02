@@ -22,7 +22,12 @@
           <td>Kick user from server</td>
           <td>TCP</td>
           <td>Server</td>
-          <td>uint8 - length + $length bytes string - reason</td>
+          <td>
+            <ol>
+              <li>uint8 - length</li>
+              <li>{length} bytes string - reason</li>
+            </ol>
+          </td>
         </tr>
       </table>
     </main>
