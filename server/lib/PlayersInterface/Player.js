@@ -386,7 +386,7 @@ class Player {
 			}
 			if( this.currentWeapon.id === 0 || this.currentWeapon.id === 6 )
 			{
-				this.bugs[ this.currentBug ].meleeAttack( this.currentWeapon );
+				this.bugs[ this.currentBug ].meleeAttack( this.currentWeapon, data.param );
 			}
 			if( this.currentWeapon.id === 1 )
 			{

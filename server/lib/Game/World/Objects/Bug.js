@@ -115,12 +115,19 @@ class Bug extends Object {
 		}
 	}
 
+	setHitVelocity( power )
+	{
+		let powerSpeed = power * 1000 / 255;
+		this.speedX = Math.sin( this.angle ) * powerSpeed;
+		this.speedY = Math.cos( this.angle ) * powerSpeed;
+	}
+
 	removeYourself()
 	{
 		this.game.removeBug( this.id, this.owner );
 	}
 
-	meleeAttack( weapon )
+	meleeAttack( weapon, power )
 	{
 		let weaponX = this.hitbox.pos.x;
 		if( this.angle >= 0 && this.angle < 180 )
@@ -132,7 +139,8 @@ class Bug extends Object {
 		weaponHitbox.rotate( (360 - this.angle) * Math.PI / 180 );
 		this.world.meleeAttack( weaponHitbox, {
 			dmg : weapon.dmg,
-			owner : this.owner
+			owner : this.owner,
+			power
 		} );
 	}
 }
