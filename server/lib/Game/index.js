@@ -89,7 +89,7 @@ class Game {
 		{
 			let playerIndex = i % this.players.length;
 			let playerLobbyID = this.players[ playerIndex ].lobbyID;
-			this.players[ playerIndex ].addWorm( this.bugs[ i ] );
+			this.players[ playerIndex ].addBug( this.bugs[ i ] );
 			this.bugs[ i ].assignOwnerId( playerLobbyID );
 		}
 		this.sendGameStateToPlayers();
@@ -224,12 +224,30 @@ class Game {
 		}
 	}
 
-	removeBug( id )
+	findPlayerById( id )
 	{
+		for( let i = 0 ; i < this.players.length ; i++ )
+		{
+			if( this.players[ i ].lobbyID === id )
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	removeBug( id, owner )
+	{
+		let index = this.findPlayerById( owner );
+		if( index === -1 )
+		{
+			return;
+		}
 		for( let i = 0 ; i < this.bugs.length ; i++ )
 		{
 			if( this.bugs[ i ].id === id )
 			{
+				this.players[ index ].removeBug( id );
 				this.bugs.splice( i, 1 );
 				break;
 			}

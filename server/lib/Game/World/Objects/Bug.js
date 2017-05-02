@@ -117,7 +117,7 @@ class Bug extends Object {
 
 	removeYourself()
 	{
-		this.game.removeBug( this.id );
+		this.game.removeBug( this.id, this.owner );
 	}
 
 	meleeAttack( weapon )

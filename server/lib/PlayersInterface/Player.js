@@ -274,9 +274,20 @@ class Player {
 		return this.mapLoaded;
 	}
 
-	addWorm( bug )
+	addBug( bug )
 	{
 		this.bugs.push( bug );
+	}
+
+	removeBug( id )
+	{
+		for( let i = 0 ; i < this.bugs.length ; i++ )
+		{
+			if( this.bugs[ i ].id === id )
+			{
+				this.bugs.splice( i, 1 );
+			}
+		}
 	}
 
 	sendGameState( state )
