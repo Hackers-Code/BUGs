@@ -393,7 +393,7 @@ class Player {
 			{
 				return;
 			}
-			if( typeof this.currentWeapon.notEndRound === 'undefined' )
+			if( this.currentWeapon.notEndRound === false )
 			{
 				this.endTurn( data );
 			}
