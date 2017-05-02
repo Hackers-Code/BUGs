@@ -25,11 +25,6 @@ class GameServer extends EventEmitter {
 		return this.clientsCollection;
 	}
 
-	getLogger()
-	{
-		return this.logger;
-	}
-
 	sendServerErrorMessage( socketWrite, error )
 	{
 		this.logger.error( `Internal server error occurred. Message: ${error}` );

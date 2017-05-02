@@ -12,7 +12,6 @@ class Client extends EventEmitter {
 		this.udpSocketSend = null;
 		this.server = server;
 		this.clientsCollection = server.getClientsCollection();
-		this.logger = server.getLogger();
 		this.streamParser = new StreamParser();
 		this.rinfo = null;
 		this.keepAliveUDP = null;
