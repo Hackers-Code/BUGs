@@ -130,7 +130,12 @@ class Bug extends Object {
 
 	meleeAttack( weapon )
 	{
-		let weaponHitbox = new SAT.Box( new SAT.Vector( this.hitbox.pos.x, this.hitbox.pos.y + BUG_HEIGHT / 2 ), 1,
+		let weaponX = this.hitbox.pos.x;
+		if( this.angle >= 0 && this.angle < 180 )
+		{
+			weaponX += BUG_WIDTH;
+		}
+		let weaponHitbox = new SAT.Box( new SAT.Vector( weaponX, this.hitbox.pos.y + BUG_HEIGHT / 2 ), 1,
 			weapon.radius ).toPolygon();
 		weaponHitbox.rotate( (360 - this.angle) * Math.PI / 180 );
 		this.world.meleeAttack( weaponHitbox, this.owner );
