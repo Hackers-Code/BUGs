@@ -333,11 +333,24 @@ class Player {
 		respond( { weapons }, Sockets.udp );
 	}
 
+	getWeaponIndexById( id )
+	{
+		for( let i = 0 ; i < this.weaponsList.length ; i++ )
+		{
+			if( this.weaponsList[ i ].id === id )
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	selectWeapon( data )
 	{
-		if( this.isYourTurn && typeof this.weaponsList[ data.id ] && this.weaponsList[ data.id ].usages !== 0 )
+		let index = this.getWeaponIndexById( data.id );
+		if( this.isYourTurn && index !== -1 && this.weaponsList[ index ].usages !== 0 )
 		{
-			this.currentWeapon = this.weaponsList[ data.id ];
+			this.currentWeapon = this.weaponsList[ index ];
 			this.game.sendSelectWeaponToAll( data );
 		}
 	}
