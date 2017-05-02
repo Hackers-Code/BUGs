@@ -447,7 +447,7 @@ class Player {
 	{
 		if( this.isYourTurn )
 		{
-			this.bugs[ this.currentBug ].rotateBy2Degrees( data );
+			this.bugs[ this.currentBug ].setAngle( data );
 		}
 	}
 }

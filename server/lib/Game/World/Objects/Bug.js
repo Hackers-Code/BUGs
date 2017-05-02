@@ -97,21 +97,13 @@ class Bug extends Object {
 		};
 	}
 
-	rotateBy2Degrees( data )
+	setAngle( data )
 	{
-		if( data.angle !== 1 && data.angle !== -1 )
+		if( data.angle > 180 )
 		{
 			return;
 		}
-		this.angle += 2 * data.angle;
-		if( this.angle > 360 )
-		{
-			this.angle -= 360;
-		}
-		else if( this.angle < 0 )
-		{
-			this.angle += 360;
-		}
+		this.angle = 2 * data.angle;
 	}
 
 	decreaseHP( damage )

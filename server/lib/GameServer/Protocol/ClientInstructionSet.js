@@ -123,7 +123,7 @@ module.exports = {
 	0x3b : {
 		socket : udp,
 		params : {
-			angle : I8
+			angle : U8
 		},
 		event : 'setAngle'
 	},
