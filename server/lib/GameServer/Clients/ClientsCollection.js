@@ -60,22 +60,19 @@ class ClientsStorage extends Collection {
 		if( result === -1 )
 		{
 			let decodedPacket = DecodePacket( packet, Sockets.udp );
-			if( decodedPacket.success === false || typeof decodedPacket.result.object.id === 'undefined' )
+			if( decodedPacket.success === true || typeof decodedPacket.result.object.id !== 'undefined' )
 			{
-				return false;
+				let index = this.find( decodedPacket.result.object.id );
+				if( index !== -1 )
+				{
+					this.clients[ index ].assignUDPSocket( rinfo, socketSend );
+				}
 			}
-			let index = this.find( decodedPacket.result.object.id );
-			if( index === -1 )
-			{
-				return false;
-			}
-			this.clients[ index ].assignUDPSocket( rinfo, socketSend );
 		}
 		else
 		{
 			this.clients[ result ].handleData( packet, Sockets.udp );
 		}
-		return true;
 	}
 }
 
