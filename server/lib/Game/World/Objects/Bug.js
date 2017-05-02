@@ -117,9 +117,11 @@ class Bug extends Object {
 
 	setHitVelocity( angle, power )
 	{
+		power = 255;
 		let powerSpeed = power * 1000 / 255;
-		this.speedX = Math.sin( angle ) * powerSpeed;
-		this.speedY = Math.cos( angle ) * powerSpeed;
+		this.speedX = Math.sin( angle * Math.PI / 180 ) * powerSpeed;
+		this.speedY = Math.cos( angle * Math.PI / 180 ) * powerSpeed;
+		this.isOnTheGround = false;
 	}
 
 	removeYourself()
