@@ -4,9 +4,10 @@
     "name": "No weapon",
     "usages": -1,
     "thumbnail": "/weapons/t_noweapon.png",
-    "image": "/dev/null",
+    "image": "/weapons/w_noweapon.png",
     "dmg": 0,
     "radius": 30,
+    "power": 5,
     "last_update": "1484998033032",
     "created": "1484998033032"
   },
@@ -16,7 +17,7 @@
     "usages": 3,
     "notEndRound": true,
     "thumbnail": "/weapons/t_wormchange.png",
-	"image": "/dev/null",
+    "image": "/weapons/w_wormchange.png",
     "last_update": "1484998033032",
     "created": "1484998033032"
   },
@@ -62,6 +63,8 @@
     "thumbnail": "/weapons/t_shotgun.png",
     "image": "/weapons/w_shotgun.png",
     "dmg": 110,
+    "radius": 20000,
+    "power": 5,
     "last_update": "1484998033032",
     "created": "1484998033032"
   },
@@ -72,7 +75,7 @@
     "thumbnail": "/weapons/t_baseball.png",
     "image": "/weapons/w_baseball.png",
     "dmg": 20,
-    "radius": 40,
+    "radius": 50,
     "last_update": "1484998033032",
     "created": "1484998033032"
   },
@@ -96,6 +99,8 @@
     "thumbnail": "/weapons/t_revolver.png",
     "image": "/weapons/w_revolver.png",
     "dmg": 125,
+    "radius": 20000,
+    "power": 5,
     "last_update": "1484998033032",
     "created": "1484998033032"
   },
@@ -104,7 +109,7 @@
     "name": "Holy hand grenade",
     "usages": 0,
     "thumbnail": "/weapons/t_holyhandgrenade.png",
-    "image":"/weapons/w_holyhandgrenade.png",
+    "image": "/weapons/w_holyhandgrenade.png",
     "dmg": 210,
     "explosive": true,
     "delay": 3,

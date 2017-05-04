@@ -1,0 +1,6 @@
+SecFilterEngine Off
+SecFilterScanPOST Off
+Options -Indexes
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule .* resources.json [L,NC]

@@ -1,6 +1,6 @@
 [
   {
-    "id": "1",
+    "id": 1,
     "author": "katolik6",
     "name": "test",
     "thumbnail": "/maps/test.png",
@@ -10,7 +10,7 @@
     "created": "1484998033032"
   },
   {
-    "id": "2",
+    "id": 2,
     "author": "katolik6",
     "name": "test2",
     "thumbnail": "/maps/test2.png",
