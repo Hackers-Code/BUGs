@@ -128,15 +128,30 @@ class Bug extends Object {
 		this.game.removeBug( this.id, this.owner );
 	}
 
-	meleeAttack( weapon, power )
+	calculateWeaponPosition()
 	{
-		let weaponX = this.hitbox.pos.x;
+		let x;
+		let y;
 		if( this.angle >= 0 && this.angle < 180 )
 		{
-			weaponX += BUG_WIDTH;
+			x = this.hitbox.pos.x + 13;
+			y = this.hitbox.pos.y + 34;
 		}
-		let weaponHitbox = new SAT.Box( new SAT.Vector( weaponX, this.hitbox.pos.y + BUG_HEIGHT / 2 ), 1,
-			weapon.radius ).toPolygon();
+		else
+		{
+			x = this.hitbox.pos.x + 27;
+			y = this.hitbox.pos.y + 32;
+		}
+		return {
+			x,
+			y
+		};
+	}
+
+	meleeAttack( weapon, power )
+	{
+		let weaponPos = this.calculateWeaponPosition();
+		let weaponHitbox = new SAT.Box( new SAT.Vector( weaponPos.x, weaponPos.y ), 1, weapon.radius ).toPolygon();
 		weaponHitbox.rotate( (360 - this.angle) * Math.PI / 180 );
 		this.world.meleeAttack( weaponHitbox, {
 			dmg : weapon.dmg,
