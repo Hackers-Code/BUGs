@@ -13,7 +13,8 @@ class Weapons {
 				notEndRound : this._weaponsList[ i ].notEndRound || false,
 				explosive : this._weaponsList[ i ].explosive || false,
 				delay : this._weaponsList[ i ].delay || 0,
-				bounces : this._weaponsList[ i ].bounces || false
+				bounces : this._weaponsList[ i ].bounces || false,
+				power : this._weaponsList[ i ].power || null
 			} );
 		}
 		return weaponsList;

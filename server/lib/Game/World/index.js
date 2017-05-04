@@ -3,6 +3,7 @@ const SAT = require( 'sat' );
 const Block = require( './Objects/Block' );
 const KillingZone = require( './Objects/KillingZone' );
 const START_BUG_HP = require( './Objects/Bug' ).START_HP;
+const PENETRATION_RATE = 5;
 class World {
 	constructor( game )
 	{
@@ -173,6 +174,44 @@ class World {
 				element.setHitVelocity( data.angle, data.power );
 			}
 		} );
+	}
+
+	shoot( weapon, data )
+	{
+		let enemies = this.getEnemyBugs( data.owner );
+		let enemiesOnBulletRange = [];
+		enemies.forEach( ( element, index ) =>
+		{
+			if( SAT.testPolygonPolygon( weapon, element.hitbox ) )
+			{
+				enemiesOnBulletRange.push( {
+					index,
+					x : element.hitbox.pos.x
+				} );
+			}
+		} );
+		if( enemiesOnBulletRange.length > 0 )
+		{
+			let enemiesToHit = [];
+			enemiesToHit.push( enemiesOnBulletRange[ 0 ] );
+			for( let i = 1 ; i < enemiesOnBulletRange.length ; i++ )
+			{
+				let distance = Math.abs( enemiesOnBulletRange[ i ].x - weapon.pos.x );
+				if( distance < enemiesToHit[ 0 ].x )
+				{
+					enemiesToHit[ 0 ] = enemiesOnBulletRange[ i ];
+				}
+				else if( distance < enemiesToHit[ 0 ].x + PENETRATION_RATE )
+				{
+					enemiesToHit.push( enemiesOnBulletRange[ i ] );
+				}
+			}
+			for( let i = 0 ; i < enemiesToHit.length ; i++ )
+			{
+				enemies[ enemiesToHit[ i ].index ].decreaseHP( data.dmg );
+				enemies[ enemiesToHit[ i ].index ].setHitVelocity( data.angle, data.power );
+			}
+		}
 	}
 }
 module.exports = World;

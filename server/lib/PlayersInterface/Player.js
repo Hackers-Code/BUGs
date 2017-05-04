@@ -384,11 +384,16 @@ class Player {
 			{
 				return;
 			}
+			let power = this.currentWeapon.power !== null ? this.currentWeapon.power : data.param;
 			if( this.currentWeapon.id === 0 || this.currentWeapon.id === 6 )
 			{
-				this.bugs[ this.currentBug ].meleeAttack( this.currentWeapon, data.param );
+				this.bugs[ this.currentBug ].meleeAttack( this.currentWeapon, power );
 			}
-			if( this.currentWeapon.id === 1 )
+			else if( this.currentWeapon.id === 5 || this.currentWeapon.id === 8 )
+			{
+				this.bugs[ this.currentBug ].shoot( this.currentWeapon, power );
+			}
+			else if( this.currentWeapon.id === 1 )
 			{
 				for( let i = 0 ; i < this.bugs.length ; i++ )
 				{
@@ -401,7 +406,7 @@ class Player {
 					}
 				}
 			}
-			if( this.currentWeapon.id === 5 || this.currentWeapon.id === 8 || this.currentWeapon.id === 3 || this.currentWeapon.id === 4 || this.currentWeapon.id === 5 || this.currentWeapon.id === 7 || this.currentWeapon.id === 8 || this.currentWeapon.id === 9 )
+			else if( this.currentWeapon.id === 3 || this.currentWeapon.id === 4 || this.currentWeapon.id === 5 || this.currentWeapon.id === 7 || this.currentWeapon.id === 8 || this.currentWeapon.id === 9 )
 			{
 				return;
 			}

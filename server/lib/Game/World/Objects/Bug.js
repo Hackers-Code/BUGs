@@ -160,6 +160,19 @@ class Bug extends Object {
 			angle : this.angle
 		} );
 	}
+
+	shoot( weapon, power )
+	{
+		let startPos = this.calculateWeaponPosition();
+		let hitRange = new SAT.Box( new SAT.Vector( weaponPos.x, weaponPos.y ), 1, weapon.radius ).toPolygon();
+		hitRange.rotate( (360 - this.angle) * Math.PI / 180 );
+		this.world.meleeAttack( hitRange, {
+			dmg : weapon.dmg,
+			owner : this.owner,
+			power,
+			angle : this.angle
+		} );
+	}
 }
 module.exports = Bug;
 module.exports.START_HP = START_HP;
