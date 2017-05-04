@@ -127,8 +127,8 @@ list<sf::Vector2u> spawnpoints;
 
 //zmienne do rozgrywki
 sf::Color playercolors[4];
-sf::Texture backgroundt, wormt[9], clockt[8], aimert, backpackt;
-sf::Sprite  backgrounds, clocks, aimers, backpacks;
+sf::Texture backgroundt, wormt[9], clockt[8], aimert, backpackt, firingt;
+sf::Sprite  backgrounds, clocks, aimers, backpacks, firings;
 sf::Image backgroundi;
 sf::Vector2f deltabg(0,0);
 sf::Text turntimet;
@@ -441,7 +441,10 @@ void worm::update(){
             weapons[players[currentplayer].choosenweapon].mgraphs.setRotation((angle+270)%360);
         aimers.setRotation((angle+270)%360);
         aimers.setScale(mapscale, mapscale);
-        aimers.setPosition((position.x+20+(cos((angle-90)*3.14159265/180)*80)+deltabg.x)*mapscale, (position.y+23+(sin((angle-90)*3.14159265/180)*80)+deltabg.y)*mapscale);
+        aimers.setPosition((position.x+(direction==-1)*wormt[0].getSize().x+direction*(ORG_X/2)+(cos((angle-90)*3.14159265/180)*80)+deltabg.x)*mapscale, (position.y+ORG_Y/2+(sin((angle-90)*3.14159265/180)*80)+deltabg.y)*mapscale);
+        firings.setRotation((angle+270)%360);
+        firings.setScale(mapscale, mapscale);
+        firings.setPosition((deltabg+position+sf::Vector2f((direction==-1)*wormt[0].getSize().x+direction*(ORG_X/2), ORG_Y/2))*mapscale);
     }
 }
 
@@ -955,6 +958,10 @@ int main(){
         backpackt.loadFromFile("img/backpack.png");
         backpacks.setTexture(backpackt);
         backpacks.setPosition(928, 200);
+        firingt.loadFromFile("img/firing.png");
+        firings.setTexture(firingt);
+        firings.setTextureRect(sf::IntRect(0,250,95,25));
+        firings.setOrigin(2,10);
 
         mainfont.loadFromFile("font.ttf");
         ipinput.setFont(mainfont);
@@ -3204,6 +3211,7 @@ int main(){
             if(currentworm){
                 (*currentworm).draw(window);
                 if((*currentworm).V==sf::Vector2f(0,0)){
+                    window.draw(firings);
                     window.draw(aimers);
                 }
             }
