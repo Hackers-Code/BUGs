@@ -361,6 +361,7 @@ class Player {
 		let index = this.getWeaponIndexById( data.id );
 		if( this.isYourTurn && index !== -1 && this.weaponsList[ index ].usages !== 0 )
 		{
+			this.currentWeapon = this.weaponsList[ index ];
 			this.game.sendSelectWeaponToAll( data );
 		}
 	}
@@ -400,7 +401,7 @@ class Player {
 					}
 				}
 			}
-			if( this.currentWeapon.id === 3 || this.currentWeapon.id === 4 || this.currentWeapon.id === 5 || this.currentWeapon.id === 7 || this.currentWeapon.id === 8 || this.currentWeapon.id === 9 )
+			if( this.currentWeapon.id === 5 || this.currentWeapon.id === 8 || this.currentWeapon.id === 3 || this.currentWeapon.id === 4 || this.currentWeapon.id === 5 || this.currentWeapon.id === 7 || this.currentWeapon.id === 8 || this.currentWeapon.id === 9 )
 			{
 				return;
 			}
