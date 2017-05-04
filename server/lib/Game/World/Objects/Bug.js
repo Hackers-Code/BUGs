@@ -130,21 +130,9 @@ class Bug extends Object {
 
 	calculateWeaponPosition()
 	{
-		let x;
-		let y;
-		if( this.angle >= 0 && this.angle < 180 )
-		{
-			x = this.hitbox.pos.x + 13;
-			y = this.hitbox.pos.y + 34;
-		}
-		else
-		{
-			x = this.hitbox.pos.x + 27;
-			y = this.hitbox.pos.y + 32;
-		}
 		return {
-			x,
-			y
+			x : this.hitbox.pos.x + (BUG_WIDTH / 2),
+			y : this.hitbox.pos.y + (BUG_HEIGHT / 2)
 		};
 	}
 
