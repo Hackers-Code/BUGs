@@ -325,7 +325,6 @@ class Player {
 	notifyRoundEnd()
 	{
 		this.bugs[ this.currentBug ].stopMoving();
-		this.currentWeapon = this.weaponsList[ 0 ];
 		this.isYourTurn = false;
 		this.canAttack = false;
 		this.client.send( { opcode : 0x36 }, Sockets.tcp );
