@@ -139,7 +139,7 @@ class Bug extends Object {
 	meleeAttack( weapon, power )
 	{
 		let weaponPos = this.calculateWeaponPosition();
-		let weaponHitbox = new SAT.Box( new SAT.Vector( weaponPos.x, weaponPos.y ), 1, weapon.radius ).toPolygon();
+		let weaponHitbox = new SAT.Box( new SAT.Vector( weaponPos.x, weaponPos.y ), 5, weapon.radius ).toPolygon();
 		weaponHitbox.rotate( (360 - this.angle) * Math.PI / 180 );
 		this.world.meleeAttack( weaponHitbox, {
 			dmg : weapon.dmg,
@@ -152,9 +152,9 @@ class Bug extends Object {
 	shoot( weapon, power )
 	{
 		let startPos = this.calculateWeaponPosition();
-		let hitRange = new SAT.Box( new SAT.Vector( weaponPos.x, weaponPos.y ), 1, weapon.radius ).toPolygon();
+		let hitRange = new SAT.Box( new SAT.Vector( startPos.x, startPos.y ), 2, weapon.radius ).toPolygon();
 		hitRange.rotate( (360 - this.angle) * Math.PI / 180 );
-		this.world.meleeAttack( hitRange, {
+		this.world.shoot( hitRange, {
 			dmg : weapon.dmg,
 			owner : this.owner,
 			power,
