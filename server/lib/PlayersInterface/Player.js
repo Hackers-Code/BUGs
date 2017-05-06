@@ -405,7 +405,7 @@ class Player {
 					}
 				}
 			}
-			else if( this.currentWeapon.id === 3 || this.currentWeapon.id === 4 || this.currentWeapon.id === 5 || this.currentWeapon.id === 7 || this.currentWeapon.id === 8 || this.currentWeapon.id === 9 )
+			else if( this.currentWeapon.explosive === true )
 			{
 				return;
 			}
