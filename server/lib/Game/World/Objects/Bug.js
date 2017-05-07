@@ -161,6 +161,11 @@ class Bug extends Object {
 			angle : this.angle
 		} );
 	}
+
+	useExplosive( weapon, power )
+	{
+		//TODO:Implement this method
+	}
 }
 module.exports = Bug;
 module.exports.START_HP = START_HP;

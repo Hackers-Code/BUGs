@@ -407,6 +407,7 @@ class Player {
 			}
 			else if( this.currentWeapon.explosive === true )
 			{
+				this.bugs[ this.currentBug ].useExplosive( this.currentWeapon, power );
 				return;
 			}
 			if( this.currentWeapon.notEndRound === false )
