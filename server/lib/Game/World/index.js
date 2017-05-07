@@ -140,11 +140,13 @@ class World {
 				}
 				else
 				{
-					if( bug.speedY + this.physics.gravity * diffTime < this.physics.maxSpeedY )
-					{
-						bug.speedY += this.physics.gravity * diffTime;
-					}
+					bug.speedY += this.physics.gravity * diffTime;
 				}
+				if( bug.speedX !== this.physics.maxSpeedX && bug.speedX !== -this.physics.maxSpeedX )
+				{
+					bug.speedX -= this.physics.gravity * bug.speedX / this.physics.maxSpeedY;
+				}
+				bug.speedY -= this.physics.gravity * bug.speedY / this.physics.maxSpeedY;
 			}
 		}
 	}
