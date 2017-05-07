@@ -1,6 +1,7 @@
 'use strict';
 const SAT = require( 'sat' );
 const Object = require( './Object' );
+const Explosive = require( './Explosive' );
 const BUG_WIDTH = 40;
 const BUG_HEIGHT = 45;
 const START_HP = 200;
@@ -13,9 +14,8 @@ class Bug extends Object {
 			width : BUG_WIDTH,
 			height : BUG_HEIGHT
 		}, {
-			affectedByGravity : true,
-			destroyable : false,
-			collidable : false
+			notifyIfOnTheGround : true,
+			affectedByGravity : true
 		} );
 		this.world = world;
 		this.game = world.getGame();
@@ -97,6 +97,15 @@ class Bug extends Object {
 		};
 	}
 
+	notifyOnTheGround()
+	{
+		if( this.speedY >= this.physics.maxSpeedY / 2 )
+		{
+			this.decreaseHP( START_HP * (this.speedY / this.physics.maxSpeedY) );
+		}
+		this.isOnTheGround = true;
+	}
+
 	setAngle( data )
 	{
 		if( data.angle > 180 )
@@ -164,8 +173,15 @@ class Bug extends Object {
 
 	useExplosive( weapon, power )
 	{
-		//TODO:Implement this method
+		let startPos = this.calculateWeaponPosition();
+		let explosive = new Explosive( {
+			x : startPos.x,
+			y : startPos.y,
+			width : 5,
+			height : 5
+		}, weapon );
+		explosive.setVelocity( this.angle, power );
+		this.world.spawnExplosive( explosive );
 	}
 }
 module.exports = Bug;
-module.exports.START_HP = START_HP;

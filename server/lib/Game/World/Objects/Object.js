@@ -3,9 +3,10 @@ const SAT = require( 'sat' );
 class Object {
 	constructor( element, flags )
 	{
-		this.affectedByGravity = flags.affectedByGravity;
-		this.destroyable = flags.destroyable;
-		this.collidable = flags.collidable;
+		this.notifyIfOnTheGround = flags.notifyIfOnTheGround || false;
+		this.affectedByGravity = flags.affectedByGravity || false;
+		this.destroyable = flags.destroyable || false;
+		this.collidable = flags.collidable || false;
 		this.hitbox = new SAT.Box( new SAT.Vector( element.x, element.y ), element.width, element.height ).toPolygon();
 	}
 }

@@ -4,8 +4,6 @@ class KillingZone extends Object {
 	constructor( element )
 	{
 		super( element, {
-			affectedByGravity : false,
-			destroyable : false,
 			collidable : true
 		} );
 	}

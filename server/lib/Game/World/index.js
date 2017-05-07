@@ -2,7 +2,6 @@
 const SAT = require( 'sat' );
 const Block = require( './Objects/Block' );
 const KillingZone = require( './Objects/KillingZone' );
-const START_BUG_HP = require( './Objects/Bug' ).START_HP;
 const PENETRATION_RATE = 5;
 class World {
 	constructor( game )
@@ -15,6 +14,7 @@ class World {
 		this.killingZones = [];
 		this.bounds = new SAT.Box( new SAT.Vector( 0, 0 ), this.parsedMap.metadata[ 0 ].width,
 			this.parsedMap.metadata[ 0 ].height ).toPolygon();
+		this.explosiveInAir = null;
 		this.addBlocks();
 		this.addKillingZones();
 	}
@@ -97,15 +97,19 @@ class World {
 
 	simulate( diffTime )
 	{
-		let bugs = this.game.getBugs();
-		for( let i = 0 ; i < bugs.length ; i++ )
+		let objects = this.game.getBugs();
+		if( this.explosiveInAir !== null )
 		{
-			let bug = bugs[ i ];
-			if( bug.isMoving() )
+			objects.push( this.explosiveInAir );
+		}
+		for( let i = 0 ; i < objects.length ; i++ )
+		{
+			let object = objects[ i ];
+			if( object.isMoving() )
 			{
-				let hitbox = bug.hitbox;
-				let speedX = bug.speedX;
-				let speedY = bug.speedY;
+				let hitbox = object.hitbox;
+				let speedX = object.speedX;
+				let speedY = object.speedY;
 				let oldX = hitbox.pos.x;
 				let oldY = hitbox.pos.y;
 				hitbox.pos.x += speedX * diffTime;
@@ -113,40 +117,39 @@ class World {
 				let canMoveHere = this.canMoveHere( hitbox );
 				if( canMoveHere !== true )
 				{
-					bug.speedY = 0;
+					object.speedY = 0;
 					if( canMoveHere !== false )
 					{
 						if( canMoveHere.overlapV.x !== 0 )
 						{
-							bug.speedX = 0;
+							object.speedX = 0;
 						}
 						hitbox.pos.x -= canMoveHere.overlapV.x;
 						hitbox.pos.y -= canMoveHere.overlapV.y;
 					}
 					else
 					{
-						bug.speedX = 0;
+						object.speedX = 0;
 						hitbox.pos.x = oldX;
 						hitbox.pos.y = oldY;
 					}
 				}
 				if( this.isOnTheGround( hitbox ) )
 				{
-					if( speedY >= this.physics.maxSpeedY / 2 )
+					if( object.notifyIfOnTheGround )
 					{
-						bug.decreaseHP( START_BUG_HP * (speedY / this.physics.maxSpeedY) );
+						object.notifyOnTheGround();
 					}
-					bug.isOnTheGround = true;
 				}
 				else
 				{
-					bug.speedY += this.physics.gravity * diffTime;
+					object.speedY += this.physics.gravity * diffTime;
 				}
-				if( bug.speedX !== this.physics.maxSpeedX && bug.speedX !== -this.physics.maxSpeedX )
+				if( object.speedX !== this.physics.maxSpeedX && object.speedX !== -this.physics.maxSpeedX )
 				{
-					bug.speedX -= this.physics.gravity * bug.speedX / this.physics.maxSpeedY * diffTime;
+					object.speedX -= this.physics.gravity * object.speedX / this.physics.maxSpeedY * diffTime;
 				}
-				bug.speedY -= this.physics.gravity * bug.speedY / this.physics.maxSpeedY * diffTime;
+				object.speedY -= this.physics.gravity * object.speedY / this.physics.maxSpeedY * diffTime;
 			}
 		}
 	}
@@ -214,6 +217,11 @@ class World {
 				enemies[ enemiesToHit[ i ].index ].setHitVelocity( data.angle, data.power );
 			}
 		}
+	}
+
+	spawnExplosive( explosive, weaponData )
+	{
+		this.explosiveInAir = explosive;
 	}
 }
 module.exports = World;
