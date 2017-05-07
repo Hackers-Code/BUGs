@@ -45,25 +45,31 @@ class Bug extends Object {
 
 	moveRight()
 	{
-		if( this.speedX === this.physics.maxSpeedX )
+		if( this.isOnTheGround )
 		{
-			this.speedX = 0;
-		}
-		if( this.isOnTheGround && this.speedX !== this.physics.maxSpeedX )
-		{
-			this.speedX = this.physics.maxSpeedX;
+			if( this.speedX === this.physics.maxSpeedX )
+			{
+				this.speedX = 0;
+			}
+			else
+			{
+				this.speedX = this.physics.maxSpeedX;
+			}
 		}
 	}
 
 	moveLeft()
 	{
-		if( this.speedX === -this.physics.maxSpeedX )
+		if( this.isOnTheGround )
 		{
-			this.speedX = 0;
-		}
-		if( this.isOnTheGround && this.speedX !== -this.physics.maxSpeedX )
-		{
-			this.speedX = -this.physics.maxSpeedX;
+			if( this.speedX === -this.physics.maxSpeedX )
+			{
+				this.speedX = 0;
+			}
+			else
+			{
+				this.speedX = -this.physics.maxSpeedX;
+			}
 		}
 	}
 
