@@ -144,9 +144,9 @@ class World {
 				}
 				if( bug.speedX !== this.physics.maxSpeedX && bug.speedX !== -this.physics.maxSpeedX )
 				{
-					bug.speedX -= this.physics.gravity * bug.speedX / this.physics.maxSpeedY;
+					bug.speedX -= this.physics.gravity * bug.speedX / this.physics.maxSpeedY * diffTime;
 				}
-				bug.speedY -= this.physics.gravity * bug.speedY / this.physics.maxSpeedY;
+				bug.speedY -= this.physics.gravity * bug.speedY / this.physics.maxSpeedY * diffTime;
 			}
 		}
 	}
