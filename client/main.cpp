@@ -133,10 +133,11 @@ sf::Image backgroundi;
 sf::Vector2f deltabg(0,0);
 sf::Text turntimet;
 sf::Clock moveclock;
-float mapscale=0.2;
-unsigned int turntime=0, clockframe=0, no18delta=0, force=0, currentplayer=0;
+sf::Time shootedtime;
+float mapscale=0.2, force=0;
+unsigned int turntime=0, clockframe=0, no18delta=0, currentplayer=0;
 int choosedworm=0;
-bool shooting=0, choosingweapon=0;
+bool shooting=0, choosingweapon=0, shooted=0;
 
 //fizyka
 short vjump=-300, ay=43, vxmax=27, vymax=875;
@@ -210,10 +211,10 @@ worm *currentworm=0;
 
 class weapon{public:
     int id, usages, dmg, r;
-    string track, name, thumbnail;
+    string track, name, thumbnail, anim;
     sf::Vector2f origin, position;
-    sf::Texture thumbt, mgrapht;
-    sf::Sprite thumbs, mgraphs;
+    sf::Texture thumbt, mgrapht, animt;
+    sf::Sprite thumbs, mgraphs, anims;
     sf::Text text;//ambitne, prawda?
 
     weapon(string namein){
@@ -251,7 +252,15 @@ class weapon{public:
                 text.  setPosition(986+((input%5)*36), 277+(int(input/5)*35));
                 if(!mgrapht.loadFromFile("img/cache"+track)){ cout<<"("<<name<<" graphic)\n"; good=0;}
                 if((!thumbt.getSize().x)||(!thumbt.getSize().y)){ cout<<name<<"'s graphic is invalid\n"; good=0;}
-            }else{
+                if(anim.length()){
+                    if(!animt.loadFromFile("img/cache"+anim)){ cout<<"("<<name<<" animation)\n"; good=0;}
+                    if((!animt.getSize().x)||(!animt.getSize().y)){ cout<<name<<"'s animation is invalid\n"; good=0;}
+                    anims.setTexture(animt, 1);
+                    anims.setOrigin(ORG_X, ORG_Y);
+                    anims.setTextureRect(sf::IntRect(0, 0, animt.getSize().x, mgrapht.getSize().y));
+                }
+            }
+            else{
                 sf::Http http;
                 http.setHost(HTTPURL, 80);
                 sf::Http::Request request(thumbnail);
@@ -272,6 +281,20 @@ class weapon{public:
                         buffer=response.getBody();
                         if(!mgrapht.loadFromMemory(&buffer[0], buffer.length())){ cout<<"("<<name<<" graphic)\n"; good=0;}
                         if((!thumbt.getSize().x)||(!thumbt.getSize().y)){ cout<<name<<"'s graphic is invalid\n"; good=0;}
+
+                        if(anim.length()){
+                        request=sf::Http::Request(anim);
+                        response=http.sendRequest(request);
+                        httpstatus=response.getStatus();
+                            if(httpstatus==sf::Http::Response::Ok){
+                                buffer=response.getBody();
+                                if(!animt.loadFromMemory(&buffer[0], buffer.length())){ cout<<"("<<name<<" animation)\n"; good=0;}
+                                if((!animt.getSize().x)||(!animt.getSize().y)){ cout<<name<<"'s animation is invalid\n"; good=0;}
+                                anims.setTexture(animt, 1);
+                                anims.setOrigin(ORG_X, ORG_Y);
+                                anims.setTextureRect(sf::IntRect(0, 0, animt.getSize().x, mgrapht.getSize().y));
+                            }else{ cout<<"error while trying to download "<<name<<"'s animation\n"; good=0;}
+                        }
                     }else{ cout<<"error while trying to download "<<name<<"'s graphic\n"; good=0;}
                 }else{ cout<<"error while trying to download "<<name<<"'s thumbnail\n"; good=0;}
             }
@@ -282,6 +305,15 @@ class weapon{public:
     }
 };
 vector<weapon> weapons;
+
+weapon* getWeaponFromId(unsigned int idin){
+    if((idin<weapons.size())&&(weapons[idin].id==idin))return &weapons[idin];
+    for(int i=0; i<weapons.size(); i++){
+        if(weapons[idin].id==idin)return &weapons[idin];
+    }
+    cout<<"wrong weapon id, prepare for crash\n";
+    return 0;
+}
 
 class worm{public:
     sf::Vector2f position, V;
@@ -407,6 +439,7 @@ class player{public:
 };
 vector<player> players;
 
+
 worm worm::operator =(worm input){
     position =input.position;
     hp       =input.hp;
@@ -438,7 +471,7 @@ void worm::update(){
     text.setString("HP="+to_string(hp));
     if((currentworm)&&((*currentworm).id==id)){
         if(players[currentplayer].choosenweapon!=1)
-            weapons[players[currentplayer].choosenweapon].mgraphs.setRotation((angle+270)%360);
+            (*(getWeaponFromId(players[currentplayer].choosenweapon))).mgraphs.setRotation((angle+270)%360);
         aimers.setRotation((angle+270)%360);
         aimers.setScale(mapscale, mapscale);
         aimers.setPosition((position.x+(direction==-1)*wormt[0].getSize().x+direction*(ORG_X/2)+(cos((angle-90)*3.14159265/180)*80)+deltabg.x)*mapscale, (position.y+ORG_Y/2+(sin((angle-90)*3.14159265/180)*80)+deltabg.y)*mapscale);
@@ -470,15 +503,6 @@ void weapon::draw(sf::RenderWindow &window){
             mgraphs.setScale(mapscale, mapscale*(*currentworm).direction);
         window.draw(mgraphs);
     }
-}
-
-weapon* getWeaponFromId(unsigned int idin){
-    if((idin<weapons.size())&&(weapons[idin].id==idin))return &weapons[idin];
-    for(int i=0; i<weapons.size(); i++){
-        if(weapons[idin].id==idin)return &weapons[idin];
-    }
-    cout<<"wrong weapon id, prepare for crash\n";
-    return 0;
 }
 
 void placek(sf::Image &image, int x, int y,unsigned int r){
@@ -580,13 +604,13 @@ bool getMapsFromServer(){
 
 bool getWeaponsFromServer(){
     fstream plik;
-    vector<string> wnames, wthumbs, wtracks;
+    vector<string> wnames, wthumbs, wtracks, wanims;
     vector<unsigned int> wtimes;
     plik.open("img/cache/settings.cfg", ios::in | ios::binary);
     if(plik.good()){
         int linenumber=0;
         while(getline(plik, buffer)){
-            switch(linenumber%4){
+            switch(linenumber%5){
                 case 0:{
                     wnames.push_back(buffer);
                 }break;
@@ -597,6 +621,9 @@ bool getWeaponsFromServer(){
                     wthumbs.push_back(buffer);
                 }break;
                 case 3:{
+                    wanims.push_back(buffer);
+                }break;
+                case 4:{
                     wtimes.push_back(stoul(buffer.c_str()));
                 }break;
             }linenumber++;
@@ -625,10 +652,11 @@ bool getWeaponsFromServer(){
             if((protbufferi[0]<weapons.size())&&(weapons[protbufferi[0]].name==buffer)){
                 weapons[protbufferi[0]].id=protbufferi[0];
                 auto vdjnadfaskfj=armvector[i].find("usages");      if(vdjnadfaskfj!=armvector[i].end()) weapons[protbufferi[0]].usages=   armvector[i]["usages"].get<int>();
-                auto fdcasdvsdfvb=armvector[i].find("dmg");         if(fdcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=      armvector[i]["dmg"].get<int>();
+                auto adcasdvsdfvb=armvector[i].find("dmg");         if(adcasdvsdfvb!=armvector[i].end()) weapons[protbufferi[0]].dmg=      armvector[i]["dmg"].get<int>();
                 auto vbfgdgyutrra=armvector[i].find("image");       if(vbfgdgyutrra!=armvector[i].end()) weapons[protbufferi[0]].track=    armvector[i]["image"].get<string>();
-                auto fghfbdfdvsdw=armvector[i].find("thumbnail");   if(fghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
-                auto fgbdvfbrdtbt=armvector[i].find("radius");      if(fgbdvfbrdtbt!=armvector[i].end()) weapons[protbufferi[0]].r=        armvector[i]["radius"].get<int>();
+                auto aghfbdfdvsdw=armvector[i].find("thumbnail");   if(aghfbdfdvsdw!=armvector[i].end()) weapons[protbufferi[0]].thumbnail=armvector[i]["thumbnail"].get<string>();
+                auto etsrdytnbaaf=armvector[i].find("anim");        if(etsrdytnbaaf!=armvector[i].end()) weapons[protbufferi[0]].anim=     armvector[i]["anim"].get<string>();
+                auto agbdvfbrdtbt=armvector[i].find("radius");      if(agbdvfbrdtbt!=armvector[i].end()) weapons[protbufferi[0]].r=        armvector[i]["radius"].get<int>();
                 auto bvsdzdrtdrsf=armvector[i].find("last_update"); if(bvsdzdrtdrsf!=armvector[i].end()) {protbuffers[0]=armvector[i]["last_update"].get<string>(); for(int hfs=0; hfs<6; hfs++)protbuffers[0].pop_back(); last_changed=stoul(protbuffers[0]);}
                 bool fnotexist=1;
                 for(int j=0; j<wtimes.size(); j++){
@@ -643,7 +671,13 @@ bool getWeaponsFromServer(){
                             wthumbs[j]=weapons[protbufferi[0]].thumbnail;
                             weapons[protbufferi[0]].mgrapht.copyToImage().saveToFile("img/cache"+weapons[protbufferi[0]].track);
                             wtracks[j]=weapons[protbufferi[0]].track;
+                            if(weapons[protbufferi[0]].anim.length())
+                                weapons[protbufferi[0]].animt.copyToImage().saveToFile("img/cache"+weapons[protbufferi[0]].anim);
+                            wanims[j]=weapons[protbufferi[0]].anim;
                         }else{
+                            weapons[protbufferi[0]].track=    wtracks[j];
+                            weapons[protbufferi[0]].thumbnail=wthumbs[j];
+                            weapons[protbufferi[0]].anim=     wanims[j];
                             weapons[protbufferi[0]].loadGraphics(protbufferi[0], 1);
                         }
                         fnotexist=0;
@@ -657,9 +691,12 @@ bool getWeaponsFromServer(){
                     weapons[protbufferi[0]].loadGraphics(protbufferi[0]);
                     weapons[protbufferi[0]].thumbt.copyToImage().saveToFile("img/cache"+weapons[protbufferi[0]].thumbnail);
                     weapons[protbufferi[0]].mgrapht.copyToImage().saveToFile("img/cache"+weapons[protbufferi[0]].track);
+                    if(weapons[protbufferi[0]].anim.length())
+                        weapons[protbufferi[0]].animt.copyToImage().saveToFile("img/cache"+weapons[protbufferi[0]].anim);
                     wnames.push_back(weapons[protbufferi[0]].name);
                     wtracks.push_back(weapons[protbufferi[0]].track);
                     wthumbs.push_back(weapons[protbufferi[0]].thumbnail);
+                    wanims.push_back(weapons[protbufferi[0]].anim);
                     wtimes.push_back(last_changed);
                 }
             }else{cout<<"\b";
@@ -668,10 +705,11 @@ bool getWeaponsFromServer(){
                     if(weapons[j].name==buffer){
                         weapons[j].id=protbufferi[0];
                         auto vdjnadfaskfj=armvector[i].find("usages");      if(vdjnadfaskfj!=armvector[i].end()) weapons[j].usages=   armvector[i]["usages"].get<int>();
-                        auto fdcasdvsdfvb=armvector[i].find("dmg");         if(fdcasdvsdfvb!=armvector[i].end()) weapons[j].dmg=      armvector[i]["dmg"].get<int>();
+                        auto adcasdvsdfvb=armvector[i].find("dmg");         if(adcasdvsdfvb!=armvector[i].end()) weapons[j].dmg=      armvector[i]["dmg"].get<int>();
                         auto vbfgdgyutrra=armvector[i].find("image");       if(vbfgdgyutrra!=armvector[i].end()) weapons[j].track=    armvector[i]["image"].get<string>();
-                        auto fghfbdfdvsdw=armvector[i].find("thumbnail");   if(fghfbdfdvsdw!=armvector[i].end()) weapons[j].thumbnail=armvector[i]["thumbnail"].get<string>();
-                        auto fgbdvfbrdtbt=armvector[i].find("radius");      if(fgbdvfbrdtbt!=armvector[i].end()) weapons[j].r=        armvector[i]["radius"].get<int>();
+                        auto aghfbdfdvsdw=armvector[i].find("thumbnail");   if(aghfbdfdvsdw!=armvector[i].end()) weapons[j].thumbnail=armvector[i]["thumbnail"].get<string>();
+                        auto etsrdytnbaaf=armvector[i].find("anim");        if(etsrdytnbaaf!=armvector[i].end()) weapons[j].anim=     armvector[i]["anim"].get<string>();
+                        auto agbdvfbrdtbt=armvector[i].find("radius");      if(agbdvfbrdtbt!=armvector[i].end()) weapons[j].r=        armvector[i]["radius"].get<int>();
                         auto bvsdzdrtdrsf=armvector[i].find("last_update"); if(bvsdzdrtdrsf!=armvector[i].end()) {protbuffers[0]=armvector[i]["last_update"].get<string>(); for(int hfs=0; hfs<6; hfs++)protbuffers[0].pop_back(); last_changed=stoul(protbuffers[0]);}
                         bool fnotexist=1;
                         for(int k=0; k<wtimes.size(); k++){
@@ -686,7 +724,13 @@ bool getWeaponsFromServer(){
                                     wthumbs[k]=weapons[j].thumbnail;
                                     weapons[j].mgrapht.copyToImage().saveToFile("img/cache"+weapons[j].track);
                                     wtracks[k]=weapons[j].track;
+                                    if(weapons[j].anim.length())
+                                        weapons[j].animt.copyToImage().saveToFile("img/cache"+weapons[j].anim);
+                                    wanims[k]=weapons[j].anim;
                                 }else{
+                                    weapons[protbufferi[0]].track=    wtracks[j];
+                                    weapons[protbufferi[0]].thumbnail=wthumbs[j];
+                                    weapons[protbufferi[0]].anim=     wanims[j];
                                     weapons[j].loadGraphics(protbufferi[0], 1);
                                 }
                                 fnotexist=0;
@@ -700,9 +744,12 @@ bool getWeaponsFromServer(){
                             weapons[j].loadGraphics(protbufferi[0]);
                             weapons[j].thumbt.copyToImage().saveToFile("img/cache"+weapons[j].thumbnail);
                             weapons[j].mgrapht.copyToImage().saveToFile("img/cache"+weapons[j].track);
+                            if(weapons[j].anim.length())
+                                weapons[j].animt.copyToImage().saveToFile("img/cache"+weapons[j].anim);
                             wnames.push_back(weapons[j].name);
                             wtracks.push_back(weapons[j].track);
                             wthumbs.push_back(weapons[j].thumbnail);
+                            wanims.push_back(weapons[j].anim);
                             wtimes.push_back(last_changed);
                         }
                         fnotexists=0;
@@ -718,7 +765,7 @@ bool getWeaponsFromServer(){
             plik.open("img/cache/settings.cfg", ios::out | ios::binary);
             if(plik.good())
                 for(int i=0; i<wtimes.size(); i++)
-                    plik<<wnames[i]<<"\n"<<wtracks[i]<<"\n"<<wthumbs[i]<<"\n"<<wtimes[i]<<"\n";
+                    plik<<wnames[i]<<"\n"<<wtracks[i]<<"\n"<<wthumbs[i]<<"\n"<<wanims[i]<<"\n"<<wtimes[i]<<"\n";
             else cout<<"cannot open file img/cache/settings.cfg\n";
             plik.close();
         }
@@ -960,7 +1007,7 @@ int main(){
         backpacks.setPosition(928, 200);
         firingt.loadFromFile("img/firing.png");
         firings.setTexture(firingt);
-        firings.setTextureRect(sf::IntRect(0,250,95,25));
+        firings.setTextureRect(sf::IntRect(0,0,95,25));
         firings.setOrigin(2,10);
 
         mainfont.loadFromFile("font.ttf");
@@ -1165,10 +1212,12 @@ int main(){
                     if(event.mouseWheel.delta>0){
                         if(mapscale<1){
                             mapscale+=0.1;
+                            deltabg+=sf::Vector2f(event.mouseWheel.x, event.mouseWheel.y)*float(1/mapscale-1/(mapscale-0.1));
                         }
                     }else{
                         if(mapscale>0.3){
                             mapscale-=0.1;
+                            deltabg+=sf::Vector2f(event.mouseWheel.x, event.mouseWheel.y)*float(1/mapscale-1/(mapscale+0.1));
                         }
                     }
                     backgrounds.setScale(mapscale, mapscale);
@@ -1262,7 +1311,7 @@ int main(){
                 }else
                 if((event.type==sf::Event::KeyPressed)||(event.type==sf::Event::KeyReleased)){
                     if(event.key.code==sf::Keyboard::A){
-                        if((currentworm)&&((*currentworm).team==userid)&&((*currentworm).V.x<=0)&&(((event.type==sf::Event::KeyPressed)&&((*currentworm).V.x!=-vxmax)&&(moveclock.getElapsedTime().asSeconds()>1))||((event.type==sf::Event::KeyReleased)&&((*currentworm).V.x==-vxmax)))){
+                        if((currentworm)&&((*currentworm).team==userid)&&((*currentworm).V.x<=0)&&(!(*currentworm).V.y)&&(((event.type==sf::Event::KeyPressed)&&((*currentworm).V.x!=-vxmax))||((event.type==sf::Event::KeyReleased)&&((*currentworm).V.x==-vxmax)))){
                             if(protocol38()){
                                 if((*currentworm).V.x!=-vxmax){
                                     (*currentworm).walking=1;
@@ -1272,18 +1321,19 @@ int main(){
                                         (*currentworm).angle=360-(*currentworm).angle;
                                         protocol3b((*currentworm).angle/2);
                                     }
-                                    moveclock.restart();
-                                }else{
+                                }
+                                else{
                                     (*currentworm).walking=0;
                                     (*currentworm).V.x=0;
                                     (*currentworm).animcount=0;
                                     (*currentworm).sprite.setTexture(wormt[0]);
+                                    moveclock.restart();
                                 }
                             }
                         }
                     }else
                     if(event.key.code==sf::Keyboard::D){
-                        if((currentworm)&&((*currentworm).team==userid)&&((*currentworm).V.x>=0)&&(((event.type==sf::Event::KeyPressed)&&((*currentworm).V.x!=vxmax))||((event.type==sf::Event::KeyReleased)&&((*currentworm).V.x==vxmax)))){
+                        if((currentworm)&&((*currentworm).team==userid)&&((*currentworm).V.x>=0)&&(!(*currentworm).V.y)&&(((event.type==sf::Event::KeyPressed)&&((*currentworm).V.x!=vxmax))||((event.type==sf::Event::KeyReleased)&&((*currentworm).V.x==vxmax)))){
                             if(protocol39()){
                                 if((*currentworm).V.x!=vxmax){
                                     (*currentworm).V.x=vxmax;
@@ -1298,14 +1348,18 @@ int main(){
                                     (*currentworm).V.x=0;
                                     (*currentworm).animcount=0;
                                     (*currentworm).sprite.setTexture(wormt[0]);
+                                    moveclock.restart();
                                 }
                             }
                         }
+                    }else
+                    if((event.key.code==sf::Keyboard::Return)&&(event.type==sf::Event::KeyPressed)){
+                        shooting=1;
                     }
                     if(event.type==sf::Event::KeyReleased){
-                        if(event.key.code==sf::Keyboard::F)
+                        if(event.key.code==sf::Keyboard::F){
                             choosingweapon=!choosingweapon;
-                        else
+                        }else
                         if((players[currentplayer].choosenweapon==1)&&((*(getWeaponFromId(players[currentplayer].choosenweapon))).usages)){
                             if(event.key.code==sf::Keyboard::W){
                                 choosedworm++;
@@ -1346,10 +1400,15 @@ int main(){
                         if(event.key.code==sf::Keyboard::Return){
                             if((players[currentplayer].choosenweapon==2)&&((*(getWeaponFromId(players[currentplayer].choosenweapon))).usages)){
                                 protocol43(0);
-                            }else
-                            if((players[currentplayer].choosenweapon==6)&&((*(getWeaponFromId(players[currentplayer].choosenweapon))).usages)){
-                                protocol43(0);
                             }
+                            else{
+                                protocol43(force);
+                            }
+                            shooting=0;
+                            firings.setTextureRect(sf::IntRect(0,0,95,25));
+                            force=0;
+                            shootedtime=clocker.getElapsedTime();
+                            shooted=1;
                         }
                     }
                 }else
@@ -1853,6 +1912,26 @@ int main(){
                 }
             }
         }
+        if((currentworm)&&((*currentworm).team==userid)&&(!(*currentworm).V.y)&&(moveclock.getElapsedTime().asSeconds()>0.8)&&((((*currentworm).V.x==-vxmax)&&(!sf::Keyboard::isKeyPressed(sf::Keyboard::A)))||(((*currentworm).V.x==vxmax)&&(!sf::Keyboard::isKeyPressed(sf::Keyboard::D))))){
+            if((*currentworm).V.x==-vxmax){
+                if(protocol38()){
+                    (*currentworm).walking=0;
+                    (*currentworm).V.x=0;
+                    (*currentworm).animcount=0;
+                    (*currentworm).sprite.setTexture(wormt[0]);
+                    moveclock.restart();
+                }
+            }else
+            if((*currentworm).V.x==vxmax){
+                if(protocol39()){
+                    (*currentworm).walking=0;
+                    (*currentworm).V.x=0;
+                    (*currentworm).animcount=0;
+                    (*currentworm).sprite.setTexture(wormt[0]);
+                }
+            }
+        }
+
 
         if(clientsocket.receive(data, 1024, received)==sf::Socket::Done){
             if(!receiving)
@@ -2563,8 +2642,12 @@ int main(){
                             }else
                             if(players[currentplayer].choosenweapon==2){
                                 cout<<players[currentplayer].name<<" surrended\n";
-                            }else
-                                cout<<"Not supported weapon used :P\n";
+                            }
+                            if(!shooted){
+                                shootedtime=clocker.getElapsedTime();
+                                shooted=1;
+                            }
+
                             protocol40();
                         }else cout<<"lost used weapon power\n";
                         break;
@@ -2854,12 +2937,10 @@ int main(){
                             }
                             if(fcolided){
                                 (*wormpointers[i]).position=colisionpos;
-                                (*wormpointers[i]).update();
                             }else{
                                 (*wormpointers[i]).position.x+=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x;
-                                (*wormpointers[i]).update();
                             }
-                            if(!(frame%5)){
+                            if((!(frame%5))&&((*wormpointers[i]).walking)){
                                 (*wormpointers[i]).next_anim();
                             }
                         }else
@@ -2879,12 +2960,10 @@ int main(){
                             }
                             if(fcolided){
                                 (*wormpointers[i]).position=colisionpos;
-                                (*wormpointers[i]).update();
                             }else{
                                 (*wormpointers[i]).position.x+=(currentittime-lastittime).asSeconds()*(*wormpointers[i]).V.x;
-                                (*wormpointers[i]).update();
                             }
-                            if(!(frame%5)){
+                            if((!(frame%5))&&((*wormpointers[i]).walking)){
                                 (*wormpointers[i]).next_anim();
                             }
                         }
@@ -2913,7 +2992,6 @@ int main(){
                                 if((*wormpointers[i]).V.y>vymax)
                                     (*wormpointers[i]).V.y=vymax;
                             }
-                            (*wormpointers[i]).update();
                         }else
                         if((*wormpointers[i]).V.x>0){//  `..
                             bool fcolided=0, mdir;
@@ -3041,7 +3119,6 @@ int main(){
                                 if((*wormpointers[i]).V.y>vymax)
                                     (*wormpointers[i]).V.y=vymax;
                             }
-                            (*wormpointers[i]).update();
                         }
                     }else
                     if((*wormpointers[i]).V.y<0){
@@ -3068,7 +3145,6 @@ int main(){
                             (*wormpointers[i]).V.y+=ay*(currentittime-lastittime).asSeconds();
                             if((*wormpointers[i]).V.y>vymax)
                                 (*wormpointers[i]).V.y=vymax;
-                            (*wormpointers[i]).update();
                         }else
                         if((*wormpointers[i]).V.x>0){//  /^
                             bool fcolided=0, mdir;
@@ -3132,7 +3208,6 @@ int main(){
                                 if((*wormpointers[i]).V.y>vymax)
                                     (*wormpointers[i]).V.y=vymax;
                             }
-                            (*wormpointers[i]).update();
                         }else
                         /*if((*wormpointers[i]).V.x<0)*/{//  ^`.
                             bool fcolided=0, mdir;
@@ -3196,12 +3271,42 @@ int main(){
                                 if((*wormpointers[i]).V.y>vymax)
                                     (*wormpointers[i]).V.y=vymax;
                             }
-                            (*wormpointers[i]).update();
+
                         }
                     }
+                    if(((*wormpointers[i]).V.x!=vxmax)&&((*wormpointers[i]).V.x!=-vxmax))
+                        (*wormpointers[i]).V.x-=(*wormpointers[i]).V.x*(currentittime-lastittime).asSeconds()*ay/vymax;
+                    (*wormpointers[i]).V.y-=(*wormpointers[i]).V.y*(currentittime-lastittime).asSeconds()*ay/vymax;
+                    (*wormpointers[i]).update();
+                }
+            }
+            if((shooting)&&(force<255)){
+                force+=(currentittime-lastittime).asSeconds()*128;
+                if(force>255) force=255;
+                firings.setTextureRect(sf::IntRect(0, int(force/23.181818)*25, 95, 25));
+            }else
+            if(shooted){
+                sf::Time deltashooted=clocker.getElapsedTime()-shootedtime;
+
+                if(deltashooted.asSeconds()>float((*(getWeaponFromId(players[currentplayer].choosenweapon))).animt.getSize().y)/(*(getWeaponFromId(players[currentplayer].choosenweapon))).mgrapht.getSize().y/30){
+                    shooted=0;
+                }else
+                if(currentworm){
+                    (*(getWeaponFromId(players[currentplayer].choosenweapon))).anims.setTextureRect(sf::IntRect(0, int(deltashooted.asSeconds()*30)*(*(getWeaponFromId(players[currentplayer].choosenweapon))).mgrapht.getSize().y, (*(getWeaponFromId(players[currentplayer].choosenweapon))).mgrapht.getSize().x, (*(getWeaponFromId(players[currentplayer].choosenweapon))).mgrapht.getSize().y));
+                    (*(getWeaponFromId(players[currentplayer].choosenweapon))).anims.setRotation(((*currentworm).angle+270)%360);
+                    (*(getWeaponFromId(players[currentplayer].choosenweapon))).anims.setScale(mapscale, mapscale);
+                    if((*currentworm).direction==1)
+                        (*(getWeaponFromId(players[currentplayer].choosenweapon))).anims.setPosition((sf::Vector2f(ORG_X/2, ORG_Y/2)+(*currentworm).position+deltabg)*mapscale);
+                    else
+                    if((*currentworm).direction==-1)
+                        (*(getWeaponFromId(players[currentplayer].choosenweapon))).anims.setPosition((sf::Vector2f((*currentworm).sprite.getLocalBounds().width-ORG_X/2, ORG_Y/2)+(*currentworm).position+deltabg)*mapscale);
+                    else cout<<"weird direction, "<<(*currentworm).direction<<"\n";
+                }else{
+                    cout<<"turn ended before end of animation!\n";
                 }
             }
         }
+
         window.clear(bgcolor);{
         if(mode==ingame){
             window.draw(backgrounds);
@@ -3211,7 +3316,11 @@ int main(){
             if(currentworm){
                 (*currentworm).draw(window);
                 if((*currentworm).V==sf::Vector2f(0,0)){
-                    window.draw(firings);
+                    if(shooting)
+                        window.draw(firings);
+                    else
+                    if(shooted)
+                        window.draw((*(getWeaponFromId(players[currentplayer].choosenweapon))).anims);
                     window.draw(aimers);
                 }
             }
@@ -3221,7 +3330,8 @@ int main(){
             window.draw(clocks);
             window.draw(turntimet);
             if(players.size()<2)cout<<"possible crash, "<<players.size()<<" players\n";
-            weapons[players[currentplayer].choosenweapon].draw(window);
+            if(!shooted)
+                weapons[players[currentplayer].choosenweapon].draw(window);
             if(choosingweapon){
                 window.draw(backpacks);
                 for(int i=0; i<weapons.size(); i++){
@@ -3341,7 +3451,7 @@ void exitting(){
     }
 }
 
-void uselessFunction(){
+volatile void uselessFunction(){
 string asd="This is a virus, do not run it or it will destroy your eyes";
 }
 
@@ -3354,3 +3464,10 @@ string asd="This is a virus, do not run it or it will destroy your eyes";
 -"To jaką animację mam dać na poddanie się?"
 -"Nie wiem, wbij to w ziemię i napisz "mały krok dla worma, duży dla wormsowości"..." Michał Marczewski
 */
+
+
+/*
+(
+    (((*currentworm).V.x==-vxmax)&&(!sf::Keyboard::isKeyPressed(sf::Keyboard::A)))
+  ||(((*currentworm).V.x==vxmax)&&(!sf::Keyboard::isKeyPressed(sf::Keyboard::D)))
+)*/
