@@ -288,6 +288,11 @@ class Player {
 				this.bugs.splice( i, 1 );
 			}
 		}
+		if( this.bugs.length === 0 )
+		{
+			this.room.leave( this.lobbyID );
+			this.setDefaults();
+		}
 	}
 
 	sendGameState( state )
