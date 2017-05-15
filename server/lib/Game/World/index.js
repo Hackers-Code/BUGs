@@ -117,7 +117,6 @@ class World {
 				let canMoveHere = this.canMoveHere( hitbox );
 				if( canMoveHere !== true )
 				{
-					object.speedY = 0;
 					if( canMoveHere !== false )
 					{
 						if( canMoveHere.overlapV.x !== 0 )

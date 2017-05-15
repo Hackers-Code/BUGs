@@ -18,11 +18,6 @@ class Explosive extends Object {
 		this.isOnTheGround = false;
 	}
 
-	isMoving()
-	{
-		return this.speedX !== 0 || this.speedY !== 0 || !this.isOnTheGround;
-	}
-
 	setVelocity( angle, power )
 	{
 		let powerSpeed = power * 1000 / 255;
@@ -33,6 +28,7 @@ class Explosive extends Object {
 
 	notifyOnTheGround()
 	{
+		this.speedY = 0;
 		this.isOnTheGround = true;
 	}
 }

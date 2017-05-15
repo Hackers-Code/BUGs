@@ -29,11 +29,6 @@ class Bug extends Object {
 		this.isOnTheGround = this.world.isOnTheGround( this.hitbox );
 	}
 
-	isMoving()
-	{
-		return this.speedX !== 0 || this.speedY !== 0 || !this.isOnTheGround;
-	}
-
 	jump()
 	{
 		if( this.isOnTheGround )
@@ -103,6 +98,7 @@ class Bug extends Object {
 		{
 			this.decreaseHP( START_HP * (this.speedY / this.physics.maxSpeedY) );
 		}
+		this.speedY = 0;
 		this.isOnTheGround = true;
 	}
 
