@@ -115,8 +115,10 @@ class World {
 				hitbox.pos.x += speedX * diffTime;
 				hitbox.pos.y += speedY * diffTime;
 				let canMoveHere = this.canMoveHere( hitbox );
+				let oldSpeedY = object.speedY;
 				if( canMoveHere !== true )
 				{
+					object.speedY = 0;
 					if( canMoveHere !== false )
 					{
 						if( canMoveHere.overlapV.x !== 0 )
@@ -137,7 +139,7 @@ class World {
 				{
 					if( object.notifyIfOnTheGround )
 					{
-						object.notifyOnTheGround();
+						object.notifyOnTheGround( oldSpeedY );
 					}
 				}
 				else

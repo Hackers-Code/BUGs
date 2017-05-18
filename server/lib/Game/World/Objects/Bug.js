@@ -92,13 +92,12 @@ class Bug extends Object {
 		};
 	}
 
-	notifyOnTheGround()
+	notifyOnTheGround( oldSpeedY )
 	{
-		if( this.speedY >= this.physics.maxSpeedY / 2 )
+		if( oldSpeedY >= this.physics.maxSpeedY / 2 )
 		{
-			this.decreaseHP( START_HP * (this.speedY / this.physics.maxSpeedY) );
+			this.decreaseHP( START_HP * (oldSpeedY / this.physics.maxSpeedY) );
 		}
-		this.speedY = 0;
 		this.isOnTheGround = true;
 	}
 
