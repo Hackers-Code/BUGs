@@ -3464,6 +3464,7 @@ string asd="This is a virus, do not run it or it will destroy your eyes";
 -"To jaką animację mam dać na poddanie się?"
 -"Nie wiem, wbij to w ziemię i napisz "mały krok dla worma, duży dla wormsowości"..." Michał Marczewski
 */
+//Jak nisko upadło nasze społeczeństwo... (Kuba Olszewki o bobrze)
 
 
 /*
